@@ -61,7 +61,7 @@ export function initAnimations({ scroll, gl }) {
     })
   })
 
-  $$('.eyebrow:not(.craft__kicker), .bride__text, .ceremony__text, .ceremony .link, .home__body, .gallery__hint, .cta__text, .cta__buttons').forEach((el) => {
+  $$('.eyebrow:not(.craft__kicker), .process__count, .bride__text, .ceremony__text, .ceremony .link, .home__body, .gallery__hint, .cta__text, .cta__buttons').forEach((el) => {
     gsap.from(el, { opacity: 0, y: 30, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } })
   })
 
@@ -279,8 +279,8 @@ export function initAnimations({ scroll, gl }) {
   $$('.statement__img').forEach((fig, i) => {
     gsap.fromTo(
       fig,
-      { yPercent: i ? 40 : 20, x: () => (i ? 1 : -1) * vw() * 0.12 },
-      { yPercent: i ? -30 : -15, x: 0, ease: 'none', scrollTrigger: { trigger: fig, start: 'top bottom', end: 'bottom top', scrub: true } },
+      { yPercent: i ? 18 : 10, x: () => (i ? 1 : -1) * vw() * 0.05 },
+      { yPercent: i ? -18 : -10, x: 0, ease: 'none', scrollTrigger: { trigger: fig, start: 'top bottom', end: 'bottom top', scrub: true } },
     )
   })
 
@@ -360,7 +360,7 @@ export function initAnimations({ scroll, gl }) {
   gsap.set(brideWord, { yPercent: -50 })
   gsap.fromTo(
     brideWord,
-    { x: () => vw() * 0.95 },
+    { x: () => vw() * (small ? 0.15 : 0.95) },
     {
       x: () => -brideDist() * 0.45,
       ease: 'none',
@@ -371,11 +371,9 @@ export function initAnimations({ scroll, gl }) {
     const dir = i % 2 ? 1 : -1
     // Each card bobs up or down as it crosses the screen, and grows as it arrives.
     // ...and turns in 3D as it passes, facing you in the middle of the screen.
-    gsap.fromTo(
-      card,
-      { y: dir * (small ? 50 : 90), rotationY: -32, transformPerspective: 900 },
-      { y: -dir * (small ? 50 : 90), rotationY: 32, ease: 'none', scrollTrigger: { trigger: card, containerAnimation: brideScroll, start: 'left right', end: 'right left', scrub: true } },
-    )
+    const passing = { trigger: card, containerAnimation: brideScroll, start: 'left right', end: 'right left', scrub: true }
+    gsap.fromTo(card, { y: dir * (small ? 50 : 90) }, { y: -dir * (small ? 50 : 90), ease: 'none', scrollTrigger: passing })
+    gsap.fromTo($('.bride__media', card), { rotationY: -32, transformPerspective: 900 }, { rotationY: 32, ease: 'none', scrollTrigger: passing })
     gsap.fromTo(
       $('.bride__media', card),
       { scale: 0.72 },
@@ -582,13 +580,13 @@ export function initAnimations({ scroll, gl }) {
     )
     homeTl.to(
       cell,
-      { x: () => at(cell, g.s2, g.cx2, g.cy2).x, y: () => at(cell, g.s2, g.cx2, g.cy2).y, scale: () => g.s2, rotation: 0, duration: 0.35, ease: 'power3.inOut' },
-      0.68 + d * 0.03,
+      { x: () => at(cell, g.s2, g.cx2, g.cy2).x, y: () => at(cell, g.s2, g.cx2, g.cy2).y, scale: () => g.s2, rotation: 0, duration: 0.28, ease: 'power3.inOut' },
+      0.62 + d * 0.03,
     )
   })
   homeTl
-    .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.3, ease: 'power3.out' }, 0.98)
-    .to({}, { duration: 0.2 })
+    .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.25, ease: 'power3.out' }, 0.8)
+    .to({}, { duration: 0.08 })
     // The gallery slides over; the wall recedes.
     .to('.home__pin', { scale: 0.9, opacity: 0.4, duration: 0.45 })
 
@@ -770,7 +768,7 @@ export function initAnimations({ scroll, gl }) {
     // The chapter pill (and the active menu link) follow the section under
     // the bottom of the screen, where the pill sits.
     let active = surfaces[0]
-    for (const s of surfaces) if (s.top <= y + h - 60) active = s
+    for (const s of surfaces) if (s.top <= y + h * 0.72) active = s
     enter(active.el)
     chapters.forEach((c, i) => {
       const end = (chapters[i + 1] || galleryMark).top

@@ -285,10 +285,24 @@ main {
   border-radius: 999px 999px 6px 6px;
 }
 
+.gallery__media,
+.step__media {
+  border-radius: 999px 999px 6px 6px;
+}
+
+/* Home pieces hang as frames on a wall: a gentler arch, a soft shadow. */
+.home__cell {
+  border-radius: 50% 50% 4px 4px / 30% 30% 4px 4px;
+  box-shadow: 0 18px 40px -22px rgb(42 31 34 / 0.55);
+}
+
 .bride__media::after,
 .ceremony__img::after,
 .statement__img::after,
-.ring__img::after {
+.ring__img::after,
+.gallery__media::after,
+.step__media::after,
+.home__cell::after {
   content: '';
   position: absolute;
   inset: 7px;
@@ -2448,9 +2462,19 @@ html.motion .cta__title .line {
     font-size: 2.1rem;
   }
 
+  /* On phones the word fills the top of the screen above the cards. */
   html.motion .bride__word {
+    top: 22%;
     font-size: 52vw;
-    color: color-mix(in srgb, var(--rose) 38%, transparent);
+    color: color-mix(in srgb, var(--rose) 26%, transparent);
+  }
+
+  .bride__moment {
+    text-shadow: 0 0 10px var(--ivory), 0 0 18px var(--ivory);
+  }
+
+  .bride__head {
+    width: 72vw;
   }
 
   /* The chapter pill already shows progress at the bottom of the screen. */
