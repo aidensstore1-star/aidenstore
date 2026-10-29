@@ -1924,10 +1924,13 @@ html.reduced-motion .gallery__item {
 
 .step__media {
   aspect-ratio: 4 / 5;
+  /* Transparent so only the photo shows while it is being wiped in. */
+  background: none;
 }
 
 .step__body {
   position: relative;
+  z-index: 1;
   display: grid;
   gap: 1rem;
   padding-top: 1.6rem;
@@ -2031,7 +2034,7 @@ html.motion .step__title {
   display: grid;
   justify-items: center;
   gap: 2.4rem;
-  padding: 20vh var(--gutter) 22vh;
+  padding: 12vh var(--gutter) 20vh;
   text-align: center;
   overflow: hidden;
 }
@@ -2090,6 +2093,15 @@ html.motion .cta__title .line {
   display: flex;
   gap: 1.6rem;
   color: var(--ink);
+}
+
+/* Comfortable tap targets for the small text links. */
+.footer__links a,
+.menu__links a,
+.footer__top-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .footer__brand {
@@ -2504,7 +2516,7 @@ html.motion .cta__title .line {
 
   .detail__type,
   .detail__count {
-    font-size: 0.66rem;
+    font-size: 0.7rem;
   }
 
   .detail__enquire {

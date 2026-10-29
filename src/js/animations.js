@@ -528,8 +528,8 @@ export function initAnimations({ scroll, gl }) {
     )
   })
   homeTl
-    .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.3, ease: 'power3.out' }, 0.82)
-    .to({}, { duration: 0.15 })
+    .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.3, ease: 'power3.out' }, 0.98)
+    .to({}, { duration: 0.2 })
     // The gallery slides over; the wall recedes.
     .to('.home__pin', { scale: 0.9, opacity: 0.4, duration: 0.45 })
 
@@ -555,7 +555,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: process,
       start: 'top top',
-      end: () => `+=${stepDist() * 1.2}`,
+      end: () => `+=${stepDist() * 0.85}`,
       pin: true,
       scrub: 0.8,
       anticipatePin: 1,
@@ -566,17 +566,17 @@ export function initAnimations({ scroll, gl }) {
   steps.forEach((step) => {
     const media = $('.step__media', step)
     const body = $('.step__body', step)
-    // Each step's photo opens from a sliver as it arrives, then drifts; its
+    // Each step's photo is wiped in as it arrives (the frame slides one way,
+    // the photo the other, so only transforms change), then drifts; its
     // number travels faster than the page, and the words follow.
+    const photo = $('img', media)
+    const wipe = { trigger: step, containerAnimation: processScroll, start: 'left 95%', end: 'left 25%', scrub: true }
+    gsap.fromTo(media, { x: () => media.offsetWidth }, { x: 0, ease: 'power2.out', scrollTrigger: wipe })
+    gsap.fromTo(photo, { x: () => -media.offsetWidth }, { x: 0, ease: 'power2.out', scrollTrigger: wipe })
     gsap.fromTo(
-      media,
-      { clipPath: 'inset(0% 0% 0% 100%)' },
-      { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left 95%', end: 'left 25%', scrub: true } },
-    )
-    gsap.fromTo(
-      $('img', media),
-      { scale: 1.3, xPercent: 10 },
-      { scale: 1, xPercent: -6, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
+      photo,
+      { scale: 1.3, xPercent: 8 },
+      { scale: 1.12, xPercent: -4, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
     )
     gsap.fromTo(
       $('.step__num', step),
@@ -601,7 +601,7 @@ export function initAnimations({ scroll, gl }) {
     duration: 1.5,
     stagger: 0.03,
     ease: 'expo.out',
-    scrollTrigger: { trigger: '.cta__title', start: 'top 80%', once: true },
+    scrollTrigger: { trigger: '.cta__title', start: 'top 92%', once: true },
   })
   $$('.cta__title .line').forEach((line, i) => {
     gsap.fromTo(
@@ -614,7 +614,7 @@ export function initAnimations({ scroll, gl }) {
   // Epilogue: the finished flower draws itself in gold wire, petal by petal.
   const flower = $('.cta__flower')
   gsap
-    .timeline({ scrollTrigger: { trigger: '.cta', start: 'top 75%', end: 'center 45%', scrub: 0.8 } })
+    .timeline({ scrollTrigger: { trigger: '.cta', start: 'top 95%', end: 'center 50%', scrub: 0.8 } })
     .to($$('.stem, .leaf', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.15, ease: 'none' }, 0)
     .to($$('.cta__flower-head > g:first-of-type .petal', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.12, ease: 'none' }, 0.2)
     .to($$('.petal--inner', flower), { strokeDashoffset: 0, duration: 0.4, stagger: 0.08, ease: 'none' }, 0.6)
