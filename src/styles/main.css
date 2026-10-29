@@ -1544,7 +1544,7 @@ html.motion .ceremony__card {
 }
 
 .ring {
-  --card-w: clamp(130px, 12.5vw, 220px);
+  --card-w: clamp(150px, 15vw, 260px);
 }
 
 .ring__spin {
@@ -1664,15 +1664,44 @@ html.motion .ring__card {
   position: absolute;
   inset: 0;
   /* --face (0 to 1) is how directly a cake faces you; the front one grows. */
-  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--radius, 400px)) scale(calc(0.86 + 0.24 * var(--face, 0)));
+  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--radius, 400px)) scale(calc(0.92 + 0.1 * var(--face, 0)));
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
+/* One caption, for whichever cake faces you, replaces the per-card ones. */
 html.motion .ring__cap {
-  text-align: center;
-  justify-items: center;
-  opacity: var(--cap, 0);
+  display: none;
+}
+
+.ring__now {
+  display: none;
+}
+
+html.motion .ring__now {
+  display: flex;
+  align-items: baseline;
+  gap: 0.9rem;
+  width: 100%;
+  overflow: hidden;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.6rem, 2.6vw, 2.6rem);
+  line-height: 1.15;
+  color: #e6b7ae;
+}
+
+.ring__now-num {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--muted);
+}
+
+.ring__now-title {
+  display: inline-block;
 }
 
 /* ---------- Chapter V: the home (a wall that pulls back) ---------- */

@@ -374,21 +374,35 @@ export function initAnimations({ scroll, gl }) {
   const n = cakes.length
   gsap.set('.celebration__word', { yPercent: -50 })
   const setRadius = () => {
-    const r = (spin.offsetWidth / 2 / Math.tan(Math.PI / n)) * 1.12
+    const r = (spin.offsetWidth / 2 / Math.tan(Math.PI / n)) * 1.3
     ring.style.setProperty('--radius', `${r}px`)
   }
   setRadius()
   ScrollTrigger.addEventListener('refreshInit', setRadius)
-  // Cakes turning towards you brighten and grow, and only the front one
-  // shows its name.
+  // Cakes turning towards you brighten and grow; the caption below names
+  // whichever one faces you.
+  const nowNum = $('.ring__now-num')
+  const nowTitle = $('.ring__now-title')
+  let front = -1
   const shade = () => {
     const rot = gsap.getProperty(spin, 'rotationY')
+    let best = 0
+    let bestFace = -1
     cakes.forEach((c, i) => {
       const face = Math.max(0, Math.cos(((i * 360) / n + rot) * (Math.PI / 180)))
       c.style.opacity = (0.2 + 0.8 * face ** 1.5).toFixed(3)
       c.style.setProperty('--face', face.toFixed(3))
-      c.style.setProperty('--cap', (face ** 8).toFixed(3))
+      if (face > bestFace) {
+        bestFace = face
+        best = i
+      }
     })
+    if (best === front) return
+    const dir = best > front ? 1 : -1
+    front = best
+    nowNum.textContent = `${String(best + 1).padStart(2, '0')} / ${String(n).padStart(2, '0')}`
+    nowTitle.textContent = cakes[best].dataset.title
+    gsap.fromTo(nowTitle, { yPercent: 100 * dir, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.5, ease: 'expo.out', overwrite: true })
   }
   const celebrationTl = gsap.timeline({
     defaults: { ease: 'none' },
@@ -499,7 +513,8 @@ export function initAnimations({ scroll, gl }) {
   const steps = $$('.step')
   const stepList = $('.process__list')
   const stepIndex = $('.process__index')
-  const stepDist = () => Math.max(0, stepList.scrollWidth - vw())
+  // Measured from the steps themselves; the numbers' offsets would inflate scrollWidth.
+  const stepDist = () => Math.max(0, steps.length * steps[0].offsetWidth - vw())
   const processScroll = gsap.to(stepList, {
     x: () => -stepDist(),
     ease: 'none',
