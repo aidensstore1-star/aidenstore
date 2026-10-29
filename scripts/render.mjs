@@ -93,9 +93,11 @@ export function renderSections() {
   // ---------- Chapter II: the bride (sideways) ----------
   s.brideTitle = titled(content.bride.title)
   s.brideText = esc(content.bride.text)
+  const brideLast = content.bride.photos.length - 1
   s.brideCards = content.bride.photos
     .map(
-      (id, i) => `<article class="bride__card bride__card--${(i % 4) + 1}">
+      (id, i) => `<article class="bride__card bride__card--${(i % 4) + 1}${i === brideLast ? ' bride__card--last' : ''}">
+  ${i === brideLast ? `<p class="bride__end">${esc(content.bride.end[0])} <em>${esc(content.bride.end[1])}</em></p>` : ''}
   ${media(id, { cls: 'bride__media', gl: false, sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
   <p class="bride__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</p>
 </article>`,

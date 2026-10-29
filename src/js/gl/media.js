@@ -208,6 +208,16 @@ export class Media {
     })
   }
 
+  // A ripple spreading from a tap at (x, y) in screen pixels.
+  pulse(x, y) {
+    const r = this.el.getBoundingClientRect()
+    this.uniforms.uMouse.value = [(x - r.left) / r.width, 1 - (y - r.top) / r.height]
+    gsap
+      .timeline()
+      .to(this.uniforms.uHover, { value: 1, duration: 0.35, ease: 'power2.out', overwrite: true })
+      .to(this.uniforms.uHover, { value: 0, duration: 1.6, ease: 'power2.inOut' })
+  }
+
   reveal({ delay = 0, duration = 1.8 } = {}) {
     if (this.revealed) return
     this.revealed = true

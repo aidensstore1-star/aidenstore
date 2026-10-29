@@ -1381,12 +1381,11 @@ html.motion .craft__count {
 }
 
 .bride__end {
-  flex: none;
-  width: clamp(14rem, 26vw, 26rem);
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(2.2rem, 4vw, 4.4rem);
+  font-size: clamp(2rem, 3.4vw, 3.8rem);
   line-height: 1;
+  margin-bottom: 0.4rem;
 }
 
 .bride__progress {
@@ -2315,9 +2314,13 @@ html.motion .cta__title .line {
   }
 
   html.motion .craft__wire {
-    right: 6vw;
-    top: 30%;
-    width: 34vw;
+    right: 5vw;
+    top: 28%;
+    width: 46vw;
+  }
+
+  .craft__wire path {
+    stroke-width: 1.1;
   }
 
   .statement__text {
@@ -2348,7 +2351,7 @@ html.motion .cta__title .line {
   }
 
   .bride__end {
-    width: 62vw;
+    font-size: 2.1rem;
   }
 
   html.motion .bride__word {
@@ -2362,6 +2365,22 @@ html.motion .cta__title .line {
 
   .ceremony__cols--wide {
     display: none;
+  }
+
+  html.motion .ceremony__card {
+    top: auto;
+    bottom: calc(4.4rem + env(safe-area-inset-bottom, 0px));
+    width: 90vw;
+    gap: 0.6rem;
+    padding: 1.3rem 1.2rem 1.4rem;
+  }
+
+  html.motion .ceremony__card .title-xl {
+    font-size: 2.3rem;
+  }
+
+  .ceremony__text {
+    font-size: 0.88rem;
   }
 
   .ceremony__cols--narrow {

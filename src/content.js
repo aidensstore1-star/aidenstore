@@ -105,6 +105,8 @@ export const marquee = ['Bridal accessories', 'Ceremony candles', 'Bouquets & fl
 export const bride = {
   title: ['Morning,', 'the bride'],
   text: 'The day begins with a comb pinned into place, a vine woven through the braid and a bouquet to hold.',
+  // Closes the chapter, above the last piece.
+  end: ['Made to match', 'the dress'],
   photos: [
     'hair-comb-pearl-crystal-ivory',
     'bouquet-white-calla-lily',

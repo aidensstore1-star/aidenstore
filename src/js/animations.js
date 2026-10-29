@@ -86,6 +86,20 @@ export function initAnimations({ scroll, gl }) {
     })
   }
 
+  if (!canHover) {
+    // Touch screens: the photos float gently, and a tap ripples the photo
+    // under the finger.
+    heroItems.forEach((item, i) =>
+      gsap.to(item, { y: i % 2 ? 10 : -10, rotation: i % 2 ? 1.5 : -1.5, duration: 2.6 + i * 0.35, ease: 'sine.inOut', yoyo: true, repeat: -1 }),
+    )
+    hero.addEventListener('pointerdown', (e) => {
+      for (const fig of heroFigs) {
+        const r = fig.getBoundingClientRect()
+        if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) gl?.get(fig)?.pulse(e.clientX, e.clientY)
+      }
+    })
+  }
+
   // Each photo flies straight out from the centre of the screen, far enough to
   // leave it whatever the screen size.
   const flyOut = (item, axis) => {
@@ -99,7 +113,7 @@ export function initAnimations({ scroll, gl }) {
   // bursting apart, so there is never an empty screen between them.
   const heroScene = () => vh() * 0.35
   const heroExit = gsap.timeline({
-    defaults: { ease: 'power2.in' },
+    defaults: { ease: 'power1.in' },
     scrollTrigger: {
       trigger: hero,
       start: 'top top',
@@ -163,7 +177,6 @@ export function initAnimations({ scroll, gl }) {
   const lines = $$('.craft__line')
   const lineChars = lines.map((l) => splitChars($$('.line', l)).chars)
   const craftIndex = $('.craft__index')
-  gsap.set(frames[0], { clipPath: 'inset(34% 32% 34% 32%)' })
   // Later frames wipe in with paired transforms (cheap on phones): the frame
   // slides in while its photo slides the other way, so the photo holds still.
   // Start a little beyond the edge so the gold edge's glow stays out of view.
@@ -180,7 +193,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: craft,
       start: 'top top',
-      ...stacked(craft, () => vh() * 3.2),
+      ...stacked(craft, () => vh() * 2.6),
       pin: true,
       scrub: 1,
       anticipatePin: 1,
@@ -192,9 +205,12 @@ export function initAnimations({ scroll, gl }) {
     },
   })
   craftTl
-    // A window in the dark opens to fill the screen.
-    .to(frames[0], { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power2.inOut' }, 0)
-    .fromTo(frameImgs[0], { scale: 1.7 }, { scale: 1.08, duration: 2.6 }, 0)
+    // A window in the dark opens from the centre to fill the screen. Both ends
+    // are written out with four values: browsers report the start back as two,
+    // which would make the window jump to a corner.
+    .fromTo(frames[0], { clipPath: 'inset(34% 32% 34% 32%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power2.inOut' }, 0)
+    // Phone photos are only lightly enlarged, so they stay sharp.
+    .fromTo(frameImgs[0], { scale: small ? 1.15 : 1.5, xPercent: 0 }, { scale: small ? 1.02 : 1.08, xPercent: small ? -3 : 0, duration: 2.6 }, 0)
     .to(craftIntro.chars, { yPercent: 0, stagger: 0.015, duration: 0.5, ease: 'power3.out' }, 0.25)
     .to(craftIntro.chars, { yPercent: -140, opacity: 0, stagger: 0.008, duration: 0.4, ease: 'power3.in' }, 1.3)
     // Beat 1 slides in from the left.
@@ -207,14 +223,14 @@ export function initAnimations({ scroll, gl }) {
     .to('.craft__wire', { x: () => vw() * 0.5, opacity: 0, duration: 0.5, ease: 'power3.in' }, 2.6)
     .to(frames[1], { xPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 2.6)
     .to(frameImgs[1], { xPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 2.6)
-    .fromTo(frameImgs[1], { scale: 1.35 }, { scale: 1.08, duration: 1.6 }, 2.6)
+    .fromTo(frameImgs[1], { scale: small ? 1.12 : 1.3 }, { scale: small ? 1.02 : 1.08, duration: 1.6 }, 2.6)
     .to(lines[0], { x: () => vw() * 0.6, autoAlpha: 0, duration: 0.5, ease: 'power3.in' }, 2.6)
     .fromTo(lines[1], { autoAlpha: 1, x: () => -vw() * 0.7 }, { x: 0, duration: 0.7, ease: 'power3.out' }, 3.0)
     .from(lineChars[1], { yPercent: 140, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 3.05)
     // Beat 3: the last photo rises from below; the line hands over upwards.
     .to(frames[2], { yPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 3.9)
     .to(frameImgs[2], { yPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 3.9)
-    .fromTo(frameImgs[2], { scale: 1.35 }, { scale: 1.06, duration: 1.4 }, 3.9)
+    .fromTo(frameImgs[2], { scale: small ? 1.12 : 1.3 }, { scale: small ? 1.02 : 1.06, duration: 1.4 }, 3.9)
     .to(lines[1], { y: () => -vh() * 0.35, autoAlpha: 0, duration: 0.5, ease: 'power3.in' }, 3.9)
     .fromTo(lines[2], { autoAlpha: 1, y: () => vh() * 0.35 }, { y: 0, duration: 0.7, ease: 'power3.out' }, 4.3)
     .from(lineChars[2], { yPercent: 140, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 4.35)
@@ -300,6 +316,18 @@ export function initAnimations({ scroll, gl }) {
       onUpdate: (self) => (brideBar.style.transform = `scaleX(${self.progress})`),
     },
   })
+  // The giant word drifts the same way, slower, like a layer further back;
+  // it starts off to the right so it never sits behind the opening words.
+  gsap.set(brideWord, { yPercent: -50 })
+  gsap.fromTo(
+    brideWord,
+    { x: () => vw() * 0.95 },
+    {
+      x: () => -brideDist() * 0.45,
+      ease: 'none',
+      scrollTrigger: { trigger: bride, start: 'top top', end: () => `+=${brideDist()}`, scrub: 1.2, invalidateOnRefresh: true },
+    },
+  )
   $$('.bride__card').forEach((card, i) => {
     const dir = i % 2 ? 1 : -1
     // Each card bobs up or down as it crosses the screen, and grows as it arrives.
@@ -335,7 +363,8 @@ export function initAnimations({ scroll, gl }) {
   const card = $('.ceremony__card')
   const finale = $('.ceremony__finale')
   const travel = (col) => Math.max(vh() * 0.25, col.offsetHeight - vh() * 0.9)
-  gsap.set(card, { x: 0, y: 0, xPercent: -50, yPercent: -50 })
+  // Centred on wide screens; a sheet along the bottom on phones.
+  gsap.set(card, { x: 0, y: 0, xPercent: -50, yPercent: small ? 0 : -50 })
   const ceremonyTl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
@@ -354,7 +383,8 @@ export function initAnimations({ scroll, gl }) {
   })
   const last = cols.length - 1
   ceremonyTl
-    .fromTo(card, { scale: 0.6, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.2, ease: 'power3.out' }, 0.06)
+    // The columns run on their own first, then the card arrives.
+    .fromTo(card, { scale: 0.6, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.2, ease: 'power3.out' }, 0.22)
     // The curtains part: outer columns slide off to the sides, the middle one sinks away.
     .to(cols[0], { x: () => -vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
     .to(cols[last], { x: () => vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
