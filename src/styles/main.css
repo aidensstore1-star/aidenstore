@@ -1004,9 +1004,13 @@ html.motion .craft__count {
 }
 
 /* ---------- Marquee ---------- */
+/* Opaque, so the pinned Chapter I resting underneath never shows through. */
 .marquee {
+  position: relative;
   padding: 2vh 0 12vh;
   overflow: hidden;
+  background: var(--ivory);
+  color: var(--plum);
 }
 
 .marquee__row {
