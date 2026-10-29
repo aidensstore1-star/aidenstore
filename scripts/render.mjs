@@ -136,12 +136,17 @@ export function renderSections() {
   // ---------- Chapter V: the home ----------
   s.homeTitle = titled(content.home.title)
   s.homeText = esc(content.home.text)
-  const homeCol = (col, side) =>
-    `<div class="home__col home__col--${side}">${col
-      .map((id) => media(id, { cls: 'home__img', gl: false, sizes: '(max-width: 900px) 46vw, 28vw' }))
-      .join('')}</div>`
-  s.homeColA = homeCol(content.home.columns[0], 'a')
-  s.homeColB = homeCol(content.home.columns[1], 'b')
+  s.homeWall = content.home.wall
+    .map((id, i) =>
+      media(id, {
+        cls: `home__cell${i === 4 ? ' home__cell--centre' : ''}`,
+        gl: false,
+        // The middle photo is seen full-screen first.
+        sizes: i === 4 ? '100vw' : '(max-width: 900px) 34vw, 30vw',
+        box: 0.8,
+      }),
+    )
+    .join('')
 
   // ---------- Gallery, process ----------
   s.gallery = content.gallery

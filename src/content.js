@@ -159,9 +159,18 @@ export const celebration = {
 export const home = {
   title: ['For the', 'home'],
   text: 'Hoops, wreaths, garlands and trays that keep the day close long after it ends.',
-  columns: [
-    ['hoop-wreath-wood-navy-blush-roses', 'triangle-wreaths-pair-gold-burgundy-ranunculus', 'tulle-garlands-burgundy-roses-with-basket'],
-    ['wood-tray-navy-blush-roses', 'hoop-wreath-gold-babys-breath', 'pillar-candles-pair-red-roses-burlap', 'triangle-wreath-gold-burgundy-ranunculus'],
+  // A wall of nine, read left to right, top to bottom. The middle one (5th)
+  // opens the chapter full-screen before the wall pulls back.
+  wall: [
+    'triangle-wreaths-pair-gold-burgundy-ranunculus',
+    'hoop-wreath-gold-babys-breath',
+    'pillar-candle-burlap-lace-flower-ring',
+    'wood-tray-navy-blush-roses',
+    'hoop-wreath-wood-navy-blush-roses',
+    'tulle-garlands-burgundy-roses-with-basket',
+    'bouquet-red-ivory-peonies',
+    'triangle-wreath-gold-burgundy-ranunculus',
+    'pillar-candles-pair-red-roses-burlap',
   ],
 }
 

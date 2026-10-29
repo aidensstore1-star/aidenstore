@@ -1659,29 +1659,20 @@ html.motion .ring__cap {
   opacity: var(--cap, 0);
 }
 
-/* ---------- Chapter V: the home ---------- */
+/* ---------- Chapter V: the home (a wall that pulls back) ---------- */
 .home {
   position: relative;
   background: var(--sage);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
-  gap: 3vw;
-  align-items: start;
-  padding: 16vh var(--gutter) 18vh;
 }
 
-.home__col {
+.home__pin {
+  position: relative;
   display: grid;
-  gap: 3vw;
-}
-
-.home__col--b {
-  margin-top: 26vh;
+  gap: 6vh;
+  padding: 16vh var(--gutter) 14vh;
 }
 
 .home__text {
-  position: sticky;
-  top: 32vh;
   display: grid;
   justify-items: center;
   gap: 1.6rem;
@@ -1693,10 +1684,53 @@ html.motion .ring__cap {
   color: var(--muted);
 }
 
+.home__wall {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.2vw;
+}
+
+.home__cell {
+  aspect-ratio: 4 / 5;
+}
+
+html.motion .home__pin {
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  overflow: hidden;
+  display: block;
+}
+
+html.motion .home__wall {
+  position: absolute;
+  inset: 0;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 1vw;
+  padding: 1vw;
+}
+
+html.motion .home__cell {
+  aspect-ratio: auto;
+  will-change: transform;
+}
+
+html.motion .home__text {
+  position: absolute;
+  z-index: 1;
+  left: var(--gutter);
+  top: 50%;
+  width: 30vw;
+  justify-items: start;
+  text-align: left;
+  transform: translateY(-50%);
+}
+
 /* ---------- Gallery ---------- */
 .gallery {
   position: relative;
   padding: 18vh 0 14vh;
+  background: var(--ivory);
 }
 
 .gallery__head {
@@ -2285,21 +2319,30 @@ html.motion .cta__title .line {
     font-size: 0.92rem;
   }
 
-  .home {
-    grid-template-columns: 1fr 1fr;
-    gap: 4vw;
+  .home__wall {
+    gap: 2vw;
   }
 
-  .home__text {
-    grid-column: 1 / -1;
-    order: -1;
-    position: relative;
-    top: 0;
-    margin-bottom: 4vh;
+  html.motion .home__wall {
+    gap: 1.5vw;
+    padding: 1.5vw;
   }
 
-  .home__col--b {
-    margin-top: 14vh;
+  html.motion .home__text {
+    top: calc(var(--header-h) + 3vh + env(safe-area-inset-top, 0px));
+    left: var(--gutter);
+    right: var(--gutter);
+    width: auto;
+    gap: 0.8rem;
+    transform: none;
+  }
+
+  html.motion .home__text .title-xl {
+    font-size: clamp(2.4rem, 11vw, 3.4rem);
+  }
+
+  html.motion .home__body {
+    font-size: 0.92rem;
   }
 
   .process__list {

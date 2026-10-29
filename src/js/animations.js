@@ -429,24 +429,78 @@ export function initAnimations({ scroll, gl }) {
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
 
-  // ---------- Chapter V: the home, columns drift against each other ----------
-  gsap.fromTo('.home__col--a', { yPercent: 12 }, { yPercent: -16, ease: 'none', scrollTrigger: { trigger: '.home', start: 'top bottom', end: 'bottom top', scrub: true } })
-  gsap.fromTo('.home__col--b', { yPercent: -10 }, { yPercent: 10, ease: 'none', scrollTrigger: { trigger: '.home', start: 'top bottom', end: 'bottom top', scrub: true } })
-  $$('.home__img').forEach((fig) => {
-    const left = !!fig.closest('.home__col--a')
-    gsap.fromTo(
-      fig,
-      { x: (left ? -1 : 1) * (small ? 60 : 160), rotation: left ? -7 : 7, scale: 0.8, opacity: 0 },
-      {
-        x: 0,
-        rotation: 0,
-        scale: 1,
-        opacity: 1,
-        ease: 'power2.out',
-        scrollTrigger: { trigger: fig, start: 'top bottom', end: 'top 55%', scrub: 0.6 },
-      },
+  // ---------- Chapter V: the home, a wall of pieces pulls back ----------
+  // It opens on one wreath filling the screen, pulls back to show the whole
+  // wall of nine, then the wall steps aside for the words. Each cell moves on
+  // its own (as if the wall were one picture being scaled) so phones never
+  // have to paint one huge layer.
+  const home = $('.home')
+  const wall = $('.home__wall')
+  const cells = $$('.home__cell')
+  const homeText = $('.home__text')
+  const geo = () => {
+    const W = wall.offsetWidth
+    const H = wall.offsetHeight
+    const centre = cells[4]
+    const fill = Math.max(W / centre.offsetWidth, H / centre.offsetHeight) * 1.02
+    let s2, cx2, cy2
+    if (small) {
+      const top = homeText.offsetTop + homeText.offsetHeight + 16
+      const bottom = 76
+      s2 = Math.min(0.72, (H - top - bottom) / H)
+      cx2 = W / 2
+      cy2 = top + (s2 * H) / 2
+    } else {
+      const left = homeText.offsetLeft + homeText.offsetWidth + 32
+      // The text starts at the page gutter; keep the same margin on the right.
+      const gutter = homeText.offsetLeft
+      s2 = Math.min(0.62, (W - left - gutter) / W)
+      cx2 = W - gutter - (s2 * W) / 2
+      cy2 = H / 2
+    }
+    return { W, H, fill, s2, cx2, cy2 }
+  }
+  let g = geo()
+  ScrollTrigger.addEventListener('refreshInit', () => (g = geo()))
+  const at = (cell, scale, cx, cy) => {
+    const px = cell.offsetLeft + cell.offsetWidth / 2
+    const py = cell.offsetTop + cell.offsetHeight / 2
+    return { x: cx - g.W / 2 + (scale - 1) * (px - g.W / 2), y: cy - g.H / 2 + (scale - 1) * (py - g.H / 2), scale }
+  }
+  gsap.set(homeText, { autoAlpha: 0 })
+  const homeTl = gsap.timeline({
+    defaults: { ease: 'none' },
+    scrollTrigger: {
+      trigger: home,
+      start: 'top top',
+      ...stacked(home, () => vh() * 2.4),
+      pin: true,
+      scrub: 0.8,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+    },
+  })
+  cells.forEach((cell, i) => {
+    const d = Math.abs((i % 3) - 1) + Math.abs(Math.floor(i / 3) - 1)
+    homeTl.fromTo(
+      cell,
+      { x: () => at(cell, g.fill, g.W / 2, g.H / 2).x, y: () => at(cell, g.fill, g.W / 2, g.H / 2).y, scale: () => g.fill, rotation: 0 },
+      // Outer pieces settle a moment later and with a slight swing, like
+      // frames being hung.
+      { x: 0, y: 0, scale: 1, rotation: d ? (i % 2 ? 2 : -2) : 0, duration: 0.5 + d * 0.06, ease: 'power2.inOut' },
+      0,
+    )
+    homeTl.to(
+      cell,
+      { x: () => at(cell, g.s2, g.cx2, g.cy2).x, y: () => at(cell, g.s2, g.cx2, g.cy2).y, scale: () => g.s2, rotation: 0, duration: 0.35, ease: 'power3.inOut' },
+      0.68 + d * 0.03,
     )
   })
+  homeTl
+    .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.3, ease: 'power3.out' }, 0.82)
+    .to({}, { duration: 0.15 })
+    // The gallery slides over; the wall recedes.
+    .to('.home__pin', { scale: 0.9, opacity: 0.4, duration: 0.45 })
 
   // ---------- Gallery rises in ----------
   gsap.from('.gallery__viewport', {
