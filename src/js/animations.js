@@ -251,7 +251,11 @@ export function initAnimations({ scroll, gl }) {
     // Beat 1 slides in from the left.
     .fromTo(lines[0], { autoAlpha: 1, x: () => -vw() * 0.7 }, { x: 0, duration: 0.7, ease: 'power3.out' }, 1.7)
     .from(lineChars[0], { yPercent: 110, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 1.75)
+    // A gold wire draws one petal beside the words, then a stem.
+    .to('.craft__wire path', { strokeDashoffset: 0, duration: 0.7, stagger: 0.35, ease: 'power1.inOut' }, 1.75)
+    .fromTo('.craft__wire', { rotation: -25, scale: 0.85 }, { rotation: 8, scale: 1, duration: 1.2 }, 1.7)
     // Beat 2: the next photo sweeps in from the right; the line hands over sideways.
+    .to('.craft__wire', { x: () => vw() * 0.5, opacity: 0, duration: 0.5, ease: 'power3.in' }, 2.6)
     .to(frames[1], { xPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 2.6)
     .to(frameImgs[1], { xPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 2.6)
     .fromTo(frameImgs[1], { scale: 1.35 }, { scale: 1.08, duration: 1.6 }, 2.6)

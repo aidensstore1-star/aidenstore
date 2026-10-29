@@ -204,6 +204,8 @@ export function renderSections() {
         `<path class="${cls}" pathLength="1" d="${PETAL}" transform="rotate(${offset + (i * 360) / count})${scale !== 1 ? ` scale(${scale})` : ''}"/>`,
     ).join('')
   const n = content.chapters.length
+  // Chapter I: one large petal drawn in wire while "petal by petal" is on screen.
+  s.craftWire = `<svg class="craft__wire" viewBox="-40 -70 80 80" aria-hidden="true"><path pathLength="1" d="${PETAL}"/><path pathLength="1" d="M0 -6 C2 2 -3 6 1 10"/></svg>`
   s.chapterFlower = `<svg class="chapter__flower" viewBox="-66 -66 132 132" aria-hidden="true">${petals(n)}<circle class="chapter__heart" r="6"/></svg>`
   s.ctaFlower = `<svg class="cta__flower" viewBox="-200 -200 400 400" aria-hidden="true">
   <g class="cta__flower-head" transform="translate(0 -40)">

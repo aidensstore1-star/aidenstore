@@ -84,6 +84,15 @@ const fragment = /* glsl */ `
       texture2D(tMap, uv - shift).b
     );
 
+    // One shared grade so phone photos taken in different rooms read as one
+    // collection: slightly warmer, a touch softer, darker at the corners.
+    float luma = dot(color, vec3(0.299, 0.587, 0.114));
+    color = mix(color, vec3(luma), 0.08);
+    color *= vec3(1.03, 1.0, 0.95);
+    color = mix(color, vec3(0.97, 0.93, 0.88), 0.05);
+    float vignette = smoothstep(0.95, 0.35, distance(vUv, vec2(0.5)));
+    color *= mix(0.86, 1.0, vignette);
+
     // Reveal upwards behind a soft, wavy edge.
     float edge = uReveal * 1.25 - 0.12;
     float wave = sin(vUv.x * 7.0 + uTime * 1.6) * 0.025 * (1.0 - uReveal);

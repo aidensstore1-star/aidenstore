@@ -211,6 +211,13 @@ main {
   object-fit: cover;
 }
 
+/* The same gentle warm grade the WebGL photos get. */
+.media img,
+.craft__frame img,
+.ring__img img {
+  filter: sepia(0.08) saturate(0.94);
+}
+
 /* When WebGL is running it draws these photos; the <img> stays for layout and alt text. */
 html.gl-on .media[data-gl] {
   background: none;
@@ -1025,6 +1032,32 @@ html.motion .craft__line {
   position: absolute;
   left: 0;
   bottom: 0;
+}
+
+.craft__wire {
+  display: none;
+}
+
+html.motion .craft__wire {
+  display: block;
+  position: absolute;
+  right: 8vw;
+  top: 50%;
+  width: clamp(160px, 22vw, 360px);
+  translate: 0 -55%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.craft__wire path {
+  fill: none;
+  stroke: #d8b77c;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  filter: drop-shadow(0 0 6px rgb(216 183 124 / 0.55));
 }
 
 html.motion .craft__count {
@@ -1919,6 +1952,12 @@ html.motion .cta__title .line {
 
   html.motion .craft__lines {
     bottom: calc(14vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  html.motion .craft__wire {
+    right: 6vw;
+    top: 30%;
+    width: 34vw;
   }
 
   .statement__text {
