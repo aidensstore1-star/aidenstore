@@ -451,7 +451,7 @@ export function initAnimations({ scroll, gl }) {
   })
   celebrationTl
     .fromTo(ring, { scale: 0.55, y: () => vh() * 0.2 }, { scale: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0)
-    .fromTo(spin, { rotationY: 50, rotationX: -18 }, { rotationY: (-360 * (n - 1)) / n, rotationX: -5, duration: 1 }, 0)
+    .fromTo(spin, { rotationY: 50, rotationX: -6 }, { rotationY: (-360 * (n - 1)) / n, rotationX: -6, duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
     // The caption and tags wait until the ring has arrived.
     .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.17)

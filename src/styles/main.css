@@ -1658,10 +1658,8 @@ html.motion .celebration__head {
   position: relative;
 }
 
-@media (min-width: 901px) {
-  html.motion .ring {
-    margin-top: 4vh;
-  }
+html.motion .ring {
+  margin-top: 4vh;
 }
 
 html.motion .celebration__head .title-xl {
