@@ -75,6 +75,7 @@ html[data-surface='cocoa'] :is(.header, .chapter, .cursor) {
 html {
   background: var(--bg);
   color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
@@ -216,6 +217,21 @@ main {
   60% { transform: translate(-4%, -1%); }
   80% { transform: translate(3%, 3%); }
   100% { transform: translate(0, 0); }
+}
+
+/* The gold wire drawn along the top of each chapter as it rises. */
+.wire-edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  height: 2px;
+  background: linear-gradient(90deg, #b08d57, #e6c88f 70%, #fff1d2);
+  box-shadow: 0 0 14px 1px rgb(216 183 124 / 0.65);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
 }
 
 /* ---------- Shared pieces ---------- */

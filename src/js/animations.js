@@ -109,9 +109,11 @@ export function initAnimations({ scroll, gl }) {
       anticipatePin: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        // Petals blow outwards with the burst; once they have gone, reset them
-        // so they can drift again in the epilogue.
-        gl?.setBurst(self.progress >= 1 ? 0 : self.progress)
+        // Petals blow outwards and fade with the burst; once they have gone,
+        // reset them so they can drift again in the epilogue.
+        const burst = clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)
+        petals.hero = 1 - burst
+        gl?.setBurst(burst >= 1 ? 0 : burst)
       },
     },
   })
@@ -137,15 +139,7 @@ export function initAnimations({ scroll, gl }) {
   // Petals show in the opening and the epilogue. Driven by scroll progress, so
   // no layout reads are needed each frame.
   const petals = { intro: 0, hero: 1, cta: 0 }
-  if (gl) {
-    ScrollTrigger.create({
-      trigger: hero,
-      start: 'top top',
-      end: () => `+=${heroScene()}`,
-      onUpdate: (self) => (petals.hero = 1 - self.progress),
-    })
-    gl.setPetalOpacity(() => Math.max(petals.hero * petals.intro, petals.cta))
-  }
+  gl?.setPetalOpacity(() => Math.max(petals.hero * petals.intro, petals.cta))
 
   function intro() {
     const tl = gsap.timeline()
@@ -279,6 +273,7 @@ export function initAnimations({ scroll, gl }) {
   // Pinned for the sideways journey, then for one more screen while the
   // ceremony slides up over it (the pin and the track have separate triggers
   // because the track also drives the cards' own triggers).
+  const bridePin = $('.bride__pin')
   ScrollTrigger.create({
     trigger: bride,
     start: 'top top',
@@ -286,6 +281,11 @@ export function initAnimations({ scroll, gl }) {
     pin: true,
     anticipatePin: 1,
     invalidateOnRefresh: true,
+    // Once the cards have passed, the chapter sinks back as the ceremony covers it.
+    onUpdate: (self) => {
+      const over = clamp((self.progress * (brideDist() + vh()) - brideDist()) / vh(), 0, 1)
+      gsap.set(bridePin, { scale: 1 - 0.12 * over, opacity: 1 - 0.6 * over })
+    },
   })
   const brideScroll = gsap.to(brideTrack, {
     x: () => -brideDist(),
@@ -299,24 +299,6 @@ export function initAnimations({ scroll, gl }) {
       onUpdate: (self) => (brideBar.style.transform = `scaleX(${self.progress})`),
     },
   })
-  // As the ceremony covers it, the bride chapter sinks back.
-  gsap.to('.bride__pin', {
-    scale: 0.88,
-    opacity: 0.4,
-    ease: 'none',
-    scrollTrigger: { trigger: bride, start: () => `top+=${brideDist()} top`, end: () => `+=${vh()}`, scrub: 0.8, invalidateOnRefresh: true },
-  })
-  // The giant word drifts the same way, slower, like a layer further back.
-  gsap.set(brideWord, { yPercent: -50 })
-  gsap.fromTo(
-    brideWord,
-    { x: () => vw() * 0.35 },
-    {
-      x: () => -brideDist() * 0.45,
-      ease: 'none',
-      scrollTrigger: { trigger: bride, start: 'top top', end: () => `+=${brideDist()}`, scrub: 1.2, invalidateOnRefresh: true },
-    },
-  )
   $$('.bride__card').forEach((card, i) => {
     const dir = i % 2 ? 1 : -1
     // Each card bobs up or down as it crosses the screen, and grows as it arrives.
@@ -580,34 +562,6 @@ export function initAnimations({ scroll, gl }) {
     )
   })
 
-  // Created after every pinned chapter so its positions account for them.
-  if (gl) {
-    ScrollTrigger.create({
-      trigger: '.cta',
-      start: 'top bottom',
-      end: 'bottom top',
-      onUpdate: (self) => (petals.cta = clamp(1.4 - Math.abs(self.progress - 0.5) * 3, 0, 1)),
-      onLeave: () => (petals.cta = 0),
-      onLeaveBack: () => (petals.cta = 0),
-    })
-  }
-
-  // ---------- The wire flower: each chapter bends one petal ----------
-  const pillPetals = $$('.chapter__flower .petal')
-  const chapters = $$('[data-chapter]')
-  chapters.forEach((sec, i) => {
-    const next = chapters[i + 1] || $('.gallery')
-    ScrollTrigger.create({
-      trigger: sec,
-      start: 'top 60%',
-      endTrigger: next,
-      end: 'top 60%',
-      onUpdate: (self) => (pillPetals[i].style.strokeDashoffset = 1.05 * (1 - self.progress)),
-      onLeave: () => (pillPetals[i].style.strokeDashoffset = 0),
-      onLeaveBack: () => (pillPetals[i].style.strokeDashoffset = 1.05),
-    })
-  })
-
   // Epilogue: the finished flower draws itself in gold wire, petal by petal.
   const flower = $('.cta__flower')
   gsap
@@ -622,18 +576,40 @@ export function initAnimations({ scroll, gl }) {
     { rotation: 20, svgOrigin: '0 -40', ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'bottom top', scrub: true } },
   )
 
-  // ---------- Which section is on screen ----------
-  // Each section owns the screen from when its top reaches the middle until
-  // the next section's top does. Toggles only fire at those moments, so
-  // nothing is measured while scrolling. CSS fades the header, chapter pill
-  // and cursor to suit the section underneath.
+  // ---------- The story tracker ----------
+  // Where every section starts in the page, measured once per refresh. The
+  // pinned chapters add no spacing, so these positions hold while scrolling,
+  // and one scroll listener can work out the section, the chapter, the flower
+  // petals and the gold wire edges without measuring anything.
   const root = document.documentElement
   const metaTheme = $('meta[name="theme-color"]')
   const indicator = $('.chapter')
   const chapterNum = $('.chapter__num')
   const chapterTitle = $('.chapter__title')
   const navLinks = $$('.header__nav a')
-  const surfaces = $$('[data-bg]')
+  const pillPetals = $$('.chapter__flower .petal')
+  const surfaces = $$('[data-bg]').map((el) => ({ el, top: 0 }))
+  const chapters = surfaces.filter((s) => s.el.dataset.chapter)
+  const galleryMark = surfaces.find((s) => s.el.id === 'gallery')
+  const cta = { el: $('.cta'), top: 0, h: 1 }
+  // A gold wire draws along the top of each chapter as it rises over the last.
+  const edges = $$('.craft, .statement, .ceremony, .celebration, .home, .gallery').map((el) => {
+    const line = document.createElement('span')
+    line.className = 'wire-edge'
+    line.setAttribute('aria-hidden', 'true')
+    el.prepend(line)
+    return { el, line, top: 0, p: -1 }
+  })
+  const docTop = (el) => {
+    const box = el.parentElement.classList.contains('pin-spacer') ? el.parentElement : el
+    return box.getBoundingClientRect().top + window.scrollY
+  }
+  const measure = () => {
+    for (const s of [...surfaces, ...edges]) s.top = docTop(s.el)
+    cta.top = docTop(cta.el)
+    cta.h = cta.el.offsetHeight
+  }
+
   let current = null
   const enter = (sec) => {
     if (sec === current) return
@@ -651,16 +627,33 @@ export function initAnimations({ scroll, gl }) {
     chapterTitle.innerHTML = `<span>${chapter.dataset.chapterTitle}</span>`
     gsap.from(chapterTitle.firstChild, { yPercent: 110, duration: 0.7, ease: 'expo.out' })
   }
-  surfaces.forEach((sec, i) => {
-    const next = surfaces[i + 1]
-    ScrollTrigger.create({
-      trigger: sec,
-      start: i === 0 ? 'top top' : 'top 50%',
-      ...(next ? { endTrigger: next, end: 'top 50%' } : { end: 'max' }),
-      onToggle: (self) => self.isActive && enter(sec),
+
+  const track = () => {
+    const y = window.scrollY
+    const h = vh()
+    let active = surfaces[0]
+    for (const s of surfaces) if (s.top <= y + h * 0.5) active = s
+    enter(active.el)
+    chapters.forEach((c, i) => {
+      const end = (chapters[i + 1] || galleryMark).top
+      const p = clamp((y + h * 0.4 - c.top) / (end - c.top), 0, 1)
+      pillPetals[i].style.strokeDashoffset = (1.05 * (1 - p)).toFixed(3)
     })
+    for (const e of edges) {
+      const p = clamp((y + h - e.top) / h, 0, 1)
+      if (Math.abs(p - e.p) < 0.002) continue
+      e.p = p
+      e.line.style.transform = `scaleX(${p.toFixed(4)})`
+      e.line.style.opacity = (1 - clamp((p - 0.82) / 0.18, 0, 1)).toFixed(3)
+    }
+    const c = (y + h - cta.top) / (h + cta.h)
+    petals.cta = c <= 0 || c >= 1 ? 0 : clamp(1.4 - Math.abs(c - 0.5) * 3, 0, 1)
+  }
+  ScrollTrigger.addEventListener('refresh', () => {
+    measure()
+    track()
   })
-  enter(surfaces[0])
+  scroll.onScroll(track)
 
   // ---------- Footer wordmark rises letter by letter ----------
   gsap.fromTo(
