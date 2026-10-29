@@ -1,21 +1,26 @@
 import gsap from 'gsap'
 
-// Endless, draggable row of photos. Items are positioned with transforms and
-// wrap around, so the row never ends. A tap (not a drag) opens the detail view.
-export function initGallery({ scroll, gl, onOpen }) {
+// Endless, draggable row of photos on a gentle 3D curve. Items are positioned
+// with transforms and wrap around, so the row never ends; they lean with the
+// speed of a drag. A tap (not a drag) opens the detail view.
+export function initGallery({ scroll, onOpen }) {
   const viewport = document.querySelector('.gallery__viewport')
   const items = [...document.querySelectorAll('.gallery__item')]
   if (!viewport || !items.length) return null
+  const imgs = items.map((item) => item.querySelector('img'))
 
   const OFFSETS = [-50, -55, -47, -53, -45, -52]
   const state = { current: 0, target: 0, last: 0, dragging: false, startX: 0, startTarget: 0, moved: 0, paused: false }
   let itemW = 0
   let step = 0
   let total = 0
+  let half = 1
   let visible = false
+  let lean = 0
 
   const measure = () => {
     itemW = items[0].offsetWidth
+    half = viewport.clientWidth / 2
     step = itemW + Math.max(28, window.innerWidth * 0.035)
     total = items.length * step
   }
@@ -32,13 +37,22 @@ export function initGallery({ scroll, gl, onOpen }) {
     state.current += (state.target - state.current) * 0.075
     const velocity = state.current - state.last
     state.last = state.current
-    gl?.setDrag(velocity * 0.02)
+    lean += (Math.max(-9, Math.min(9, velocity * 0.35)) - lean) * 0.15
 
     for (let i = 0; i < items.length; i++) {
       let x = (i * step + state.current) % total
       if (x < 0) x += total
       x -= step
-      items[i].style.transform = `translate3d(${x}px, ${OFFSETS[i % OFFSETS.length]}%, 0)`
+      // n: -1 at the left edge, 0 in the middle, 1 at the right edge.
+      const n = (x + itemW / 2 - half) / half
+      if (n < -1.6 || n > 1.6) {
+        items[i].style.transform = `translate3d(${x}px, -50%, 0)`
+        continue
+      }
+      const depth = -Math.abs(n) * 110
+      items[i].style.transform = `translate3d(${x}px, ${OFFSETS[i % OFFSETS.length]}%, ${depth.toFixed(1)}px) rotateY(${(-n * 22).toFixed(2)}deg) skewX(${lean.toFixed(2)}deg)`
+      // The photo drifts inside its frame, the other way, like looking through a window.
+      imgs[i].style.transform = `translateX(${(n * -7).toFixed(2)}%) scale(1.16)`
     }
   }
   gsap.ticker.add(update, false, true)

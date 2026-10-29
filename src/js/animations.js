@@ -415,14 +415,17 @@ export function initAnimations({ scroll, gl }) {
       scrub: 1,
       anticipatePin: 1,
       invalidateOnRefresh: true,
-      onUpdate: shade,
     },
+    // Follows the smoothed playhead, so the caption always names the cake in front.
+    onUpdate: shade,
   })
   celebrationTl
     .fromTo(ring, { scale: 0.55, y: () => vh() * 0.2 }, { scale: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0)
     .fromTo(spin, { rotationY: 50, rotationX: -18 }, { rotationY: (-360 * (n - 1)) / n, rotationX: -5, duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
-    .from('.celebration__tags li', { y: 30, opacity: 0, stagger: 0.015, duration: 0.08, ease: 'back.out(2)' }, 0.1)
+    // The caption and tags wait until the ring has arrived.
+    .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.17)
+    .from('.celebration__tags li', { y: 30, opacity: 0, stagger: 0.012, duration: 0.06, ease: 'back.out(2)' }, 0.18)
     // The home slides over; the cakes recede.
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
@@ -626,12 +629,18 @@ export function initAnimations({ scroll, gl }) {
     cta.h = cta.el.offsetHeight
   }
 
+  // The header takes the colours of whatever is under it, and the chapter
+  // pill of whatever is under it at the bottom, so each switches exactly as
+  // a new section passes it.
+  const under = (line) => {
+    let found = surfaces[0]
+    for (const s of surfaces) if (s.top <= line) found = s
+    return found.el.dataset.bg
+  }
   let current = null
   const enter = (sec) => {
     if (sec === current) return
     current = sec
-    root.dataset.surface = sec.dataset.bg
-    metaTheme?.setAttribute('content', SURFACES[sec.dataset.bg])
     const chapter = sec.dataset.chapter ? sec : null
     navLinks.forEach((a) => a.classList.toggle('is-active', !!chapter && a.getAttribute('href') === `#${chapter.id}`))
     if (!chapter) {
@@ -647,6 +656,13 @@ export function initAnimations({ scroll, gl }) {
   const track = () => {
     const y = window.scrollY
     const h = vh()
+    const top = under(y + 30)
+    if (root.dataset.surface !== top) {
+      root.dataset.surface = top
+      metaTheme?.setAttribute('content', SURFACES[top])
+    }
+    const low = under(y + h - 50)
+    if (root.dataset.surfaceLow !== low) root.dataset.surfaceLow = low
     let active = surfaces[0]
     for (const s of surfaces) if (s.top <= y + h * 0.5) active = s
     enter(active.el)

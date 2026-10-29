@@ -153,7 +153,7 @@ export function renderSections() {
   s.gallery = content.gallery
     .map(
       (id, i) => `<button class="gallery__item" type="button" data-index="${i}" aria-label="View ${esc(photos[id]?.title)}">
-  ${media(id, { cls: 'gallery__media', attrs: 'data-bend', sizes: '(max-width: 900px) 60vw, 24vw', box: 0.75 })}
+  ${media(id, { cls: 'gallery__media', gl: false, sizes: '(max-width: 900px) 60vw, 24vw', box: 0.75 })}
   <span class="gallery__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</span>
 </button>`,
     )

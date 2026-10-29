@@ -49,7 +49,7 @@ if (reduced) {
 } else {
   const gl = createGL(document.querySelector('.gl'), { scroll })
   let detail
-  const galleryApi = initGallery({ scroll, gl, onOpen: (i, item) => detail.open(i, item) })
+  const galleryApi = initGallery({ scroll, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })
   const { intro } = initAnimations({ scroll, gl })
   // Refresh triggers in page order so ones below a pinned chapter account for it.

@@ -44,24 +44,28 @@
   --tone-bg: var(--ivory);
   --tone-ink: var(--plum);
   transition:
-    --tone-bg 0.8s ease,
-    --tone-ink 0.8s ease;
+    --tone-bg 0.35s ease,
+    --tone-ink 0.35s ease;
 }
 
-html[data-surface='blush'] :is(.header, .chapter, .cursor) {
+html[data-surface='blush'] :is(.header, .cursor),
+html[data-surface-low='blush'] .chapter {
   --tone-bg: var(--blush);
 }
 
-html[data-surface='sage'] :is(.header, .chapter, .cursor) {
+html[data-surface='sage'] :is(.header, .cursor),
+html[data-surface-low='sage'] .chapter {
   --tone-bg: var(--sage);
 }
 
-html[data-surface='night'] :is(.header, .chapter, .cursor) {
+html[data-surface='night'] :is(.header, .cursor),
+html[data-surface-low='night'] .chapter {
   --tone-bg: var(--night);
   --tone-ink: var(--ivory);
 }
 
-html[data-surface='cocoa'] :is(.header, .chapter, .cursor) {
+html[data-surface='cocoa'] :is(.header, .cursor),
+html[data-surface-low='cocoa'] .chapter {
   --tone-bg: var(--cocoa);
   --tone-ink: var(--ivory);
 }
@@ -1560,7 +1564,7 @@ html.motion .ceremony__card {
 }
 
 .ring {
-  --card-w: clamp(150px, 15vw, 260px);
+  --card-w: clamp(140px, 13vw, 230px);
 }
 
 .ring__spin {
@@ -1655,6 +1659,12 @@ html.motion .celebration__head {
   position: relative;
 }
 
+@media (min-width: 901px) {
+  html.motion .ring {
+    margin-top: 4vh;
+  }
+}
+
 html.motion .celebration__head .title-xl {
   font-size: clamp(2.4rem, 6vw, 6.5rem);
 }
@@ -1663,7 +1673,7 @@ html.motion .ring {
   position: relative;
   display: grid;
   place-items: center;
-  perspective: 1700px;
+  perspective: 2600px;
   perspective-origin: 50% 30%;
 }
 
@@ -1826,6 +1836,7 @@ html.motion .home__text {
 .gallery__track {
   position: absolute;
   inset: 0;
+  perspective: 1200px;
 }
 
 .gallery__item {
@@ -1846,6 +1857,7 @@ html.motion .home__text {
 
 .gallery__media img {
   -webkit-user-drag: none;
+  will-change: transform;
 }
 
 .gallery__cap {
@@ -2361,7 +2373,7 @@ html.motion .cta__title .line {
   }
 
   html.motion .ring {
-    perspective: 900px;
+    perspective: 1300px;
     perspective-origin: 50% 45%;
   }
 
@@ -2375,7 +2387,7 @@ html.motion .cta__title .line {
   }
 
   .celebration__tags li {
-    font-size: 0.62rem;
+    font-size: 0.69rem;
   }
 
   .gallery__head {

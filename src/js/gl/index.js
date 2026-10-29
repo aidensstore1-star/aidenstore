@@ -88,19 +88,18 @@ export function createGL(canvas, { scroll }) {
     mouse[1] = -(e.clientY / screen.h - 0.5) * viewport.h
   })
 
-  const state = { strength: 0, drag: 0, dragTarget: 0, burst: 0, petalOpacity: () => 0 }
+  const state = { strength: 0, burst: 0, petalOpacity: () => 0 }
 
   function tick(time) {
     if (lost) return
     const target = clamp(scroll.velocity() * 0.014, -0.9, 0.9)
     state.strength += (target - state.strength) * 0.1
-    state.drag += (clamp(state.dragTarget, -1, 1) - state.drag) * 0.12
 
     // Upload at most one photo per frame, before it is needed.
     for (const m of medias) if (m.coming && m.upload()) break
 
-    let changed = dirty || Math.abs(state.strength) > 0.002 || Math.abs(state.drag) > 0.0005
-    for (const m of medias) changed = m.update({ strength: state.strength, drag: state.drag, time }) || changed
+    let changed = dirty || Math.abs(state.strength) > 0.002
+    for (const m of medias) changed = m.update({ strength: state.strength, time }) || changed
     const petalOpacity = state.petalOpacity()
     petals.update({ time, mouse, scroll: window.scrollY * 0.0004, opacity: petalOpacity, burst: state.burst })
     changed = changed || petalOpacity > 0.001 || petals.wasVisible
@@ -127,9 +126,6 @@ export function createGL(canvas, { scroll }) {
   return {
     get: (el) => byElement.get(el),
     medias,
-    setDrag(v) {
-      state.dragTarget = v
-    },
     setPetalOpacity(fn) {
       state.petalOpacity = fn
     },

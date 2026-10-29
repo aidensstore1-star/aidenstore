@@ -10,8 +10,6 @@ const vertex = /* glsl */ `
   uniform mat4 projectionMatrix;
   uniform vec2 uViewport;
   uniform float uStrength;
-  uniform float uDrag;
-  uniform float uBend;
   uniform float uHover;
   uniform vec2 uMouse;
 
@@ -26,12 +24,7 @@ const vertex = /* glsl */ `
     // Scroll speed bows the photo like paper in a breeze.
     world.z += sin(world.y / uViewport.y * PI + PI * 0.5) * -uStrength;
 
-    // Dragging the gallery bends it like a sail.
-    world.z += sin(uv.y * PI) * uDrag * 0.35;
 
-    // Gallery photos sit on a gentle curve, edges further away.
-    float nx = world.x / (uViewport.x * 0.5);
-    world.z -= nx * nx * uBend;
 
     // Hover lifts the photo towards the pointer.
     float d = distance(uv, uMouse);
@@ -111,7 +104,6 @@ export class Media {
     this.hidden = false
     this.loaded = false
     this.near = false
-    this.bend = el.hasAttribute('data-bend') ? 0.45 : 0
 
     // Phones get 640px textures without mipmaps, to keep graphics memory low.
     this.small = small
@@ -132,8 +124,6 @@ export class Media {
         uImageSize: { value: [1, 1] },
         uViewport: { value: [viewport.w, viewport.h] },
         uStrength: { value: 0 },
-        uDrag: { value: 0 },
-        uBend: { value: this.bend },
         uHover: { value: 0 },
         uMouse: { value: [0.5, 0.5] },
         uReveal: { value: 0 },
@@ -229,7 +219,7 @@ export class Media {
   }
 
   // Returns true when this photo needs the frame redrawn.
-  update({ strength, drag, time }) {
+  update({ strength, time }) {
     // Skip layout reads entirely for photos nowhere near the screen.
     if (!this.near) {
       const was = this.mesh.visible
@@ -262,8 +252,7 @@ export class Media {
     this.lastRect = rect
     u.uPlaneSize.value = [rect.width, rect.height]
     u.uStrength.value = strength
-    u.uDrag.value = this.bend ? drag : 0
-    u.uShift.value = [this.bend ? drag * 0.6 : 0, strength * 0.6]
+    u.uShift.value = [0, strength * 0.6]
     u.uTime.value = time
     this.syncReady(rect)
     return !was || moved || u.uHover.value > 0.001 || (this.revealed && u.uReveal.value < 1)
