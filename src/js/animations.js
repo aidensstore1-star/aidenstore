@@ -117,7 +117,7 @@ export function initAnimations({ scroll, gl }) {
   const gather = (item, axis) => (axis === 'x' ? vw() / 2 - centre(item).x : vh() * 0.84 - centre(item).y)
   // A short hold, then Chapter I rises over the opening while it is still
   // bursting apart, so there is never an empty screen between them.
-  const heroScene = () => vh() * 0.35
+  const heroScene = () => vh() * 0.2
   const heroExit = gsap.timeline({
     defaults: { ease: 'power1.in' },
     scrollTrigger: {
@@ -148,9 +148,12 @@ export function initAnimations({ scroll, gl }) {
         x: () => gsap.utils.random(-0.55, 0.55) * vw(),
         y: () => gsap.utils.random(-1, -0.3) * vh(),
         rotation: () => gsap.utils.random(-140, 140),
+        // Letters drift up and away over the whole hand-over, fading late,
+        // so the screen above the rising arch never sits empty.
         opacity: 0,
-        duration: 0.75,
-        stagger: { amount: 0.2, from: 'center' },
+        duration: 0.85,
+        ease: 'power1.in',
+        stagger: { amount: 0.12, from: 'center' },
       },
       0,
     )
@@ -172,17 +175,21 @@ export function initAnimations({ scroll, gl }) {
   // while a photo decodes.
   const preloadAll = () => {
     const queue = $$('img[loading="lazy"]').filter((img) => img.getClientRects().length)
+    // Nearest chapters first, three at a time.
+    queue.sort((a, b) => Math.abs(a.getBoundingClientRect().top) - Math.abs(b.getBoundingClientRect().top))
     const next = () => {
       const img = queue.shift()
       if (!img) return
       img.loading = 'eager'
-      ;(img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => setTimeout(next, 60))
+      ;(img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => setTimeout(next, 30))
     }
+    next()
+    next()
     next()
   }
 
   function intro() {
-    const tl = gsap.timeline({ onComplete: () => setTimeout(preloadAll, 800) })
+    const tl = gsap.timeline({ onComplete: preloadAll })
     tl.to(heroSplit.chars, { yPercent: 0, duration: 1.6, stagger: 0.035, ease: 'expo.out' }, 0)
     heroFigs.forEach((fig, i) => {
       const media = gl?.get(fig)
@@ -430,19 +437,42 @@ export function initAnimations({ scroll, gl }) {
   const cakes = $$('.ring__card')
   const n = cakes.length
   gsap.set('.celebration__word', { yPercent: -50 })
+  const turn = $('.ring__turn')
+  // Sizes the ring so the cake in front, enlarged by perspective, always
+  // fits above the caption.
   const setRadius = () => {
-    const r = (spin.offsetWidth / 2 / Math.tan(Math.PI / n)) * (small ? 1.12 : 1.3)
-    ring.style.setProperty('--radius', `${r}px`)
+    ring.style.removeProperty('--card-w')
+    const k = (0.5 / Math.tan(Math.PI / n)) * (small ? 1.12 : 1.3)
+    const style = getComputedStyle(ring)
+    const P = parseFloat(style.perspective) || 2000
+    const H = ring.clientHeight
+    // The viewpoint sits above centre, which also pushes the front cake down.
+    const originY = (parseFloat(style.perspectiveOrigin.split(' ')[1]) || H / 2) / H
+    const fits = (w) => {
+      const m = (P / (P - k * w)) * 1.02
+      return ((4 / 3) * w * m) / 2 + (0.5 - originY) * H * (m - 1) <= H * 0.47
+    }
+    let w = turn.offsetWidth
+    while (w > 80 && !fits(w)) w -= 4
+    ring.style.setProperty('--card-w', `${w}px`)
+    ring.style.setProperty('--radius', `${k * w}px`)
   }
   setRadius()
   ScrollTrigger.addEventListener('refreshInit', setRadius)
   // Cakes turning towards you brighten and grow; the caption below names
   // whichever one faces you.
+  // Extra turn while the arch rises (set by the story tracker below).
+  let preTurn = 0
+  const setPreTurn = (deg) => {
+    preTurn = deg
+    gsap.set(turn, { rotationY: deg })
+    shade()
+  }
   const nowNum = $('.ring__now-num')
   const nowTitle = $('.ring__now-title')
   let front = -1
   const shade = () => {
-    const rot = gsap.getProperty(spin, 'rotationY')
+    const rot = gsap.getProperty(spin, 'rotationY') + preTurn
     let best = 0
     let bestFace = -1
     cakes.forEach((c, i) => {
@@ -476,12 +506,11 @@ export function initAnimations({ scroll, gl }) {
     onUpdate: shade,
   })
   celebrationTl
-    .fromTo(ring, { scale: 0.55, y: () => vh() * 0.1 }, { scale: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0)
     .fromTo(spin, { rotationY: 50, rotationX: () => (small ? -10 : -6) }, { rotationY: (-360 * (n - 1)) / n, rotationX: () => (small ? -10 : -6), duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
     // The caption and tags wait until the ring has arrived.
     .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.2)
-    .from('.celebration__tags li', { y: 30, opacity: 0, stagger: 0.012, duration: 0.06, ease: 'back.out(2)' }, 0.18)
+    .from('.celebration__tags li', { y: 24, opacity: 0, stagger: 0.004, duration: 0.06, ease: 'back.out(2)' }, 0.2)
     // The home slides over; the cakes recede.
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
@@ -676,7 +705,16 @@ export function initAnimations({ scroll, gl }) {
   // Labels near the top of a chapter wait until its arch is nearly open, so
   // the arch never cuts through their words.
   const archGated = { craft: '.craft__kicker, .craft__count', celebration: '.celebration__head' }
-  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({ el, top: 0, p: -1, gated: $$(archGated[el.id] || '_none_', el) }))
+  // While the arch rises, the chapter inside settles into place like a camera
+  // coming to rest, so a hand-over never shows a still frame.
+  const riseTargets = { craft: '.craft__pin', ceremony: '.ceremony__pin', celebration: '.celebration__pin', home: '.home__wall' }
+  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({
+    el,
+    top: 0,
+    p: -1,
+    gated: $$(archGated[el.id] || '_none_', el),
+    rise: $(riseTargets[el.id], el),
+  }))
   // Between chapters, a gold wire draws along the top edge instead.
   const edges = $$('.statement, .gallery').map((el) => {
     const line = document.createElement('span')
@@ -745,7 +783,10 @@ export function initAnimations({ scroll, gl }) {
       const p = clamp((y + h - a.top) / h, 0, 1)
       if (Math.abs(p - a.p) < 0.002) continue
       a.p = p
-      for (const g of a.gated) g.style.opacity = p >= 1 ? '' : clamp((p - 0.82) / 0.16, 0, 1).toFixed(3)
+      for (const g of a.gated) g.style.opacity = p >= 1 ? '' : clamp((p - 0.9) / 0.1, 0, 1).toFixed(3)
+      const q = 1 - p
+      if (a.rise) a.rise.style.transform = p >= 1 || p <= 0 ? '' : `translate3d(0, ${(-7 * q).toFixed(2)}vh, 0) scale(${(1 + 0.12 * q).toFixed(4)})`
+      if (a.el.id === 'celebration') setPreTurn(p <= 0 ? 70 : 70 * q)
       if (p >= 1 || p <= 0) {
         a.el.style.clipPath = p <= 0 ? 'inset(0 50% 0 50%)' : ''
         continue

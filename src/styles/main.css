@@ -1704,11 +1704,19 @@ html.motion .ring {
   perspective-origin: 50% 30%;
 }
 
-html.motion .ring__spin {
+/* .ring__turn takes the extra turn while the chapter's arch rises;
+   .ring__spin is turned by scrolling once the chapter is in place. */
+html.motion .ring__turn {
   position: relative;
-  display: block;
   width: var(--card-w);
   aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+}
+
+html.motion .ring__spin {
+  position: absolute;
+  inset: 0;
+  display: block;
   transform-style: preserve-3d;
   will-change: transform;
 }
