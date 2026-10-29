@@ -152,6 +152,14 @@ main,
   animation: grain 1s steps(6) infinite;
 }
 
+/* Phones: a still, screen-sized grain layer instead of a large moving one. */
+@media (hover: none) {
+  .grain {
+    inset: 0;
+    animation: none;
+  }
+}
+
 @keyframes grain {
   0% { transform: translate(0, 0); }
   20% { transform: translate(-3%, 2%); }
@@ -555,6 +563,14 @@ html.menu-open .header::before {
 
 html.menu-open .header {
   color: var(--ivory);
+}
+
+/* The close-up view has its own Close button where Menu would be. */
+html.detail-open .header,
+html.detail-open .chapter {
+  opacity: 0 !important;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
 }
 
 /* ---------- Menu ---------- */
@@ -1449,6 +1465,7 @@ html.motion .ring__cap {
   position: relative;
   height: clamp(420px, 70vh, 760px);
   overflow: hidden;
+  /* The page keeps vertical swipes; sideways drags move the gallery. */
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;

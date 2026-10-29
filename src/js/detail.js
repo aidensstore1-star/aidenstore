@@ -76,6 +76,10 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     }
   }
 
+  let byKeyboard = false
+  window.addEventListener('keydown', () => (byKeyboard = true), true)
+  window.addEventListener('pointerdown', () => (byKeyboard = false), true)
+
   async function open(i, card) {
     if (isOpen || busy) return
     busy = true
@@ -84,6 +88,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     lastFocus = document.activeElement
     galleryApi?.pause()
     scroll.stop()
+    document.documentElement.classList.add('detail-open')
     root.classList.add('is-open')
     root.setAttribute('aria-hidden', 'false')
     fill(i)
@@ -94,7 +99,8 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       onComplete: () => {
         busy = false
         if (media) media.hidden = true
-        closeBtn.focus({ preventScroll: true })
+        // Move focus into the dialog; only show the ring when using a keyboard.
+        closeBtn.focus({ preventScroll: true, focusVisible: byKeyboard })
       },
     })
     tl.fromTo(backdrop, { opacity: 0 }, { opacity: 0.97, duration: reduced ? 0.2 : 0.9, ease: 'power2.out' }, 0)
@@ -112,6 +118,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     const tl = gsap.timeline({
       onComplete: () => {
         root.classList.remove('is-open')
+        document.documentElement.classList.remove('detail-open')
         root.setAttribute('aria-hidden', 'true')
         gsap.set([img, ...info.children, ...chrome], { clearProps: 'all' })
         img.style.width = ''
@@ -149,6 +156,38 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       })
       .fromTo([img, ...info.children], { opacity: 0, x: 40 * dir }, { opacity: 1, x: 0, duration: 0.7, stagger: 0.04, ease: 'expo.out' }, '+=0.05')
   }
+
+  // Touch: swipe sideways for the next or previous piece, swipe down to close.
+  let touch = null
+  root.addEventListener(
+    'touchstart',
+    (e) => {
+      if (e.touches.length !== 1) return
+      touch = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: performance.now() }
+    },
+    { passive: true },
+  )
+  root.addEventListener(
+    'touchmove',
+    (e) => {
+      if (!touch || busy) return
+      const dy = e.touches[0].clientY - touch.y
+      const dx = e.touches[0].clientX - touch.x
+      if (dy > 0 && dy > Math.abs(dx)) gsap.set(img, { y: dy * 0.6, scale: 1 - Math.min(dy / 2000, 0.15) })
+    },
+    { passive: true },
+  )
+  root.addEventListener('touchend', (e) => {
+    if (!touch) return
+    const p = e.changedTouches[0]
+    const dx = p.clientX - touch.x
+    const dy = p.clientY - touch.y
+    touch = null
+    if (busy) return
+    if (dy > 90 && dy > Math.abs(dx)) return close()
+    gsap.to(img, { y: 0, scale: 1, duration: 0.5, ease: 'expo.out' })
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1)
+  })
 
   closeBtn.addEventListener('click', close)
   backdrop.addEventListener('click', close)

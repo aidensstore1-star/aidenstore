@@ -153,6 +153,7 @@ export class Media {
   setImage() {
     this.texture.image = this.img
     this.texture.needsUpdate = true
+    this.uploaded = false
     this.uniforms.uImageSize.value = [this.img.naturalWidth, this.img.naturalHeight]
     this.loaded = true
   }
@@ -182,11 +183,13 @@ export class Media {
     this.uniforms.uViewport.value = [this.viewport.w, this.viewport.h]
   }
 
+  // Returns true when this photo needs the frame redrawn.
   update({ strength, drag, time }) {
     // Skip layout reads entirely for photos nowhere near the screen.
     if (!this.near) {
+      const was = this.mesh.visible
       this.mesh.visible = false
-      return
+      return was
     }
     const rect = this.el.getBoundingClientRect()
     const { w: sw, h: sh } = this.screen
@@ -194,8 +197,9 @@ export class Media {
     const onScreen =
       rect.width > 0 && rect.bottom > -margin && rect.top < sh + margin && rect.right > -margin && rect.left < sw + margin
 
+    const was = this.mesh.visible
     this.mesh.visible = onScreen && this.loaded && !this.hidden
-    if (!onScreen) return
+    if (!this.mesh.visible) return was
 
     if (!this.manual && !this.revealed && this.loaded && rect.top < sh * 0.9 && rect.bottom > 0 && rect.left < sw && rect.right > 0) {
       this.reveal()
@@ -208,10 +212,14 @@ export class Media {
     this.mesh.position.y = vh / 2 - this.mesh.scale.y / 2 - (rect.top / sh) * vh
 
     const u = this.uniforms
+    const last = this.lastRect
+    const moved = !last || last.left !== rect.left || last.top !== rect.top || last.width !== rect.width || last.height !== rect.height
+    this.lastRect = rect
     u.uPlaneSize.value = [rect.width, rect.height]
     u.uStrength.value = strength
     u.uDrag.value = this.bend ? drag : 0
     u.uShift.value = [this.bend ? drag * 0.6 : 0, strength * 0.6]
     u.uTime.value = time
+    return !was || moved || u.uHover.value > 0.001 || (this.revealed && u.uReveal.value < 1) || !this.uploaded
   }
 }

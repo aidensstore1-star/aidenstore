@@ -41,26 +41,32 @@ export function initGallery({ scroll, gl, onOpen }) {
   }
   gsap.ticker.add(update, false, true)
 
+  // Only a short, still press counts as a tap. Any movement (including a
+  // vertical swipe that scrolls the page) or a long press does not open a piece.
   viewport.addEventListener('pointerdown', (e) => {
     if (e.button !== 0) return
     state.dragging = true
     state.startX = e.clientX
+    state.startY = e.clientY
+    state.startTime = performance.now()
     state.startTarget = state.target
     state.moved = 0
     state.downItem = e.target.closest('.gallery__item')
-    viewport.setPointerCapture(e.pointerId)
+    if (e.pointerType === 'mouse') viewport.setPointerCapture(e.pointerId)
   })
   viewport.addEventListener('pointermove', (e) => {
     if (!state.dragging) return
     const dx = e.clientX - state.startX
-    state.moved = Math.max(state.moved, Math.abs(dx))
+    const dy = e.clientY - state.startY
+    state.moved = Math.max(state.moved, Math.hypot(dx, dy))
     state.target = state.startTarget + dx * 1.6
   })
   const end = (e) => {
     if (!state.dragging) return
     state.dragging = false
     if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId)
-    if (e.type === 'pointerup' && state.moved < 6 && state.downItem) open(state.downItem)
+    const quick = performance.now() - state.startTime < 300
+    if (e.type === 'pointerup' && quick && state.moved < 8 && state.downItem) open(state.downItem)
   }
   viewport.addEventListener('pointerup', end)
   viewport.addEventListener('pointercancel', end)

@@ -27,15 +27,15 @@ export function runPreloader({ reduced }) {
   let done = 0
   tasks.forEach((p) => p.then(() => done++))
 
-  const MIN_DURATION = 2.6
+  const MIN_DURATION = 1.8
   const MAX_DURATION = 9
   const start = performance.now()
   let shown = 0
 
   const intro = gsap.timeline()
-  intro.to(letters, { y: 0, duration: 1.3, stagger: 0.06, ease: 'expo.out' }, 0.1)
+  intro.to(letters, { y: 0, duration: 1.1, stagger: 0.05, ease: 'expo.out' }, 0.05)
   imgs.forEach((img, i) => {
-    intro.to(img, { clipPath: 'inset(0% 0 0 0)', duration: 0.7, ease: 'power4.inOut' }, 0.25 + i * 0.36)
+    intro.to(img, { clipPath: 'inset(0% 0 0 0)', duration: 0.55, ease: 'power4.inOut' }, 0.15 + i * 0.24)
   })
 
   return new Promise((resolve) => {
@@ -44,7 +44,7 @@ export function runPreloader({ reduced }) {
       const real = (done / tasks.length) * 100
       const cap = Math.min(100, (elapsed / MIN_DURATION) * 100)
       const target = elapsed > MAX_DURATION ? 100 : Math.min(cap, real)
-      shown += (target - shown) * 0.08
+      shown += (target - shown) * 0.12
       if (target === 100 && shown > 99.4) shown = 100
       num.textContent = Math.round(shown)
       bar.style.transform = `scaleX(${shown / 100})`
@@ -60,11 +60,11 @@ export function runPreloader({ reduced }) {
       const cover = Math.max(window.innerWidth / r.width, window.innerHeight / r.height) * 1.05
       gsap
         .timeline({ onComplete: () => root.remove() })
-        .to(letters, { yPercent: -110, duration: 0.9, stagger: 0.04, ease: 'expo.in' }, 0)
+        .to(letters, { yPercent: -110, duration: 0.7, stagger: 0.03, ease: 'expo.in' }, 0)
         .to(fade, { opacity: 0, duration: 0.5 }, 0)
-        .to(stack, { scale: cover, duration: 1.3, ease: 'expo.inOut' }, 0.35)
-        .add(resolve, 1.25)
-        .to(root, { yPercent: -100, duration: 1.2, ease: 'expo.inOut' }, 1.25)
+        .to(stack, { scale: cover, duration: 1.1, ease: 'expo.inOut' }, 0.2)
+        .add(resolve, 0.95)
+        .to(root, { yPercent: -100, duration: 1.1, ease: 'expo.inOut' }, 0.95)
     }
   })
 }

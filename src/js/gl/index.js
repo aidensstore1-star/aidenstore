@@ -54,7 +54,11 @@ export function createGL(canvas, { scroll }) {
 
   const petals = new Petals({ gl, scene, viewport, count: small ? 30 : 70, pixelRatio: dpr })
 
+  let dirty = true
+  let lost = false
+
   function resize() {
+    dirty = true
     screen.w = window.innerWidth
     screen.h = window.innerHeight
     renderer.setSize(screen.w, screen.h)
@@ -80,15 +84,33 @@ export function createGL(canvas, { scroll }) {
   const state = { strength: 0, drag: 0, dragTarget: 0, burst: 0, petalOpacity: () => 0 }
 
   function tick(time) {
+    if (lost) return
     const target = clamp(scroll.velocity() * 0.014, -0.9, 0.9)
     state.strength += (target - state.strength) * 0.1
     state.drag += (clamp(state.dragTarget, -1, 1) - state.drag) * 0.12
 
-    for (const m of medias) m.update({ strength: state.strength, drag: state.drag, time })
-    petals.update({ time, mouse, scroll: window.scrollY * 0.0004, opacity: state.petalOpacity(), burst: state.burst })
+    let changed = dirty || Math.abs(state.strength) > 0.002 || Math.abs(state.drag) > 0.0005
+    for (const m of medias) changed = m.update({ strength: state.strength, drag: state.drag, time }) || changed
+    const petalOpacity = state.petalOpacity()
+    petals.update({ time, mouse, scroll: window.scrollY * 0.0004, opacity: petalOpacity, burst: state.burst })
+    changed = changed || petalOpacity > 0.001 || petals.wasVisible
+    petals.wasVisible = petalOpacity > 0.001
+
+    // Nothing moved this frame: keep the last image and save the battery.
+    if (!changed) return
+    dirty = false
     renderer.render({ scene, camera, sort: false, frustumCull: false })
+    for (const m of medias) if (m.mesh.visible) m.uploaded = true
   }
   gsap.ticker.add(tick)
+
+  // If the phone drops the WebGL context, show the plain photos instead.
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault()
+    lost = true
+    document.documentElement.classList.remove('gl-on')
+  })
+  canvas.addEventListener('webglcontextrestored', () => location.reload())
 
   document.documentElement.classList.add('gl-on')
 
