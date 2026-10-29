@@ -32,7 +32,8 @@ export function initAnimations({ scroll, gl }) {
     (entries) =>
       entries.forEach((e) => {
         if (!e.isIntersecting) return
-        e.target.querySelectorAll('img[loading="lazy"]').forEach((img) => (img.loading = 'eager'))
+        // Skip images in layouts hidden at this screen size.
+        e.target.querySelectorAll('img[loading="lazy"]').forEach((img) => img.getClientRects().length && (img.loading = 'eager'))
         warm.unobserve(e.target)
       }),
     { rootMargin: '150% 0px' },
@@ -275,6 +276,17 @@ export function initAnimations({ scroll, gl }) {
   const brideWord = $('.bride__word')
   const brideBar = $('.bride__progress i')
   const brideDist = () => Math.max(0, brideTrack.scrollWidth - vw())
+  // Pinned for the sideways journey, then for one more screen while the
+  // ceremony slides up over it (the pin and the track have separate triggers
+  // because the track also drives the cards' own triggers).
+  ScrollTrigger.create({
+    trigger: bride,
+    start: 'top top',
+    ...stacked(bride, brideDist),
+    pin: true,
+    anticipatePin: 1,
+    invalidateOnRefresh: true,
+  })
   const brideScroll = gsap.to(brideTrack, {
     x: () => -brideDist(),
     ease: 'none',
@@ -282,12 +294,17 @@ export function initAnimations({ scroll, gl }) {
       trigger: bride,
       start: 'top top',
       end: () => `+=${brideDist()}`,
-      pin: true,
       scrub: 0.8,
-      anticipatePin: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => (brideBar.style.transform = `scaleX(${self.progress})`),
     },
+  })
+  // As the ceremony covers it, the bride chapter sinks back.
+  gsap.to('.bride__pin', {
+    scale: 0.88,
+    opacity: 0.4,
+    ease: 'none',
+    scrollTrigger: { trigger: bride, start: () => `top+=${brideDist()} top`, end: () => `+=${vh()}`, scrub: 0.8, invalidateOnRefresh: true },
   })
   // The giant word drifts the same way, slower, like a layer further back.
   gsap.set(brideWord, { yPercent: -50 })
@@ -328,17 +345,19 @@ export function initAnimations({ scroll, gl }) {
   })
 
   // ---------- Chapter III: the ceremony, columns travel in opposite directions ----------
+  // Then they part like curtains to reveal one photo full-screen behind the card.
   const ceremony = $('.ceremony')
-  const cols = $$('.ceremony__col')
+  const cols = $$(`.ceremony__cols--${small ? 'narrow' : 'wide'} .ceremony__col`)
   const card = $('.ceremony__card')
-  const travel = (col) => Math.max(0, col.offsetHeight - vh() * 0.9)
+  const finale = $('.ceremony__finale')
+  const travel = (col) => Math.max(vh() * 0.25, col.offsetHeight - vh() * 0.9)
   gsap.set(card, { x: 0, y: 0, xPercent: -50, yPercent: -50 })
   const ceremonyTl = gsap.timeline({
     defaults: { ease: 'none' },
     scrollTrigger: {
       trigger: ceremony,
       start: 'top top',
-      ...stacked(ceremony, () => vh() * 1.9),
+      ...stacked(ceremony, () => vh() * 2.2),
       pin: true,
       scrub: 0.8,
       anticipatePin: 1,
@@ -346,23 +365,23 @@ export function initAnimations({ scroll, gl }) {
     },
   })
   cols.forEach((col, i) => {
-    const up = i !== 1
-    ceremonyTl.fromTo(
-      col,
-      { y: () => (up ? vh() * 0.1 : -travel(col)) },
-      { y: () => (up ? -travel(col) * (i === 2 ? 0.8 : 1) : vh() * 0.1), duration: 1 },
-      0,
-    )
+    const up = i % 2 === 0
+    ceremonyTl.fromTo(col, { y: () => (up ? vh() * 0.1 : -travel(col)) }, { y: () => (up ? -travel(col) : vh() * 0.1), duration: 0.8 }, 0)
   })
+  const last = cols.length - 1
   ceremonyTl
-    .fromTo(card, { scale: 0.6, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.22, ease: 'power3.out' }, 0.08)
-    // Towards the end the outer columns part sideways to frame the card.
-    .to(cols[0], { x: () => -vw() * (small ? 0.18 : 0.08), duration: 0.3, ease: 'power2.inOut' }, 0.65)
-    .to(cols[2], { x: () => vw() * (small ? 0.18 : 0.08), duration: 0.3, ease: 'power2.inOut' }, 0.65)
-    .to(card, { scale: 1.06, duration: 0.3, ease: 'power2.inOut' }, 0.65)
+    .fromTo(card, { scale: 0.6, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.2, ease: 'power3.out' }, 0.06)
+    // The curtains part: outer columns slide off to the sides, the middle one sinks away.
+    .to(cols[0], { x: () => -vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
+    .to(cols[last], { x: () => vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
+  if (cols.length > 2) ceremonyTl.to(cols[1], { yPercent: 30, opacity: 0, duration: 0.3, ease: 'power2.in' }, 0.58)
+  ceremonyTl
+    .fromTo(finale, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1.04, duration: 0.42, ease: 'power2.out' }, 0.62)
+    .to(card, { scale: 0.92, duration: 0.3, ease: 'power2.inOut' }, 0.62)
+    .to({}, { duration: 0.1 })
     // The celebration slides over; the ceremony recedes.
-    .to('.ceremony__cols', { scale: 0.88, opacity: 0.4, duration: 0.53 }, 1)
-    .to(card, { scale: 0.9, opacity: 0.4, duration: 0.53 }, 1)
+    .to(finale, { scale: 0.9, opacity: 0.5, duration: 0.45 }, 1)
+    .to(card, { scale: 0.8, opacity: 0.4, duration: 0.45 }, 1)
 
   // ---------- Chapter IV: the celebration, a ring of cakes turns as you scroll ----------
   const celebration = $('.celebration')

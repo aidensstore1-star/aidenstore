@@ -104,15 +104,19 @@ export function renderSections() {
   // ---------- Chapter III: the ceremony (counter-scrolling columns) ----------
   s.ceremonyTitle = titled(content.ceremony.title)
   s.ceremonyText = esc(content.ceremony.text)
-  s.ceremonyCols = content.ceremony.columns
-    .map(
-      (col, i) =>
-        // Each column repeats once so it is tall enough to keep moving on any screen.
-        `<div class="ceremony__col ceremony__col--${i + 1}">${[...col, ...col]
-          .map((id, j) => media(id, { cls: 'ceremony__img', gl: false, sizes: '(max-width: 900px) 32vw, 30vw', decorative: j >= col.length }))
-          .join('')}</div>`,
-    )
-    .join('')
+  // Three columns on wide screens, two on phones; each photo appears once.
+  const deal = (list, n) => Array.from({ length: n }, (_, c) => list.filter((_, i) => i % n === c))
+  const ceremonyCols = (n, cls) =>
+    `<div class="ceremony__cols ceremony__cols--${cls}">${deal(content.ceremony.photos, n)
+      .map(
+        (col, i) =>
+          `<div class="ceremony__col ceremony__col--${i + 1}">${col
+            .map((id) => media(id, { cls: 'ceremony__img', gl: false, sizes: n === 2 ? '46vw' : '30vw' }))
+            .join('')}</div>`,
+      )
+      .join('')}</div>`
+  s.ceremonyCols = ceremonyCols(3, 'wide') + ceremonyCols(2, 'narrow')
+  s.ceremonyFinale = `<figure class="ceremony__finale" aria-hidden="true">${img(content.ceremony.finale, { sizes: '100vw', decorative: true })}</figure>`
 
   // ---------- Chapter IV: the celebration (cake ring) ----------
   s.celebrationTitle = titled(content.celebration.title)

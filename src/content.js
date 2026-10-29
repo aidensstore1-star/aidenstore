@@ -118,11 +118,22 @@ export const bride = {
 export const ceremony = {
   title: ['For the', 'ceremony'],
   text: 'Holy Communion and christening candles and floral crowns, dressed by hand in wire flowers, pearls and ribbon.',
-  columns: [
-    ['tall-candle-silver-wire-flowers-pearls', 'crown-and-candle-lilac-set', 'tall-candle-pink-wire-flower-cluster'],
-    ['tall-candles-collection-four', 'tall-candle-ombre-wire-flowers', 'pillar-candles-pair-pastel-lace'],
-    ['tall-candle-ivory-roses-gold', 'pillar-candle-small-pastel-lace', 'pillar-candle-ivory-coral-roses-side'],
+  // Every candle once, in the order they are shared across the columns.
+  photos: [
+    'tall-candle-silver-wire-flowers-pearls',
+    'tall-candles-collection-four',
+    'tall-candle-ivory-roses-gold',
+    'pillar-candle-ivory-coral-roses-front',
+    'tall-candle-ombre-wire-flowers',
+    'pillar-candle-small-pastel-lace',
+    'tall-candle-pink-wire-flower-cluster',
+    'pillar-candles-pair-pastel-lace',
+    'pillar-candle-ivory-coral-roses-side',
+    'pillar-candles-pair-red-roses-burlap',
+    'pillar-candle-burlap-lace-flower-ring',
   ],
+  // Revealed full-screen when the columns part.
+  finale: 'crown-and-candle-lilac-set',
 }
 
 export const celebration = {
