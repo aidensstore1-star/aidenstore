@@ -337,6 +337,7 @@ export function initAnimations({ scroll, gl }) {
     },
   })
   // The giant word drifts the same way, slower, like a layer further back.
+  gsap.set(brideWord, { yPercent: -50 })
   gsap.fromTo(
     brideWord,
     { x: () => vw() * 0.35 },
@@ -416,6 +417,7 @@ export function initAnimations({ scroll, gl }) {
   const spin = $('.ring__spin')
   const cakes = $$('.ring__card')
   const n = cakes.length
+  gsap.set('.celebration__word', { yPercent: -50 })
   const setRadius = () => {
     const r = (spin.offsetWidth / 2 / Math.tan(Math.PI / n)) * 1.12
     ring.style.setProperty('--radius', `${r}px`)

@@ -1144,7 +1144,6 @@ html.motion .bride__word {
   white-space: nowrap;
   color: color-mix(in srgb, var(--rose) 16%, transparent);
   pointer-events: none;
-  transform: translateY(-50%);
   will-change: transform;
 }
 
@@ -1342,7 +1341,6 @@ html.motion .celebration__word {
   color: transparent;
   -webkit-text-stroke: 1px rgb(243 236 228 / 0.16);
   pointer-events: none;
-  transform: translateY(-50%);
   will-change: transform;
 }
 
