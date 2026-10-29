@@ -783,7 +783,12 @@ export function initAnimations({ scroll, gl }) {
       a.p = p
       for (const g of a.gated) g.style.opacity = p >= 1 ? '' : clamp((p - 0.9) / 0.1, 0, 1).toFixed(3)
       const q = 1 - p
-      if (a.rise) a.rise.style.transform = p >= 1 || p <= 0 ? '' : `translate3d(0, ${(-7 * q).toFixed(2)}vh, 0) scale(${(1 + 0.12 * q).toFixed(4)})`
+      if (a.rise) {
+        const rising = p > 0 && p < 1
+        // Its own GPU layer only while it moves, so it isn't repainted each frame.
+        a.rise.style.willChange = rising ? 'transform' : ''
+        a.rise.style.transform = rising ? `translate3d(0, ${(-7 * q).toFixed(2)}vh, 0) scale(${(1 + 0.12 * q).toFixed(4)})` : ''
+      }
       if (a.el.id === 'celebration') setPreTurn(p <= 0 ? 70 : 70 * q)
       if (p >= 1 || p <= 0) {
         a.el.style.clipPath = p <= 0 ? 'inset(0 50% 0 50%)' : ''

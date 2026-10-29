@@ -57,6 +57,12 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       enquire.href = '#contact'
     }
     layout()
+    // Load the pieces either side, so swiping never shows a blank.
+    for (const step of [1, -1]) {
+      const near = new Image()
+      near.src = `photos/${gallery[(index + step + gallery.length) % gallery.length]}-1280.webp`
+      near.decode?.().catch(() => {})
+    }
   }
 
   // Size the <img> to the photo's own shape inside the available space.
@@ -132,7 +138,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
         root.classList.remove('is-open')
         document.documentElement.classList.remove('detail-open')
         root.setAttribute('aria-hidden', 'true')
-        gsap.set([img, ...info.children, ...chrome], { clearProps: 'all' })
+        gsap.set([img, info, ...info.children, ...chrome], { clearProps: 'all' })
         img.style.width = ''
         img.style.height = ''
         isOpen = false
@@ -203,7 +209,14 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       // the photo only follows the finger when it is free to.
       if (busy) return
       if (touch.axis === 'x') gsap.set(img, { x: dx, rotation: dx * 0.02, opacity: 1 - Math.min(Math.abs(dx) / 600, 0.4) })
-      if (touch.axis === 'y' && dy > 0) gsap.set(img, { y: dy * 0.7, scale: 1 - Math.min(dy / 1800, 0.18) })
+      if (touch.axis === 'y' && dy > 0) {
+        // Pulling down shrinks the photo and fades the words and backdrop,
+        // showing the page underneath.
+        const pull = Math.min(dy / 400, 1)
+        gsap.set(img, { y: dy * 0.7, scale: 1 - pull * 0.2 })
+        gsap.set([info, ...chrome], { opacity: 1 - pull })
+        gsap.set(backdrop, { opacity: 1 - pull * 0.6 })
+      }
     },
     { passive: true },
   )
@@ -223,6 +236,8 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     }
     if (action) return action()
     gsap.to(img, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'expo.out' })
+    gsap.to([info, ...chrome], { opacity: 1, duration: 0.4 })
+    gsap.to(backdrop, { opacity: 1, duration: 0.4 })
   })
 
   closeBtn.addEventListener('click', close)
