@@ -270,13 +270,7 @@ main {
   object-fit: cover;
 }
 
-/* The same warm grade the WebGL photos get, so photos taken in different
-   rooms read as one collection. */
-.media img,
-.craft__frame img,
-.ring__img img {
-  filter: sepia(0.16) saturate(0.86) contrast(1.04) brightness(1.02);
-}
+/* Photos carry one shared warm grade, baked in by scripts/prepare-images.mjs. */
 
 /* Arched frames, like chapel windows, with a fine gold line inside. */
 .bride__media,
@@ -299,10 +293,11 @@ main {
 }
 
 /* When WebGL is running it draws these photos; the <img> stays for layout and alt text. */
-html.gl-on .media[data-gl] {
+/* The plain photo stays until its WebGL copy is ready to draw. */
+html.gl-on .media[data-gl].gl-ready {
   background: none;
 }
-html.gl-on .media[data-gl] img {
+html.gl-on .media[data-gl].gl-ready img {
   opacity: 0;
 }
 
@@ -1528,7 +1523,7 @@ html.motion .ceremony__finale img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: sepia(0.08) saturate(0.94) brightness(0.92);
+  filter: brightness(0.92);
 }
 
 html.motion .ceremony__card {
@@ -2473,7 +2468,17 @@ html.motion .cta__title .line {
   }
 
   .detail__info {
-    gap: 0.8rem;
+    gap: 0.5rem;
+  }
+
+  .detail__type,
+  .detail__count {
+    font-size: 0.66rem;
+  }
+
+  .detail__enquire {
+    min-height: 0;
+    padding: 0.9em 1.5em;
   }
 
   .detail__nav {

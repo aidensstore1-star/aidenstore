@@ -125,14 +125,14 @@ export function initAnimations({ scroll, gl }) {
         y: () => gsap.utils.random(-1, -0.3) * vh(),
         rotation: () => gsap.utils.random(-140, 140),
         opacity: 0,
-        duration: 0.5,
-        stagger: { amount: 0.3, from: 'center' },
+        duration: 0.75,
+        stagger: { amount: 0.2, from: 'center' },
       },
       0,
     )
     .fromTo('.hero__sub, .hero__foot', { opacity: 1, y: 0 }, { opacity: 0, y: -80, duration: 0.3, immediateRender: false }, 0)
   heroItems.forEach((item, i) => {
-    heroExit.to(heroFigs[i], { x: () => flyOut(item, 'x'), y: () => flyOut(item, 'y'), scale: 1.9, rotation: (i % 2 ? 1 : -1) * 12, duration: 0.85 }, 0)
+    heroExit.to(heroFigs[i], { x: () => flyOut(item, 'x'), y: () => flyOut(item, 'y'), scale: 1.9, rotation: (i % 2 ? 1 : -1) * 12, duration: 1 }, 0)
   })
   heroExit.to('.hero__media', { scale: 0.85, duration: 1, ease: 'none' }, 0)
 
@@ -166,10 +166,11 @@ export function initAnimations({ scroll, gl }) {
   gsap.set(frames[0], { clipPath: 'inset(34% 32% 34% 32%)' })
   // Later frames wipe in with paired transforms (cheap on phones): the frame
   // slides in while its photo slides the other way, so the photo holds still.
-  gsap.set(frames[1], { xPercent: 100 })
-  gsap.set(frameImgs[1], { xPercent: -100 })
-  gsap.set(frames[2], { yPercent: 100 })
-  gsap.set(frameImgs[2], { yPercent: -100 })
+  // Start a little beyond the edge so the gold edge's glow stays out of view.
+  gsap.set(frames[1], { xPercent: 108 })
+  gsap.set(frameImgs[1], { xPercent: -108 })
+  gsap.set(frames[2], { yPercent: 108 })
+  gsap.set(frameImgs[2], { yPercent: -108 })
   // Letters travel well past their line's mask so no slivers show.
   gsap.set(craftIntro.chars, { yPercent: 140 })
   gsap.set(lines, { autoAlpha: 0 })
@@ -179,7 +180,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: craft,
       start: 'top top',
-      ...stacked(craft, () => vh() * 4),
+      ...stacked(craft, () => vh() * 3.2),
       pin: true,
       scrub: 1,
       anticipatePin: 1,

@@ -103,7 +103,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
         closeBtn.focus({ preventScroll: true, focusVisible: byKeyboard })
       },
     })
-    tl.fromTo(backdrop, { opacity: 0 }, { opacity: 0.97, duration: reduced ? 0.2 : 0.9, ease: 'power2.out' }, 0)
+    tl.fromTo(backdrop, { opacity: 0 }, { opacity: 1, duration: reduced ? 0.2 : 0.9, ease: 'power2.out' }, 0)
     if (!reduced) {
       tl.fromTo(img, { ...fromCard(card), transformOrigin: '0 0' }, { x: 0, y: 0, scale: 1, clipPath: 'inset(0px 0px 0px 0px)', duration: 1.2, ease: 'expo.inOut' }, 0)
     }
@@ -140,13 +140,16 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     }
   }
 
-  function go(dir) {
+  // `swiped`: the photo is already under the finger, so it carries on off
+  // the screen from where it is instead of starting over.
+  function go(dir, swiped = false) {
     if (!isOpen || busy) return
     busy = true
     const media = gl?.get(source.querySelector('.media'))
     gsap
       .timeline({ onComplete: () => (busy = false) })
-      .to([img, ...info.children], { opacity: 0, x: -40 * dir, duration: 0.35, stagger: 0.03, ease: 'power2.in' })
+      .to(img, { opacity: 0, x: swiped ? -window.innerWidth * dir : -40 * dir, rotation: 0, duration: swiped ? 0.3 : 0.35, ease: 'power2.in' })
+      .to(info.children, { opacity: 0, x: -40 * dir, duration: 0.35, stagger: 0.03, ease: 'power2.in' }, 0)
       .add(async () => {
         if (media) media.hidden = false
         fill(index + dir)
@@ -157,13 +160,15 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       .fromTo([img, ...info.children], { opacity: 0, x: 40 * dir }, { opacity: 1, x: 0, duration: 0.7, stagger: 0.04, ease: 'expo.out' }, '+=0.05')
   }
 
-  // Touch: swipe sideways for the next or previous piece, swipe down to close.
+  // Touch: the photo follows the finger. Swipe sideways for the next or
+  // previous piece, down to close; a quick flick counts even if it is short.
   let touch = null
   root.addEventListener(
     'touchstart',
     (e) => {
-      if (e.touches.length !== 1) return
-      touch = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: performance.now() }
+      if (e.touches.length !== 1 || busy) return
+      const t = e.touches[0]
+      touch = { x: t.clientX, y: t.clientY, lx: t.clientX, ly: t.clientY, lt: performance.now(), vx: 0, vy: 0, axis: null }
     },
     { passive: true },
   )
@@ -171,9 +176,19 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     'touchmove',
     (e) => {
       if (!touch || busy) return
-      const dy = e.touches[0].clientY - touch.y
-      const dx = e.touches[0].clientX - touch.x
-      if (dy > 0 && dy > Math.abs(dx)) gsap.set(img, { y: dy * 0.6, scale: 1 - Math.min(dy / 2000, 0.15) })
+      const t = e.touches[0]
+      const now = performance.now()
+      const dt = Math.max(1, now - touch.lt)
+      touch.vx = (t.clientX - touch.lx) / dt
+      touch.vy = (t.clientY - touch.ly) / dt
+      touch.lx = t.clientX
+      touch.ly = t.clientY
+      touch.lt = now
+      const dx = t.clientX - touch.x
+      const dy = t.clientY - touch.y
+      if (!touch.axis && Math.hypot(dx, dy) > 8) touch.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+      if (touch.axis === 'x') gsap.set(img, { x: dx, rotation: dx * 0.02, opacity: 1 - Math.min(Math.abs(dx) / 600, 0.4) })
+      if (touch.axis === 'y' && dy > 0) gsap.set(img, { y: dy * 0.7, scale: 1 - Math.min(dy / 1800, 0.18) })
     },
     { passive: true },
   )
@@ -182,11 +197,12 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     const p = e.changedTouches[0]
     const dx = p.clientX - touch.x
     const dy = p.clientY - touch.y
+    const { axis, vx, vy } = touch
     touch = null
     if (busy) return
-    if (dy > 90 && dy > Math.abs(dx)) return close()
-    gsap.to(img, { y: 0, scale: 1, duration: 0.5, ease: 'expo.out' })
-    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) go(dx < 0 ? 1 : -1)
+    if (axis === 'y' && (dy > 110 || (dy > 30 && vy > 0.6))) return close()
+    if (axis === 'x' && (Math.abs(dx) > 90 || (Math.abs(dx) > 25 && Math.abs(vx) > 0.5))) return go(dx < 0 ? 1 : -1, true)
+    gsap.to(img, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'expo.out' })
   })
 
   closeBtn.addEventListener('click', close)

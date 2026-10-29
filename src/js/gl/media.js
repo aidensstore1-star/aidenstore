@@ -84,12 +84,8 @@ const fragment = /* glsl */ `
       texture2D(tMap, uv - shift).b
     );
 
-    // One shared grade so phone photos taken in different rooms read as one
-    // collection: slightly warmer, a touch softer, darker at the corners.
-    float luma = dot(color, vec3(0.299, 0.587, 0.114));
-    color = mix(color, vec3(luma), 0.14);
-    color *= vec3(1.05, 1.0, 0.92);
-    color = mix(color, vec3(0.97, 0.92, 0.86), 0.07);
+    // Slightly darker at the corners, to settle each photo into the page.
+    // (The warm grade itself is baked into the photo files.)
     float vignette = smoothstep(0.95, 0.35, distance(vUv, vec2(0.5)));
     color *= mix(0.86, 1.0, vignette);
 
@@ -204,6 +200,7 @@ export class Media {
     this.uniforms.tMap.value = this.texture
     this.gl.deleteTexture(old.texture)
     this.uploaded = false
+    this.syncReady()
   }
 
   bindHover() {
@@ -268,6 +265,21 @@ export class Media {
     u.uDrag.value = this.bend ? drag : 0
     u.uShift.value = [this.bend ? drag * 0.6 : 0, strength * 0.6]
     u.uTime.value = time
+    this.syncReady(rect)
     return !was || moved || u.uHover.value > 0.001 || (this.revealed && u.uReveal.value < 1)
+  }
+
+  // Hides the plain photo once the WebGL copy is drawing. If that happens
+  // while the photo is already on screen (after a jump), skip the reveal so
+  // it doesn't vanish and wipe in again.
+  syncReady(rect) {
+    const ready = this.loaded && this.uploaded
+    if (ready === this.ready) return
+    this.ready = ready
+    if (ready && !this.revealed && rect && rect.top < this.screen.h && rect.bottom > 0) {
+      this.revealed = true
+      this.uniforms.uReveal.value = 1
+    }
+    this.el.classList.toggle('gl-ready', ready)
   }
 }

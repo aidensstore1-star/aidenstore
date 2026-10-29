@@ -1,7 +1,7 @@
 // Turns the original photos in images/ into web-sized WebP files in
 // public/photos/ and writes their dimensions to src/photo-manifest.json.
 // Runs before `npm run dev` and `npm run build`; unchanged photos are skipped.
-import { readdir, mkdir, stat, writeFile } from 'node:fs/promises'
+import { readdir, mkdir, stat, writeFile, readFile } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
 
@@ -11,6 +11,19 @@ const outDir = path.join(root, 'public', 'photos')
 const manifestPath = path.join(root, 'src', 'photo-manifest.json')
 
 const WIDTHS = [640, 1280]
+
+// One shared grade, baked into the files so phones don't pay for CSS filters:
+// a touch of warmth (16% sepia), slightly less saturation, a little contrast.
+// Change GRADE_VERSION when changing the grade, to rebuild every photo.
+const GRADE_VERSION = '1'
+const SEPIA = [
+  [0.393, 0.769, 0.189],
+  [0.349, 0.686, 0.168],
+  [0.272, 0.534, 0.131],
+]
+const WARMTH = 0.16
+const GRADE = SEPIA.map((row, r) => row.map((v, c) => (r === c ? 1 - WARMTH : 0) + WARMTH * v))
+const grade = (img) => img.recomb(GRADE).modulate({ saturation: 0.88, brightness: 1.02 }).linear(1.04, -128 * 0.04)
 
 // Photos with a "SHOT ON REDMI K20" watermark in the bottom-left corner.
 // Cropping the bottom 13% removes it.
@@ -32,6 +45,10 @@ const isNewer = async (a, b) => {
 }
 
 await mkdir(outDir, { recursive: true })
+// Kept outside public/ so it isn't published with the site.
+const stampPath = path.join(root, 'node_modules', '.cache', 'photo-grade')
+const stamp = await readFile(stampPath, 'utf8').catch(() => '')
+const regrade = stamp.trim() !== GRADE_VERSION
 const files = (await readdir(srcDir)).filter((f) => /\.jpe?g$/i.test(f)).sort()
 const manifest = {}
 let written = 0
@@ -51,10 +68,10 @@ for (const file of files) {
 
   for (const w of WIDTHS) {
     const output = path.join(outDir, `${name}-${w}.webp`)
-    if (!(await isNewer(input, output))) continue
+    if (!regrade && !(await isNewer(input, output))) continue
     let img = sharp(input).rotate()
     if (crop) img = img.extract(crop)
-    await img
+    await grade(img)
       .resize({ width: Math.min(w, width), withoutEnlargement: true })
       .webp({ quality: 80, effort: 5 })
       .toFile(output)
@@ -62,6 +79,8 @@ for (const file of files) {
   }
 }
 
+await mkdir(path.dirname(stampPath), { recursive: true })
+await writeFile(stampPath, GRADE_VERSION)
 await mkdir(path.dirname(manifestPath), { recursive: true })
 await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
 console.log(`photos: ${files.length} originals, ${written} files written`)
