@@ -396,11 +396,15 @@ export function initAnimations({ scroll, gl }) {
   }
   setRadius()
   ScrollTrigger.addEventListener('refreshInit', setRadius)
+  // Cakes turning towards you brighten and grow, and only the front one
+  // shows its name.
   const shade = () => {
     const rot = gsap.getProperty(spin, 'rotationY')
     cakes.forEach((c, i) => {
-      const a = ((i * 360) / n + rot) * (Math.PI / 180)
-      c.style.opacity = (0.2 + 0.8 * Math.max(0, Math.cos(a)) ** 1.5).toFixed(3)
+      const face = Math.max(0, Math.cos(((i * 360) / n + rot) * (Math.PI / 180)))
+      c.style.opacity = (0.2 + 0.8 * face ** 1.5).toFixed(3)
+      c.style.setProperty('--face', face.toFixed(3))
+      c.style.setProperty('--cap', (face ** 8).toFixed(3))
     })
   }
   const celebrationTl = gsap.timeline({

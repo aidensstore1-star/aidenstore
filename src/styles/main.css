@@ -1522,7 +1522,7 @@ html.motion .ceremony__card {
 }
 
 .ring {
-  --card-w: clamp(140px, 16vw, 250px);
+  --card-w: clamp(130px, 12.5vw, 220px);
 }
 
 .ring__spin {
@@ -1641,7 +1641,8 @@ html.motion .ring__spin {
 html.motion .ring__card {
   position: absolute;
   inset: 0;
-  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--radius, 400px));
+  /* --face (0 to 1) is how directly a cake faces you; the front one grows. */
+  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--radius, 400px)) scale(calc(0.86 + 0.24 * var(--face, 0)));
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -1649,6 +1650,7 @@ html.motion .ring__card {
 html.motion .ring__cap {
   text-align: center;
   justify-items: center;
+  opacity: var(--cap, 0);
 }
 
 /* ---------- Chapter V: the home ---------- */
@@ -2164,11 +2166,16 @@ html.motion .cta__title .line {
   }
 
   .ring {
-    --card-w: clamp(110px, 31vw, 160px);
+    --card-w: clamp(130px, 40vw, 190px);
   }
 
   html.motion .ring {
     perspective: 900px;
+    perspective-origin: 50% 45%;
+  }
+
+  html.motion .celebration__pin {
+    gap: 0;
   }
 
   /* On phones the ring needs the height; the title already says it. */

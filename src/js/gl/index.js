@@ -41,16 +41,23 @@ export function createGL(canvas, { scroll }) {
         viewport,
         isWebgl2: renderer.isWebgl2,
         manual: el.classList.contains('hero__img'),
+        small,
       }),
   )
   const byElement = new Map(medias.map((m) => [m.el, m]))
 
-  // Only photos within about a screen of the viewport are measured and drawn.
-  const nearby = new IntersectionObserver(
-    (entries) => entries.forEach((e) => (byElement.get(e.target).near = e.isIntersecting)),
-    { rootMargin: '60% 60%' },
-  )
-  medias.forEach((m) => nearby.observe(m.el))
+  // Only photos within about a screen of the viewport are measured and drawn;
+  // photos within two screens are loaded and uploaded ahead of time; photos
+  // further away than four screens give their graphics memory back.
+  const watch = (margin, fn) => {
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => fn(byElement.get(e.target), e.isIntersecting)), {
+      rootMargin: margin,
+    })
+    medias.forEach((m) => io.observe(m.el))
+  }
+  watch('60% 60%', (m, on) => (m.near = on))
+  watch('200% 100%', (m, on) => (m.coming = on) && m.prepare())
+  watch('400% 200%', (m, on) => !on && m.free())
 
   const petals = new Petals({ gl, scene, viewport, count: small ? 30 : 70, pixelRatio: dpr })
 
@@ -88,6 +95,9 @@ export function createGL(canvas, { scroll }) {
     const target = clamp(scroll.velocity() * 0.014, -0.9, 0.9)
     state.strength += (target - state.strength) * 0.1
     state.drag += (clamp(state.dragTarget, -1, 1) - state.drag) * 0.12
+
+    // Upload at most one photo per frame, before it is needed.
+    for (const m of medias) if (m.coming && m.upload()) break
 
     let changed = dirty || Math.abs(state.strength) > 0.002 || Math.abs(state.drag) > 0.0005
     for (const m of medias) changed = m.update({ strength: state.strength, drag: state.drag, time }) || changed

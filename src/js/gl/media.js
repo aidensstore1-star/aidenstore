@@ -104,7 +104,7 @@ const fragment = /* glsl */ `
 `
 
 export class Media {
-  constructor({ gl, geometry, scene, el, screen, viewport, isWebgl2, manual }) {
+  constructor({ gl, geometry, scene, el, screen, viewport, isWebgl2, manual, small }) {
     this.gl = gl
     this.el = el
     this.img = el.querySelector('img')
@@ -117,10 +117,12 @@ export class Media {
     this.near = false
     this.bend = el.hasAttribute('data-bend') ? 0.45 : 0
 
-    this.texture = new Texture(gl, {
-      generateMipmaps: isWebgl2,
-      minFilter: isWebgl2 ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR,
-    })
+    // Phones get 640px textures without mipmaps, to keep graphics memory low.
+    this.small = small
+    const mip = isWebgl2 && !small
+    this.texOpts = { generateMipmaps: mip, minFilter: mip ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR }
+    this.texture = new Texture(gl, this.texOpts)
+    this.source = null
 
     this.program = new Program(gl, {
       vertex,
@@ -151,20 +153,57 @@ export class Media {
     this.mesh.visible = false
     this.mesh.setParent(scene)
 
-    const onLoad = () => this.setImage()
-    if (this.img.complete && this.img.naturalWidth) onLoad()
-    // Fires again if the browser swaps to a bigger srcset file after a resize.
-    this.img.addEventListener('load', onLoad)
+    if (!small) {
+      const onLoad = () => this.setImage(this.img)
+      if (this.img.complete && this.img.naturalWidth) onLoad()
+      // Fires again if the browser swaps to a bigger srcset file after a resize.
+      this.img.addEventListener('load', onLoad)
+    }
 
     this.bindHover()
   }
 
-  setImage() {
-    this.texture.image = this.img
+  setImage(source) {
+    this.source = source
+    this.texture.image = source
     this.texture.needsUpdate = true
     this.uploaded = false
-    this.uniforms.uImageSize.value = [this.img.naturalWidth, this.img.naturalHeight]
+    this.uniforms.uImageSize.value = [source.naturalWidth, source.naturalHeight]
     this.loaded = true
+  }
+
+  // Called when the photo comes within reach of the screen.
+  prepare() {
+    if (!this.small || this.source || this.loading) return
+    this.loading = true
+    const small = new Image()
+    small.decoding = 'async'
+    small.src = this.img.getAttribute('src').replace(/-1280\.webp$/, '-640.webp')
+    small
+      .decode()
+      .then(() => this.setImage(small))
+      .catch(() => (this.loading = false))
+  }
+
+  // Sends the photo to the graphics card ahead of time, so it doesn't stall
+  // the frame it first appears in. Returns true if it uploaded.
+  upload() {
+    if (!this.loaded || this.uploaded) return false
+    this.texture.update()
+    this.uploaded = true
+    return true
+  }
+
+  // Frees graphics memory for photos far from the screen; they upload again
+  // when they come back.
+  free() {
+    if (!this.uploaded) return
+    const old = this.texture
+    this.texture = new Texture(this.gl, this.texOpts)
+    this.texture.image = this.source
+    this.uniforms.tMap.value = this.texture
+    this.gl.deleteTexture(old.texture)
+    this.uploaded = false
   }
 
   bindHover() {
@@ -229,6 +268,6 @@ export class Media {
     u.uDrag.value = this.bend ? drag : 0
     u.uShift.value = [this.bend ? drag * 0.6 : 0, strength * 0.6]
     u.uTime.value = time
-    return !was || moved || u.uHover.value > 0.001 || (this.revealed && u.uReveal.value < 1) || !this.uploaded
+    return !was || moved || u.uHover.value > 0.001 || (this.revealed && u.uReveal.value < 1)
   }
 }
