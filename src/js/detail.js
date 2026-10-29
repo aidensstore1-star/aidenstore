@@ -20,6 +20,14 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
   let index = 0
   let isOpen = false
   let busy = false
+  // A gesture made while a transition is still running waits for it to end.
+  let queued = null
+  const settle = () => {
+    busy = false
+    const next = queued
+    queued = null
+    next?.()
+  }
   let source = null
   let lastFocus = null
 
@@ -97,7 +105,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     const media = gl?.get(card.querySelector('.media'))
     const tl = gsap.timeline({
       onComplete: () => {
-        busy = false
+        settle()
         if (media) media.hidden = true
         // Move focus into the dialog; only show the ring when using a keyboard.
         closeBtn.focus({ preventScroll: true, focusVisible: byKeyboard })
@@ -124,7 +132,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
         img.style.width = ''
         img.style.height = ''
         isOpen = false
-        busy = false
+        settle()
         galleryApi?.resume()
         scroll.start()
         lastFocus?.focus?.({ preventScroll: true })
@@ -147,7 +155,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     busy = true
     const media = gl?.get(source.querySelector('.media'))
     gsap
-      .timeline({ onComplete: () => (busy = false) })
+      .timeline({ onComplete: settle })
       .to(img, { opacity: 0, x: swiped ? -window.innerWidth * dir : -40 * dir, rotation: 0, duration: swiped ? 0.3 : 0.35, ease: 'power2.in' })
       .to(info.children, { opacity: 0, x: -40 * dir, duration: 0.35, stagger: 0.03, ease: 'power2.in' }, 0)
       .add(async () => {
@@ -166,7 +174,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
   root.addEventListener(
     'touchstart',
     (e) => {
-      if (e.touches.length !== 1 || busy) return
+      if (e.touches.length !== 1) return
       const t = e.touches[0]
       touch = { x: t.clientX, y: t.clientY, lx: t.clientX, ly: t.clientY, lt: performance.now(), vx: 0, vy: 0, axis: null }
     },
@@ -199,9 +207,14 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     const dy = p.clientY - touch.y
     const { axis, vx, vy } = touch
     touch = null
-    if (busy) return
-    if (axis === 'y' && (dy > 110 || (dy > 30 && vy > 0.6))) return close()
-    if (axis === 'x' && (Math.abs(dx) > 90 || (Math.abs(dx) > 25 && Math.abs(vx) > 0.5))) return go(dx < 0 ? 1 : -1, true)
+    let action = null
+    if (axis === 'y' && (dy > 110 || (dy > 30 && vy > 0.6))) action = close
+    else if (axis === 'x' && (Math.abs(dx) > 90 || (Math.abs(dx) > 25 && Math.abs(vx) > 0.5))) action = () => go(dx < 0 ? 1 : -1, !busy)
+    if (busy) {
+      queued = action
+      return
+    }
+    if (action) return action()
     gsap.to(img, { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.6, ease: 'expo.out' })
   })
 

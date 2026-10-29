@@ -40,6 +40,9 @@ export function initAnimations({ scroll, gl }) {
   )
   $$('.craft, .bride, .ceremony, .celebration, .home, .gallery').forEach((s) => warm.observe(s))
 
+  // Mouse and trackpad users click rather than tap.
+  if (canHover) $('.gallery__hint').textContent = 'Drag to explore. Click a piece to see it up close.'
+
   // ---------- Big titles rise line by line ----------
   $$('.title-xl').forEach((el) => {
     SplitText.create(el, {
@@ -155,8 +158,22 @@ export function initAnimations({ scroll, gl }) {
   const petals = { intro: 0, hero: 1, cta: 0 }
   gl?.setPetalOpacity(() => Math.max(petals.hero * petals.intro, petals.cta))
 
+  // Once the opening has played, quietly load and decode every remaining
+  // photo, one at a time, so later chapters never arrive empty or stutter
+  // while a photo decodes.
+  const preloadAll = () => {
+    const queue = $$('img[loading="lazy"]').filter((img) => img.getClientRects().length)
+    const next = () => {
+      const img = queue.shift()
+      if (!img) return
+      img.loading = 'eager'
+      ;(img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(() => setTimeout(next, 60))
+    }
+    next()
+  }
+
   function intro() {
-    const tl = gsap.timeline()
+    const tl = gsap.timeline({ onComplete: () => setTimeout(preloadAll, 800) })
     tl.to(heroSplit.chars, { yPercent: 0, duration: 1.6, stagger: 0.035, ease: 'expo.out' }, 0)
     heroFigs.forEach((fig, i) => {
       const media = gl?.get(fig)
@@ -286,7 +303,16 @@ export function initAnimations({ scroll, gl }) {
   const brideTrack = $('.bride__track')
   const brideWord = $('.bride__word')
   const brideBar = $('.bride__progress i')
-  const brideDist = () => Math.max(0, brideTrack.scrollWidth - vw())
+  // Measured from layout (the last card's edge plus the gutter): the cards'
+  // 3D turns would inflate scrollWidth.
+  const brideCards = $$('.bride__card')
+  const brideLastCard = brideCards[brideCards.length - 1]
+  const brideGutter = () => parseFloat(getComputedStyle(brideTrack).paddingLeft) || 0
+  let brideLen = 0
+  const measureBride = () => (brideLen = Math.max(0, brideLastCard.offsetLeft + brideLastCard.offsetWidth + brideGutter() - vw()))
+  measureBride()
+  ScrollTrigger.addEventListener('refreshInit', measureBride)
+  const brideDist = () => brideLen
   // Pinned for the sideways journey, then for one more screen while the
   // ceremony slides up over it (the pin and the track have separate triggers
   // because the track also drives the cards' own triggers).
@@ -348,12 +374,6 @@ export function initAnimations({ scroll, gl }) {
       ease: 'power2.out',
       scrollTrigger: { trigger: card, containerAnimation: brideScroll, start: 'left 85%', end: 'left 45%', scrub: true },
     })
-  })
-  gsap.from('.bride__end', {
-    x: () => vw() * 0.3,
-    opacity: 0,
-    ease: 'power2.out',
-    scrollTrigger: { trigger: '.bride__end', containerAnimation: brideScroll, start: 'left right', end: 'left 50%', scrub: true },
   })
 
   // ---------- Chapter III: the ceremony, columns travel in opposite directions ----------
@@ -726,7 +746,7 @@ export function initAnimations({ scroll, gl }) {
 
   // ---------- Photos when WebGL is not drawing them ----------
   $$('.media').forEach((fig) => {
-    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.bride, .ceremony, .home, .process')) return
+    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.bride, .ceremony, .home, .process, .gallery')) return
     gsap.from(fig.querySelector('img'), {
       clipPath: 'inset(100% 0 0 0)',
       scale: 1.25,
