@@ -175,7 +175,8 @@ export function initAnimations({ scroll, gl }) {
   gsap.set(frameImgs[1], { xPercent: -100 })
   gsap.set(frames[2], { yPercent: 100 })
   gsap.set(frameImgs[2], { yPercent: -100 })
-  gsap.set(craftIntro.chars, { yPercent: 110 })
+  // Letters travel well past their line's mask so no slivers show.
+  gsap.set(craftIntro.chars, { yPercent: 140 })
   gsap.set(lines, { autoAlpha: 0 })
 
   const craftTl = gsap.timeline({
@@ -199,10 +200,10 @@ export function initAnimations({ scroll, gl }) {
     .to(frames[0], { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power2.inOut' }, 0)
     .fromTo(frameImgs[0], { scale: 1.7 }, { scale: 1.08, duration: 2.6 }, 0)
     .to(craftIntro.chars, { yPercent: 0, stagger: 0.015, duration: 0.5, ease: 'power3.out' }, 0.25)
-    .to(craftIntro.chars, { yPercent: -110, stagger: 0.008, duration: 0.4, ease: 'power3.in' }, 1.3)
+    .to(craftIntro.chars, { yPercent: -140, opacity: 0, stagger: 0.008, duration: 0.4, ease: 'power3.in' }, 1.3)
     // Beat 1 slides in from the left.
     .fromTo(lines[0], { autoAlpha: 1, x: () => -vw() * 0.7 }, { x: 0, duration: 0.7, ease: 'power3.out' }, 1.7)
-    .from(lineChars[0], { yPercent: 110, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 1.75)
+    .from(lineChars[0], { yPercent: 140, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 1.75)
     // A gold wire draws one petal beside the words, then a stem.
     .to('.craft__wire path', { strokeDashoffset: 0, duration: 0.7, stagger: 0.35, ease: 'power1.inOut' }, 1.75)
     .fromTo('.craft__wire', { rotation: -25, scale: 0.85 }, { rotation: 8, scale: 1, duration: 1.2 }, 1.7)
@@ -213,14 +214,14 @@ export function initAnimations({ scroll, gl }) {
     .fromTo(frameImgs[1], { scale: 1.35 }, { scale: 1.08, duration: 1.6 }, 2.6)
     .to(lines[0], { x: () => vw() * 0.6, autoAlpha: 0, duration: 0.5, ease: 'power3.in' }, 2.6)
     .fromTo(lines[1], { autoAlpha: 1, x: () => -vw() * 0.7 }, { x: 0, duration: 0.7, ease: 'power3.out' }, 3.0)
-    .from(lineChars[1], { yPercent: 110, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 3.05)
+    .from(lineChars[1], { yPercent: 140, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 3.05)
     // Beat 3: the last photo rises from below; the line hands over upwards.
     .to(frames[2], { yPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 3.9)
     .to(frameImgs[2], { yPercent: 0, duration: 0.9, ease: 'power3.inOut' }, 3.9)
     .fromTo(frameImgs[2], { scale: 1.35 }, { scale: 1.06, duration: 1.4 }, 3.9)
     .to(lines[1], { y: () => -vh() * 0.35, autoAlpha: 0, duration: 0.5, ease: 'power3.in' }, 3.9)
     .fromTo(lines[2], { autoAlpha: 1, y: () => vh() * 0.35 }, { y: 0, duration: 0.7, ease: 'power3.out' }, 4.3)
-    .from(lineChars[2], { yPercent: 110, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 4.35)
+    .from(lineChars[2], { yPercent: 140, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 4.35)
     .to({}, { duration: 0.6 })
     // The next page slides over; the scene recedes into the dark.
     .to('.craft__frames', { scale: 0.86, opacity: 0.35, duration: 1.4 })

@@ -1003,6 +1003,12 @@ html.motion .header {
   color: #e6b7ae;
 }
 
+/* Keeps the words readable over the brighter photos. */
+.craft__intro,
+.craft__line {
+  text-shadow: 0 2px 28px rgb(28 20 22 / 0.55);
+}
+
 .craft__line-num {
   display: block;
   margin-bottom: 1rem;
@@ -1051,9 +1057,36 @@ html.motion .craft__shade {
   display: block;
   position: absolute;
   inset: 0;
+  /* Just enough shade under the words; the photos stay bright. */
   background:
-    linear-gradient(to top, rgb(28 20 22 / 0.78), rgb(28 20 22 / 0) 55%),
-    radial-gradient(ellipse at center, rgb(28 20 22 / 0.15), rgb(28 20 22 / 0.55));
+    linear-gradient(to top, rgb(28 20 22 / 0.7), rgb(28 20 22 / 0) 42%),
+    linear-gradient(to bottom, rgb(28 20 22 / 0.45), rgb(28 20 22 / 0) 22%);
+}
+
+.craft__edge {
+  display: none;
+}
+
+/* The gold wire that leads each new photo onto the screen. */
+html.motion .craft__edge {
+  display: block;
+  position: absolute;
+  background: #d8b77c;
+  box-shadow: 0 0 18px 2px rgb(216 183 124 / 0.6);
+}
+
+html.motion .craft__frame--2 .craft__edge {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+}
+
+html.motion .craft__frame--3 .craft__edge {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
 }
 
 html.motion .craft__kicker {
@@ -1115,6 +1148,48 @@ html.motion .craft__wire {
   /* Slightly past 1, so the round line caps don't leave dots before drawing. */
   stroke-dashoffset: 1.05;
   filter: drop-shadow(0 0 6px rgb(216 183 124 / 0.55));
+}
+
+/* Desktop: the photo takes the right of the screen at its own resolution,
+   the words get the left. */
+@media (min-width: 901px) {
+  html.motion .craft__frames,
+  html.motion .craft__shade {
+    left: 42vw;
+  }
+
+  html.motion .craft__shade {
+    background:
+      linear-gradient(to right, var(--night), rgb(28 20 22 / 0) 16%),
+      linear-gradient(to bottom, rgb(28 20 22 / 0.45), rgb(28 20 22 / 0) 20%);
+  }
+
+  html.motion .craft__intro {
+    right: auto;
+    width: 42vw;
+    place-content: center start;
+    text-align: left;
+    padding: 0 2vw 0 var(--gutter);
+    font-size: clamp(2.8rem, 5.4vw, 6.8rem);
+  }
+
+  html.motion .craft__lines {
+    right: auto;
+    width: 38vw;
+    bottom: 16vh;
+  }
+
+  html.motion .craft__line {
+    font-size: clamp(2.4rem, 4.8vw, 6rem);
+  }
+
+  html.motion .craft__wire {
+    left: var(--gutter);
+    right: auto;
+    top: 20vh;
+    width: clamp(120px, 12vw, 210px);
+    translate: none;
+  }
 }
 
 html.motion .craft__count {

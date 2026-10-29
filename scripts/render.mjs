@@ -68,7 +68,8 @@ export function renderSections() {
   s.craftFrames = content.craft.beats
     .map(
       (b, i) =>
-        `<figure class="craft__frame craft__frame--${i + 1}">${img(b.photo, { sizes: '100vw', box: 0.6 })}</figure>`,
+        // Frames after the first carry a gold "wire" along their leading edge.
+        `<figure class="craft__frame craft__frame--${i + 1}">${img(b.photo, { sizes: '(max-width: 900px) 100vw, 58vw', box: 0.6 })}${i ? '<span class="craft__edge" aria-hidden="true"></span>' : ''}</figure>`,
     )
     .join('')
   s.craftIntro = `<span class="line">${esc(content.craft.intro[0])}</span><span class="line"><em>${esc(content.craft.intro[1])}</em></span>`
