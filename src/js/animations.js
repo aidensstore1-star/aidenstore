@@ -457,14 +457,54 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: { trigger: '.gallery__viewport', start: 'top 92%', once: true },
   })
 
-  // ---------- How it works: steps slide in from alternate sides ----------
-  $$('.step').forEach((step, i) => {
-    gsap.fromTo(step, { '--progress': 0 }, { '--progress': 1, ease: 'none', scrollTrigger: { trigger: step, start: 'top 90%', end: 'top 55%', scrub: true } })
+  // ---------- How it works: pinned, three steps pass sideways ----------
+  const process = $('.process')
+  const steps = $$('.step')
+  const stepList = $('.process__list')
+  const stepIndex = $('.process__index')
+  const stepDist = () => Math.max(0, stepList.scrollWidth - vw())
+  const processScroll = gsap.to(stepList, {
+    x: () => -stepDist(),
+    ease: 'none',
+    scrollTrigger: {
+      trigger: process,
+      start: 'top top',
+      end: () => `+=${stepDist() * 1.2}`,
+      pin: true,
+      scrub: 0.8,
+      anticipatePin: 1,
+      invalidateOnRefresh: true,
+      onUpdate: (self) => (stepIndex.textContent = String(Math.min(steps.length, Math.round(self.progress * (steps.length - 1)) + 1)).padStart(2, '0')),
+    },
+  })
+  steps.forEach((step) => {
+    const media = $('.step__media', step)
+    const body = $('.step__body', step)
+    // Each step's photo opens from a sliver as it arrives, then drifts; its
+    // number travels faster than the page, and the words follow.
     gsap.fromTo(
-      step,
-      { x: () => (i % 2 ? 1 : -1) * vw() * (small ? 0.25 : 0.12), opacity: 0 },
-      { x: 0, opacity: 1, ease: 'power2.out', scrollTrigger: { trigger: step, start: 'top bottom', end: 'top 60%', scrub: 0.6 } },
+      media,
+      { clipPath: 'inset(0% 0% 0% 100%)' },
+      { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.out', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left 95%', end: 'left 25%', scrub: true } },
     )
+    gsap.fromTo(
+      $('img', media),
+      { scale: 1.3, xPercent: 10 },
+      { scale: 1, xPercent: -6, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
+    )
+    gsap.fromTo(
+      $('.step__num', step),
+      { x: () => vw() * 0.35 },
+      { x: () => -vw() * 0.15, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
+    )
+    gsap.fromTo(body, { '--progress': 0 }, { '--progress': 1, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left 70%', end: 'left 10%', scrub: true } })
+    gsap.from([$('.step__title', step), $('.step__text', step)], {
+      x: 120,
+      opacity: 0,
+      stagger: 0.1,
+      ease: 'power2.out',
+      scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left 80%', end: 'left 20%', scrub: true },
+    })
   })
 
   // ---------- Epilogue: lines glide in from both sides, letters rise ----------

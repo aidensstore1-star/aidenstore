@@ -26,7 +26,9 @@ export function initGallery({ scroll, gl, onOpen }) {
 
   const update = () => {
     if (!visible) return
-    if (!state.dragging && !state.paused) state.target -= 0.45 + Math.min(Math.abs(scroll.velocity()), 40) * 0.15
+    // Drifts on its own, except while held and for a few seconds after a touch.
+    const resting = performance.now() - (state.touchedAt || 0) < 3500
+    if (!state.dragging && !state.paused && !resting) state.target -= 0.45 + Math.min(Math.abs(scroll.velocity()), 40) * 0.15
     state.current += (state.target - state.current) * 0.075
     const velocity = state.current - state.last
     state.last = state.current
@@ -64,6 +66,7 @@ export function initGallery({ scroll, gl, onOpen }) {
   const end = (e) => {
     if (!state.dragging) return
     state.dragging = false
+    state.touchedAt = performance.now()
     if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId)
     const quick = performance.now() - state.startTime < 300
     if (e.type === 'pointerup' && quick && state.moved < 8 && state.downItem) open(state.downItem)

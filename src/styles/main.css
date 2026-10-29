@@ -973,6 +973,12 @@ html.motion .header {
   display: none;
 }
 
+/* Without motion the words come before the photos. */
+.craft__kicker,
+.craft__intro {
+  order: -1;
+}
+
 .craft__kicker {
   color: rgb(243 236 228 / 0.7);
 }
@@ -1783,8 +1789,13 @@ html.reduced-motion .gallery__item {
 
 /* ---------- Process ---------- */
 .process {
+  position: relative;
+  background: var(--ivory);
+}
+
+.process__pin {
+  position: relative;
   padding: 14vh var(--gutter) 10vh;
-  overflow: hidden;
 }
 
 .process__list {
@@ -1794,14 +1805,29 @@ html.reduced-motion .gallery__item {
   margin-top: 6vh;
 }
 
+.process__count {
+  display: none;
+}
+
 .step {
   position: relative;
   display: grid;
-  gap: 1.2rem;
-  padding-top: 2rem;
+  gap: 1.6rem;
+  align-content: start;
 }
 
-.step::before {
+.step__media {
+  aspect-ratio: 4 / 5;
+}
+
+.step__body {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  padding-top: 1.6rem;
+}
+
+.step__body::before {
   content: '';
   position: absolute;
   top: 0;
@@ -1832,6 +1858,65 @@ html.reduced-motion .gallery__item {
 .step__text {
   max-width: 22rem;
   color: var(--muted);
+}
+
+/* Motion: pinned, the three steps pass sideways one at a time. */
+html.motion .process__pin {
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  overflow: hidden;
+}
+
+html.motion .process__eyebrow {
+  position: absolute;
+  top: calc(var(--header-h) + 3vh + env(safe-area-inset-top, 0px));
+  left: var(--gutter);
+}
+
+html.motion .process__count {
+  display: block;
+  position: absolute;
+  top: calc(var(--header-h) + 3vh + env(safe-area-inset-top, 0px));
+  right: var(--gutter);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+html.motion .process__list {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  margin: 0;
+  gap: 0;
+  width: max-content;
+  will-change: transform;
+}
+
+html.motion .step {
+  width: 100vw;
+  height: 100%;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  align-content: center;
+  align-items: center;
+  gap: 6vw;
+  padding: calc(var(--header-h) + 8vh) var(--gutter) 10vh;
+}
+
+html.motion .step__media {
+  height: min(64vh, 40rem);
+  aspect-ratio: auto;
+}
+
+html.motion .step__num {
+  font-size: clamp(7rem, 16vw, 18rem);
+}
+
+html.motion .step__title {
+  font-size: clamp(2.4rem, 4.4vw, 5rem);
 }
 
 /* ---------- CTA ---------- */
@@ -2220,6 +2305,36 @@ html.motion .cta__title .line {
   .process__list {
     grid-template-columns: 1fr;
     gap: 6vh;
+  }
+
+  html.motion .step {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+    align-content: stretch;
+    gap: 3vh;
+    padding: calc(var(--header-h) + 7vh) var(--gutter) calc(10vh + env(safe-area-inset-bottom, 0px));
+  }
+
+  html.motion .step__media {
+    height: 100%;
+  }
+
+  html.motion .step__body {
+    gap: 0.6rem;
+    padding-top: 1rem;
+  }
+
+  html.motion .step__num {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    font-size: 7rem;
+    -webkit-text-stroke: 1px var(--ivory);
+    margin-bottom: -1.6rem;
+  }
+
+  html.motion .step__title {
+    font-size: 2.2rem;
   }
 
   .detail {

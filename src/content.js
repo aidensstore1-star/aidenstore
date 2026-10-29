@@ -192,7 +192,7 @@ export const gallery = [
 ]
 
 export const process = [
-  { title: 'Share your day', text: 'The date, your colours, the feeling you want, or a photo of something you love.' },
-  { title: 'Design it together', text: 'Choose from past pieces or start something new. Every detail can be changed.' },
-  { title: 'Made by hand', text: 'Shaped, piped, threaded and finished by hand, ready for your celebration.' },
+  { title: 'Share your day', text: 'The date, your colours, the feeling you want, or a photo of something you love.', photo: 'bouquet-white-calla-lily' },
+  { title: 'Design it together', text: 'Choose from past pieces or start something new. Every detail can be changed.', photo: 'hair-comb-pink-gold-wire-leaves' },
+  { title: 'Made by hand', text: 'Shaped, piped, threaded and finished by hand, ready for your celebration.', photo: 'tall-candle-pink-wire-flower-cluster' },
 ]

@@ -156,9 +156,12 @@ export function renderSections() {
   s.process = content.process
     .map(
       (st, i) => `<li class="step">
-  <span class="step__num">${pad(i + 1)}</span>
-  <h3 class="step__title">${esc(st.title)}</h3>
-  <p class="step__text">${esc(st.text)}</p>
+  ${media(st.photo, { cls: 'step__media', gl: false, sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
+  <div class="step__body">
+    <span class="step__num">${pad(i + 1)}</span>
+    <h3 class="step__title">${esc(st.title)}</h3>
+    <p class="step__text">${esc(st.text)}</p>
+  </div>
 </li>`,
     )
     .join('\n')
@@ -180,7 +183,10 @@ export function renderSections() {
 
   // ---------- Navigation ----------
   const nav = [
-    ...content.chapters.map((c) => ({ href: `#${c.id}`, label: c.title.replace(/^The /, ''), photo: c.photo })),
+    ...content.chapters.map((c) => {
+      const word = c.title.replace(/^The /, '')
+      return { href: `#${c.id}`, label: word[0].toUpperCase() + word.slice(1), photo: c.photo }
+    }),
     { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies' },
     { href: '#contact', label: 'Enquire', photo: 'bouquet-white-calla-lily' },
   ]
