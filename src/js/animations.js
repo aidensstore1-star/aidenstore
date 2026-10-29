@@ -157,7 +157,12 @@ export function initAnimations({ scroll, gl }) {
       scrub: 0.8,
       anticipatePin: 1,
       invalidateOnRefresh: true,
-      onUpdate: (self) => gl?.setBurst(clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)),
+      onUpdate: (self) => {
+        // Petals blow outwards with the burst; once they have faded out, reset
+        // them so they can drift again in the epilogue.
+        const burst = clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)
+        gl?.setBurst(burst >= 1 ? 0 : burst)
+      },
     },
   })
   heroExit
@@ -180,16 +185,17 @@ export function initAnimations({ scroll, gl }) {
   // While Chapter I slides up over it, what is left of the hero sinks back.
   heroExit.to('.hero__media', { scale: 0.82, ease: 'none', duration: 1.23 }, 1.35)
 
-  const petals = { intro: 0 }
+  // Petals show in the opening and the epilogue. Driven by scroll progress, so
+  // no layout reads are needed each frame.
+  const petals = { intro: 0, hero: 1, cta: 0 }
   if (gl) {
-    const cta = $('.cta')
-    gl.setPetalOpacity(() => {
-      const h = hero.getBoundingClientRect()
-      const heroVis = clamp(1 + h.top / (h.height * 0.6), 0, 1) * petals.intro
-      const c = cta.getBoundingClientRect()
-      const ctaVis = clamp(1.2 - Math.abs(c.top + c.height / 2 - vh() / 2) / (vh() * 0.8), 0, 1)
-      return Math.max(heroVis, ctaVis)
+    ScrollTrigger.create({
+      trigger: hero,
+      start: 'top top',
+      end: () => `+=${heroScene()}`,
+      onUpdate: (self) => (petals.hero = 1 - self.progress),
     })
+    gl.setPetalOpacity(() => Math.max(petals.hero * petals.intro, petals.cta))
   }
 
   function intro() {
@@ -500,6 +506,18 @@ export function initAnimations({ scroll, gl }) {
       { xPercent: 0, ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'center center', scrub: true } },
     )
   })
+
+  // Created after every pinned chapter so its positions account for them.
+  if (gl) {
+    ScrollTrigger.create({
+      trigger: '.cta',
+      start: 'top bottom',
+      end: 'bottom top',
+      onUpdate: (self) => (petals.cta = clamp(1.4 - Math.abs(self.progress - 0.5) * 3, 0, 1)),
+      onLeave: () => (petals.cta = 0),
+      onLeaveBack: () => (petals.cta = 0),
+    })
+  }
 
   // ---------- Footer wordmark rises letter by letter ----------
   gsap.fromTo(

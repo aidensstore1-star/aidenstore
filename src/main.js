@@ -52,6 +52,8 @@ if (reduced) {
   const galleryApi = initGallery({ scroll, gl, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })
   const { intro } = initAnimations({ scroll, gl })
+  // Refresh triggers in page order so ones below a pinned chapter account for it.
+  ScrollTrigger.sort()
   ScrollTrigger.refresh()
 
   await preloaderDone
