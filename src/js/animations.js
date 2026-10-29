@@ -250,7 +250,7 @@ export function initAnimations({ scroll, gl }) {
   gsap.set(frames[2], { yPercent: 108 })
   gsap.set(frameImgs[2], { yPercent: -108 })
   // Letters travel well past their line's mask so no slivers show.
-  gsap.set(craftIntro.chars, { yPercent: 140 })
+  // The opening words are already in place, revealed by the widening arch.
   gsap.set(lines, { autoAlpha: 0 })
 
   const craftTl = gsap.timeline({
@@ -273,7 +273,6 @@ export function initAnimations({ scroll, gl }) {
     // (The chapter's arched window has already opened onto this photo as it rose.)
     // Phone photos are only lightly enlarged, so they stay sharp.
     .fromTo(frameImgs[0], { scale: small ? 1.15 : 1.5, xPercent: 0 }, { scale: small ? 1.02 : 1.08, xPercent: small ? -3 : 0, duration: 2.6 }, 0)
-    .to(craftIntro.chars, { yPercent: 0, stagger: 0.015, duration: 0.5, ease: 'power3.out' }, 0.25)
     .to(craftIntro.chars, { yPercent: -140, opacity: 0, stagger: 0.008, duration: 0.4, ease: 'power3.in' }, 1.3)
     // Beat 1 slides in from the left.
     .fromTo(lines[0], { autoAlpha: 1, x: () => -vw() * 0.7 }, { x: 0, duration: 0.7, ease: 'power3.out' }, 1.7)
@@ -308,6 +307,11 @@ export function initAnimations({ scroll, gl }) {
     { opacity: 0.12 },
     { opacity: 1, stagger: 0.08, ease: 'none', scrollTrigger: { trigger: '.statement__text', start: 'top 80%', end: 'bottom 45%', scrub: true } },
   )
+  gsap.to('.statement__wire path', {
+    strokeDashoffset: 0,
+    ease: 'none',
+    scrollTrigger: { trigger: '.statement__text', start: 'top 70%', end: 'bottom 35%', scrub: true },
+  })
   $$('.statement__img').forEach((fig, i) => {
     gsap.fromTo(
       fig,
@@ -372,6 +376,8 @@ export function initAnimations({ scroll, gl }) {
     // Once the cards have passed, the chapter sinks back as the ceremony covers it.
     onUpdate: (self) => {
       const over = clamp((self.progress * (brideDist() + vh()) - brideDist()) / vh(), 0, 1)
+      if (over === bridePin._over) return
+      bridePin._over = over
       gsap.set(bridePin, { scale: 1 - 0.12 * over, opacity: 1 - 0.6 * over })
     },
   })
@@ -405,7 +411,7 @@ export function initAnimations({ scroll, gl }) {
     // ...and turns in 3D as it passes, facing you in the middle of the screen.
     const passing = { trigger: card, containerAnimation: brideScroll, start: 'left right', end: 'right left', scrub: true }
     gsap.fromTo(card, { y: dir * (small ? 50 : 90) }, { y: -dir * (small ? 50 : 90), ease: 'none', scrollTrigger: passing })
-    gsap.fromTo($('.bride__media', card), { rotationY: -32, transformPerspective: 900 }, { rotationY: 32, ease: 'none', scrollTrigger: passing })
+    gsap.fromTo($('.bride__media', card), { rotationY: -22, transformPerspective: 900 }, { rotationY: 22, ease: 'none', scrollTrigger: passing })
     gsap.fromTo(
       $('.bride__media', card),
       { scale: 0.72 },
@@ -447,7 +453,7 @@ export function initAnimations({ scroll, gl }) {
   const last = cols.length - 1
   ceremonyTl
     // The columns run on their own first, then the card arrives.
-    .fromTo(card, { scale: 0.6, autoAlpha: 0, rotation: -4 }, { scale: 1, autoAlpha: 1, rotation: 0, duration: 0.2, ease: 'power3.out' }, 0.22)
+    .fromTo(card, { y: () => vh() * 0.6, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.22, ease: 'power3.out' }, 0.5)
     // The curtains part: outer columns slide off to the sides, the middle one sinks away.
     .to(cols[0], { x: () => -vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
     .to(cols[last], { x: () => vw() * 0.8, duration: 0.3, ease: 'power2.in' }, 0.58)
@@ -507,8 +513,12 @@ export function initAnimations({ scroll, gl }) {
     let bestFace = -1
     cakes.forEach((c, i) => {
       const face = Math.max(0, Math.cos(((i * 360) / n + rot) * (Math.PI / 180)))
-      c.style.opacity = (0.2 + 0.8 * face ** 1.5).toFixed(3)
-      c.style.setProperty('--face', face.toFixed(3))
+      const key = Math.round(face * 200)
+      if (key !== c._face) {
+        c._face = key
+        c.style.opacity = (0.2 + 0.8 * face ** 1.5).toFixed(3)
+        c.style.setProperty('--face', face.toFixed(3))
+      }
       if (face > bestFace) {
         bestFace = face
         best = i
@@ -538,9 +548,6 @@ export function initAnimations({ scroll, gl }) {
   celebrationTl
     .fromTo(spin, { rotationY: 50, rotationX: () => (small ? -10 : -6) }, { rotationY: (-360 * (n - 1)) / n, rotationX: () => (small ? -10 : -6), duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
-    // The caption and tags wait until the ring has arrived.
-    .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.2)
-    .from('.celebration__tags li', { y: 24, opacity: 0, stagger: 0.004, duration: 0.06, ease: 'back.out(2)' }, 0.2)
     // The home slides over; the cakes recede.
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
@@ -622,14 +629,6 @@ export function initAnimations({ scroll, gl }) {
     // The gallery slides over; the wall recedes.
     .to('.home__pin', { scale: 0.9, opacity: 0.4, duration: 0.45 })
 
-  // ---------- Gallery rises in ----------
-  gsap.from('.gallery__viewport', {
-    yPercent: 18,
-    opacity: 0,
-    duration: 1.6,
-    ease: 'expo.out',
-    scrollTrigger: { trigger: '.gallery__viewport', start: 'top 92%', once: true },
-  })
 
   // ---------- How it works: pinned, three steps pass sideways ----------
   const process = $('.process')
@@ -703,7 +702,7 @@ export function initAnimations({ scroll, gl }) {
   // Epilogue: the finished flower draws itself in gold wire, petal by petal.
   const flower = $('.cta__flower')
   gsap
-    .timeline({ scrollTrigger: { trigger: '.cta', start: 'top 95%', end: 'center 50%', scrub: 0.8 } })
+    .timeline({ scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'top 30%', scrub: 0.8 } })
     .to($$('.stem, .leaf', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.15, ease: 'none' }, 0)
     .to($$('.cta__flower-head > g:first-of-type .petal', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.12, ease: 'none' }, 0.2)
     .to($$('.petal--inner', flower), { strokeDashoffset: 0, duration: 0.4, stagger: 0.08, ease: 'none' }, 0.6)
@@ -817,7 +816,7 @@ export function initAnimations({ scroll, gl }) {
     // The chapter pill (and the active menu link) follow the section under
     // the bottom of the screen, where the pill sits.
     let active = surfaces[0]
-    for (const s of surfaces) if (s.top <= y + h * 0.72) active = s
+    for (const s of surfaces) if (s.top <= y + h * 0.55) active = s
     enter(active.el)
     chapters.forEach((c, i) => {
       const end = (chapters[i + 1] || galleryMark).top

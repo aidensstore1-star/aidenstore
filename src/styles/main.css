@@ -258,14 +258,12 @@ main {
   stroke-linejoin: round;
   stroke-dasharray: 1 2;
   stroke-dashoffset: 1.02;
-  filter: drop-shadow(0 0 6px rgb(226 196 141 / 0.7));
 }
 
 /* The embroidery hoop: a thicker band of light wood. */
 .window-wire--hoop path {
   stroke: #d9b98a;
   stroke-width: 12;
-  filter: drop-shadow(0 2px 6px rgb(42 31 34 / 0.35));
 }
 
 .window-wire__clasp {
@@ -1325,6 +1323,29 @@ html.motion .craft__count {
   aspect-ratio: 3 / 4;
 }
 
+/* A gold wire that draws itself under the words as they light up,
+   finishing in a small loop like a twist of florist's wire. */
+.statement__wire {
+  grid-column: 2 / 12;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 10 / 1;
+  margin-top: -3vh;
+  overflow: visible;
+}
+
+.statement__wire path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+html.motion .statement__wire path {
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.02;
+}
+
 .statement__img--a {
   grid-column: 2 / 5;
   margin-top: 4vh;
@@ -1447,7 +1468,7 @@ html.motion .craft__count {
   font-style: italic;
   font-size: clamp(1.3rem, 1.8vw, 1.9rem);
   line-height: 1.1;
-  color: var(--rose);
+  color: var(--plum);
 }
 
 .bride__moment span {
@@ -1642,7 +1663,7 @@ html.motion .ceremony__card {
 }
 
 .ring {
-  --card-w: clamp(140px, 13vw, 230px);
+  --card-w: clamp(170px, 17vw, 300px);
 }
 
 .ring__spin {
@@ -2466,6 +2487,10 @@ html.motion .cta__title .line {
     grid-column: 1 / -1;
     font-size: 2.3rem;
     text-indent: 1.5em;
+  }
+
+  .statement__wire {
+    grid-column: 1 / -1;
   }
 
   .statement__img--a {

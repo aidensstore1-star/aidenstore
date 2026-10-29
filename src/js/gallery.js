@@ -7,7 +7,6 @@ export function initGallery({ scroll, onOpen }) {
   const viewport = document.querySelector('.gallery__viewport')
   const items = [...document.querySelectorAll('.gallery__item')]
   if (!viewport || !items.length) return null
-  const imgs = items.map((item) => item.querySelector('img'))
 
   const OFFSETS = [-50, -55, -47, -53, -45, -52]
   const state = { current: 0, target: 0, last: 0, dragging: false, startX: 0, startTarget: 0, moved: 0, paused: false }
@@ -51,8 +50,6 @@ export function initGallery({ scroll, onOpen }) {
       }
       const depth = -Math.abs(n) * 110
       items[i].style.transform = `translate3d(${x}px, ${OFFSETS[i % OFFSETS.length]}%, ${depth.toFixed(1)}px) rotateY(${(-n * 22).toFixed(2)}deg) skewX(${lean.toFixed(2)}deg)`
-      // The photo drifts inside its frame, the other way, like looking through a window.
-      imgs[i].style.transform = `translateX(${(n * -7).toFixed(2)}%) scale(1.16)`
     }
   }
   gsap.ticker.add(update, false, true)
