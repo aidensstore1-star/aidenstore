@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title><!--@brand--> — Handmade bridal accessories, candles, florals &amp; cakes</title>
+    <meta name="description" content="<!--@tagline-->, made by hand for weddings, Holy Communions, christenings and celebrations." />
+    <meta name="theme-color" content="#f3ece4" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232a1f22'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='32' font-style='italic' text-anchor='middle' fill='%23f3ece4'%3EA%3C/text%3E%3C/svg%3E" />
+    <script>
+      // Decide the motion level before first paint.
+      document.documentElement.classList.add('js')
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced-motion')
+    </script>
+  </head>
+  <body>
+    <div class="preloader" aria-hidden="true">
+      <div class="preloader__stack"><!--@preloader--></div>
+      <p class="preloader__brand"><!--@brandLetters--></p>
+      <p class="preloader__caption">Handmade for weddings, communions &amp; celebrations</p>
+      <div class="preloader__bar"><span></span></div>
+      <p class="preloader__count"><span class="preloader__num">0</span>%</p>
+    </div>
+
+    <canvas class="gl" aria-hidden="true"></canvas>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="cursor" aria-hidden="true">
+      <div class="cursor__ring"><span class="cursor__label"></span></div>
+      <div class="cursor__dot"></div>
+    </div>
+
+    <header class="header">
+      <a class="header__logo" href="#top" aria-label="<!--@brand--> home"><!--@brand--></a>
+      <nav class="header__nav" aria-label="Main">
+        <a href="#collections">Collections</a>
+        <a href="#communion">Communion</a>
+        <a href="#cakes">Cakes</a>
+        <a href="#gallery">Gallery</a>
+      </nav>
+      <a class="btn btn--small magnetic header__cta" href="#contact"><span>Enquire</span></a>
+      <button class="header__menu" type="button" aria-expanded="false" aria-controls="menu">
+        <span class="header__menu-label">Menu</span><i></i><i></i>
+      </button>
+    </header>
+
+    <div class="menu" id="menu" aria-hidden="true">
+      <nav class="menu__nav" aria-label="Menu">
+        <a class="menu__link" href="#collections" data-index="0"><span class="menu__num">01</span><span class="menu__text">Collections</span></a>
+        <a class="menu__link" href="#communion" data-index="1"><span class="menu__num">02</span><span class="menu__text">Communion</span></a>
+        <a class="menu__link" href="#cakes" data-index="4"><span class="menu__num">03</span><span class="menu__text">Cakes</span></a>
+        <a class="menu__link" href="#gallery" data-index="2"><span class="menu__num">04</span><span class="menu__text">Gallery</span></a>
+        <a class="menu__link" href="#contact" data-index="3"><span class="menu__num">05</span><span class="menu__text">Enquire</span></a>
+      </nav>
+      <div class="menu__media"><!--@menuMedia--></div>
+      <div class="menu__foot"><span><!--@tagline--></span><span class="menu__links"><!--@footerLinks--></span></div>
+    </div>
+
+    <main id="top">
+      <section class="hero" data-bg="ivory">
+        <div class="hero__media"><!--@hero--></div>
+        <h1 class="hero__title">
+          <span class="line">Handmade</span>
+          <span class="line line--indent">for the days</span>
+          <span class="line">you’ll <em>remember</em></span>
+        </h1>
+        <p class="hero__sub">Bridal accessories, ceremony candles, florals and celebration cakes — made by hand for weddings, Holy Communions and every celebration in between.</p>
+        <div class="hero__foot">
+          <span>Weddings · Holy Communion · Christenings · Celebrations</span>
+          <span class="hero__scroll">Scroll <i></i></span>
+        </div>
+      </section>
+
+      <section class="marquee" aria-hidden="true">
+        <div class="marquee__row"><div class="marquee__inner"><!--@marquee--></div></div>
+        <div class="marquee__row marquee__row--rev"><div class="marquee__inner"><!--@marquee--></div></div>
+      </section>
+
+      <section class="statement">
+        <p class="eyebrow">(01) — The craft</p>
+        <p class="statement__text"><!--@statementText--></p>
+        <!--@statementPhotos-->
+      </section>
+
+      <section class="collections" id="collections">
+        <div class="collections__pin">
+          <header class="collections__head">
+            <p class="eyebrow">(02) — Collections</p>
+            <h2 class="title-xl">Five ways <em>to dress a day</em></h2>
+            <div class="collections__progress"><span class="collections__index">01</span><span class="collections__bar"><i></i></span><span><!--@collectionsCount--></span></div>
+          </header>
+          <div class="collections__track">
+            <!--@collections-->
+            <div class="collections__end">
+              <p>Every piece is one of a kind.</p>
+              <a class="link" href="#gallery">See the gallery ↓</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="occasions">
+        <p class="eyebrow">(03) — Occasions</p>
+        <h2 class="title-xl">Made for every <em>occasion</em></h2>
+        <ul class="occasions__list"><!--@occasions--></ul>
+        <div class="occasions__float" aria-hidden="true"><img alt="" /></div>
+      </section>
+
+      <section class="communion" id="communion" data-bg="blush">
+        <div class="communion__sticky">
+          <p class="eyebrow">(04) — Keepsakes</p>
+          <h2 class="title-xl"><!--@communionTitle--></h2>
+          <p class="communion__text"><!--@communionText--></p>
+          <a class="link" href="#contact">Enquire about a set →</a>
+        </div>
+        <div class="communion__cols"><!--@communionCols--></div>
+      </section>
+
+      <section class="cakes" id="cakes" data-bg="cocoa">
+        <header class="cakes__head">
+          <p class="eyebrow">(05) — The cake studio</p>
+          <h2 class="cakes__title"><span class="line">Cakes</span><span class="line"><em>for every</em></span><span class="line">celebration</span></h2>
+          <p class="cakes__text"><!--@cakesText--></p>
+          <ul class="cakes__tags"><!--@cakesTags--></ul>
+        </header>
+        <div class="cakes__stack"><!--@cakesStack--></div>
+      </section>
+
+      <section class="gallery" id="gallery" data-bg="ivory">
+        <header class="gallery__head">
+          <p class="eyebrow">(06) — Gallery</p>
+          <h2 class="title-xl">Every piece, <em>by hand</em></h2>
+          <p class="gallery__hint">Drag to explore — tap a piece to see it up close</p>
+        </header>
+        <div class="gallery__viewport" data-cursor="Drag">
+          <div class="gallery__track"><!--@gallery--></div>
+        </div>
+      </section>
+
+      <section class="process">
+        <p class="eyebrow">(07) — How it works</p>
+        <ol class="process__list"><!--@process--></ol>
+      </section>
+
+      <section class="cta" id="contact" data-bg="ivory">
+        <p class="eyebrow">Enquiries</p>
+        <h2 class="cta__title">
+          <span class="line">Let’s make</span>
+          <span class="line line--indent">something</span>
+          <span class="line"><em>beautiful</em></span>
+        </h2>
+        <p class="cta__text">Tell us about your celebration — the date, the occasion and what you have in mind.</p>
+        <div class="cta__buttons"><!--@ctaButtons--></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__top">
+        <p><!--@tagline--></p>
+        <nav class="footer__links" aria-label="Contact"><!--@footerLinks--></nav>
+      </div>
+      <p class="footer__brand" aria-hidden="true"><!--@brandLetters--></p>
+      <div class="footer__bottom">
+        <span>© <!--@year--> <!--@brand--></span>
+        <span>Made by hand, one piece at a time</span>
+        <a href="#top" class="footer__top-link">Back to top ↑</a>
+      </div>
+    </footer>
+
+    <div class="detail" role="dialog" aria-modal="true" aria-label="Piece details" aria-hidden="true">
+      <div class="detail__backdrop"></div>
+      <figure class="detail__media"><img alt="" /></figure>
+      <div class="detail__info">
+        <p class="detail__type"></p>
+        <h2 class="detail__title"></h2>
+        <p class="detail__count"></p>
+        <a class="btn btn--solid magnetic detail__enquire" href="#contact"><span>Enquire about this piece</span></a>
+      </div>
+      <button class="detail__close" type="button" aria-label="Close">Close <i></i></button>
+      <button class="detail__nav detail__nav--prev" type="button" aria-label="Previous piece">←</button>
+      <button class="detail__nav detail__nav--next" type="button" aria-label="Next piece">→</button>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

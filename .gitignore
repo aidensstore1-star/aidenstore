@@ -1,0 +1,4 @@
+node_modules/
+dist/
+public/photos/
+src/photo-manifest.json
