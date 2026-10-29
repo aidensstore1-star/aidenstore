@@ -20,7 +20,7 @@ export const photos = {
   'hair-vine-gold-leaves-pearls': { title: 'Golden leaf hair vine', type: 'Bridal accessories', alt: 'Gold wire leaf hair vine with pearls', focus: '50% 74%' },
   'crown-and-candle-lilac-set': { title: 'Lilac crown & candle set', type: 'Holy Communion', alt: 'Floral crown and matching candle with lilac ribbon' },
   'bouquet-white-calla-lily': { title: 'White calla lily bouquet', type: 'Bouquets & florals', alt: 'Bridal bouquet of white calla lilies, baby’s breath and eucalyptus' },
-  'bouquet-red-ivory-peonies': { title: 'Red & ivory peony bouquet', type: 'Bouquets & florals', alt: 'Bridal bouquet of red and ivory peonies with berries' },
+  'bouquet-red-ivory-peonies': { title: 'Red & ivory peony bouquet', type: 'Bouquets & florals', alt: 'Bridal bouquet of red and ivory peonies with berries', focus: '40% 50%' },
   'pomander-babys-breath-white-ribbon': { title: 'Baby’s breath pomander', type: 'Bouquets & florals', alt: 'Round pomander of baby’s breath with a white satin ribbon' },
   'flower-basket-burgundy-roses-gold': { title: 'Flower girl basket', type: 'Bouquets & florals', alt: 'Wicker flower basket with burgundy roses, lace and gold ribbon' },
   'tulle-garlands-burgundy-roses-with-basket': { title: 'Tulle garlands', type: 'Décor', alt: 'Ivory tulle garlands with burgundy roses and gold ribbon' },

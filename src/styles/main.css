@@ -278,12 +278,17 @@ main {
 
 /* Arched frames, like chapel windows, with a fine gold line inside. */
 .bride__media,
-.ceremony__img {
+.ceremony__img,
+.statement__img,
+.hero__img,
+.ring__img {
   border-radius: 999px 999px 6px 6px;
 }
 
 .bride__media::after,
-.ceremony__img::after {
+.ceremony__img::after,
+.statement__img::after,
+.ring__img::after {
   content: '';
   position: absolute;
   inset: 7px;
@@ -894,6 +899,7 @@ html.motion .cta__flower path {
 .hero__item--5 { left: 46vw; top: 5vh; width: 6.5vw; }
 
 .hero__img {
+  aspect-ratio: 3 / 4;
   will-change: transform;
 }
 
@@ -1265,6 +1271,10 @@ html.motion .craft__count {
   text-indent: 0;
 }
 
+.statement__img {
+  aspect-ratio: 3 / 4;
+}
+
 .statement__img--a {
   grid-column: 2 / 5;
   margin-top: 4vh;
@@ -1572,6 +1582,7 @@ html.motion .ceremony__card {
 }
 
 .ring__img {
+  position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
 }
@@ -1694,6 +1705,19 @@ html.motion .ring__card {
 /* One caption, for whichever cake faces you, replaces the per-card ones. */
 html.motion .ring__cap {
   display: none;
+}
+
+/* A soft pool of light under the turning cakes. */
+html.motion .ring::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 4%;
+  width: min(80vw, 900px);
+  height: 18%;
+  translate: -50% 0;
+  background: radial-gradient(closest-side, rgb(230 183 174 / 0.22), transparent);
+  pointer-events: none;
 }
 
 .ring__now {
@@ -2397,12 +2421,14 @@ html.motion .cta__title .line {
   }
 
   .ring {
-    --card-w: clamp(130px, 40vw, 190px);
+    --card-w: clamp(120px, 36vw, 170px);
   }
 
+  /* Closer viewpoint so the ring reads as a ring: three or four cakes in
+     view, the sides turning away. */
   html.motion .ring {
-    perspective: 1300px;
-    perspective-origin: 50% 45%;
+    perspective: 760px;
+    perspective-origin: 50% 35%;
   }
 
   html.motion .celebration__pin {

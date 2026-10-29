@@ -46,8 +46,21 @@ const fragment = /* glsl */ `
   uniform vec2 uMouse;
   uniform float uTime;
   uniform vec2 uShift;
+  uniform float uArch;
+  uniform vec2 uFocus;
 
   varying vec2 vUv;
+
+  // Distance outside (positive) or inside (negative) an arch: a rectangle
+  // whose top is a semicircle, in pixels of the photo's frame.
+  float archDist(vec2 p, vec2 size) {
+    float r = size.x * 0.5;
+    float top = size.y - r;
+    // Above the springing line: distance to the semicircle.
+    if (p.y > top) return length(p - vec2(r, top)) - r;
+    // Below it: distance to the two sides and the bottom edge.
+    return max(abs(p.x - r) - r, -p.y);
+  }
 
   void main() {
     // object-fit: cover
@@ -56,8 +69,8 @@ const fragment = /* glsl */ `
       min((uPlaneSize.y / uPlaneSize.x) / (uImageSize.y / uImageSize.x), 1.0)
     );
     vec2 uv = vec2(
-      vUv.x * ratio.x + (1.0 - ratio.x) * 0.5,
-      vUv.y * ratio.y + (1.0 - ratio.y) * 0.5
+      vUv.x * ratio.x + (1.0 - ratio.x) * uFocus.x,
+      vUv.y * ratio.y + (1.0 - ratio.y) * uFocus.y
     );
 
     // Settle from a slight zoom as it reveals; zoom a touch on hover.
@@ -87,10 +100,24 @@ const fragment = /* glsl */ `
     float wave = sin(vUv.x * 7.0 + uTime * 1.6) * 0.025 * (1.0 - uReveal);
     float mask = 1.0 - smoothstep(edge - 0.08, edge, vUv.y + wave);
 
+    // Arched frame with a fine gold line inside, like the other photos.
+    if (uArch > 0.5) {
+      vec2 px = vUv * uPlaneSize;
+      float d = archDist(px, uPlaneSize);
+      mask *= 1.0 - smoothstep(-0.75, 0.75, d);
+      float line = 1.0 - smoothstep(0.0, 1.2, abs(d + 7.0));
+      color = mix(color, vec3(1.0, 0.95, 0.82), line * 0.75);
+    }
+
     float a = mask * uAlpha;
     gl_FragColor = vec4(color * a, a);
   }
 `
+
+const focusOf = (img) => {
+  const [x = '50%', y = '50%'] = (img.style.objectPosition || '').split(' ')
+  return [parseFloat(x) / 100 || 0.5, 1 - (parseFloat(y) / 100 || 0.5)]
+}
 
 export class Media {
   constructor({ gl, geometry, scene, el, screen, viewport, isWebgl2, manual, small }) {
@@ -130,6 +157,9 @@ export class Media {
         uAlpha: { value: 1 },
         uTime: { value: 0 },
         uShift: { value: [0, 0] },
+        uArch: { value: el.classList.contains('hero__img') ? 1 : 0 },
+        // The photo's focal point (CSS object-position), used when cropping.
+        uFocus: { value: focusOf(this.img) },
       },
     })
     this.program.setBlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
