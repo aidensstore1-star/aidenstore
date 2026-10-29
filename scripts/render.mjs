@@ -95,7 +95,7 @@ export function renderSections() {
   s.brideCards = content.bride.photos
     .map(
       (id, i) => `<article class="bride__card bride__card--${(i % 4) + 1}">
-  ${media(id, { cls: 'bride__media', sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
+  ${media(id, { cls: 'bride__media', gl: false, sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
   <p class="bride__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</p>
 </article>`,
     )

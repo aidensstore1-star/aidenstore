@@ -320,10 +320,11 @@ export function initAnimations({ scroll, gl }) {
   $$('.bride__card').forEach((card, i) => {
     const dir = i % 2 ? 1 : -1
     // Each card bobs up or down as it crosses the screen, and grows as it arrives.
+    // ...and turns in 3D as it passes, facing you in the middle of the screen.
     gsap.fromTo(
       card,
-      { y: dir * (small ? 50 : 90) },
-      { y: -dir * (small ? 50 : 90), ease: 'none', scrollTrigger: { trigger: card, containerAnimation: brideScroll, start: 'left right', end: 'right left', scrub: true } },
+      { y: dir * (small ? 50 : 90), rotationY: -32, transformPerspective: 900 },
+      { y: -dir * (small ? 50 : 90), rotationY: 32, ease: 'none', scrollTrigger: { trigger: card, containerAnimation: brideScroll, start: 'left right', end: 'right left', scrub: true } },
     )
     gsap.fromTo(
       $('.bride__media', card),
@@ -670,7 +671,7 @@ export function initAnimations({ scroll, gl }) {
 
   // ---------- Photos when WebGL is not drawing them ----------
   $$('.media').forEach((fig) => {
-    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.ceremony, .home')) return
+    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.bride, .ceremony, .home, .process')) return
     gsap.from(fig.querySelector('img'), {
       clipPath: 'inset(100% 0 0 0)',
       scale: 1.25,
