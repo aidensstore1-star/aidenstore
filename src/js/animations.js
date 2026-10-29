@@ -18,6 +18,16 @@ const THEMES = {
 
 const splitChars = (target) => SplitText.create(target, { type: 'words,chars', charsClass: 'char', wordsClass: 'word' })
 
+// A chapter whose scene lasts `scene()` pixels, then stays pinned for one more
+// screen while the next chapter slides up over it. The margin makes room for
+// the scene, because the pin adds no spacing of its own.
+const stacked = (section, scene) => {
+  const setGap = () => (section.style.marginBottom = `${scene()}px`)
+  setGap()
+  ScrollTrigger.addEventListener('refreshInit', setGap)
+  return { end: () => `+=${scene() + vh()}`, pinSpacing: false }
+}
+
 export function initAnimations({ scroll, gl }) {
   const small = matchMedia('(max-width: 900px)').matches
   const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches
@@ -137,16 +147,17 @@ export function initAnimations({ scroll, gl }) {
     [1, 0.9],
     [0, -1.2],
   ]
+  const heroScene = () => vh() * 1.1
   const heroExit = gsap.timeline({
     scrollTrigger: {
       trigger: hero,
       start: 'top top',
-      end: () => `+=${vh() * 1.1}`,
+      ...stacked(hero, heroScene),
       pin: true,
       scrub: 0.8,
       anticipatePin: 1,
       invalidateOnRefresh: true,
-      onUpdate: (self) => gl?.setBurst(self.progress),
+      onUpdate: (self) => gl?.setBurst(clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)),
     },
   })
   heroExit
@@ -166,6 +177,8 @@ export function initAnimations({ scroll, gl }) {
   heroFigs.forEach((fig, i) => {
     heroExit.to(fig, { x: () => fly[i][0] * vw() * 0.6, y: () => fly[i][1] * vh() * 0.7, scale: 1.9, ease: 'power2.in' }, 0)
   })
+  // While Chapter I slides up over it, what is left of the hero sinks back.
+  heroExit.to('.hero__media', { scale: 0.82, ease: 'none', duration: 1.23 }, 1.35)
 
   const petals = { intro: 0 }
   if (gl) {
@@ -216,7 +229,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: craft,
       start: 'top top',
-      end: () => `+=${vh() * 4}`,
+      ...stacked(craft, () => vh() * 4),
       pin: true,
       scrub: 1,
       anticipatePin: 1,
@@ -251,6 +264,9 @@ export function initAnimations({ scroll, gl }) {
     .fromTo(lines[2], { autoAlpha: 1, y: () => vh() * 0.35 }, { y: 0, duration: 0.7, ease: 'power3.out' }, 4.3)
     .from(lineChars[2], { yPercent: 110, stagger: 0.012, duration: 0.5, ease: 'power3.out' }, 4.35)
     .to({}, { duration: 0.6 })
+    // The next page slides over; the scene recedes into the dark.
+    .to('.craft__frames', { scale: 0.86, opacity: 0.35, duration: 1.4 })
+    .to('.craft__lines, .craft__count, .craft__kicker', { y: () => -vh() * 0.15, opacity: 0, duration: 0.8 }, '<')
 
   // ---------- Statement: words light up, photos drift in from the sides ----------
   const statement = SplitText.create('.statement__text', { type: 'words', wordsClass: 'word' })
@@ -362,7 +378,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: ceremony,
       start: 'top top',
-      end: () => `+=${vh() * 1.9}`,
+      ...stacked(ceremony, () => vh() * 1.9),
       pin: true,
       scrub: 0.8,
       anticipatePin: 1,
@@ -384,6 +400,9 @@ export function initAnimations({ scroll, gl }) {
     .to(cols[0], { x: () => -vw() * (small ? 0.18 : 0.08), duration: 0.3, ease: 'power2.inOut' }, 0.65)
     .to(cols[2], { x: () => vw() * (small ? 0.18 : 0.08), duration: 0.3, ease: 'power2.inOut' }, 0.65)
     .to(card, { scale: 1.06, duration: 0.3, ease: 'power2.inOut' }, 0.65)
+    // The celebration slides over; the ceremony recedes.
+    .to('.ceremony__cols', { scale: 0.88, opacity: 0.4, duration: 0.53 }, 1)
+    .to(card, { scale: 0.9, opacity: 0.4, duration: 0.53 }, 1)
 
   // ---------- Chapter IV: the celebration, a ring of cakes turns as you scroll ----------
   const celebration = $('.celebration')
@@ -409,7 +428,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: celebration,
       start: 'top top',
-      end: () => `+=${vh() * 2.8}`,
+      ...stacked(celebration, () => vh() * 2.8),
       pin: true,
       scrub: 1,
       anticipatePin: 1,
@@ -422,6 +441,8 @@ export function initAnimations({ scroll, gl }) {
     .fromTo(spin, { rotationY: 50, rotationX: -18 }, { rotationY: (-360 * (n - 1)) / n, rotationX: -5, duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
     .from('.celebration__tags li', { y: 30, opacity: 0, stagger: 0.015, duration: 0.08, ease: 'back.out(2)' }, 0.1)
+    // The home slides over; the cakes recede.
+    .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
 
   // ---------- Chapter V: the home, columns drift against each other ----------

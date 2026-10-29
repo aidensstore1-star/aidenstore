@@ -110,6 +110,22 @@ html.lenis body {
   overflow: hidden;
 }
 
+/* Sections that paint their own background carry their own ink, so they read
+   correctly while sliding over a chapter of a different colour. */
+.on-light {
+  --ink: var(--plum);
+  --line: color-mix(in srgb, var(--plum) 16%, transparent);
+  --muted: color-mix(in srgb, var(--plum) 62%, transparent);
+  color: var(--ink);
+}
+
+.on-dark {
+  --ink: var(--ivory);
+  --line: rgb(243 236 228 / 0.16);
+  --muted: rgb(243 236 228 / 0.62);
+  color: var(--ink);
+}
+
 /* ---------- Layers ---------- */
 .gl {
   position: fixed;
@@ -954,6 +970,7 @@ html.motion .craft__count {
 /* ---------- Statement ---------- */
 .statement {
   position: relative;
+  background: var(--ivory);
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: 2vw;
@@ -1150,6 +1167,11 @@ html.motion .bride__progress {
 }
 
 /* ---------- Chapter III: the ceremony ---------- */
+.ceremony {
+  position: relative;
+  background: var(--blush);
+}
+
 .ceremony__pin {
   position: relative;
   display: grid;
@@ -1204,7 +1226,7 @@ html.motion .ceremony__card {
   left: 50%;
   width: min(36rem, 86vw);
   padding: clamp(1.6rem, 4vw, 3.4rem) clamp(1.2rem, 3vw, 3rem);
-  background: var(--bg);
+  background: var(--blush);
   box-shadow: 0 30px 80px -30px rgb(42 31 34 / 0.35);
   transform: translate(-50%, -50%);
 }
@@ -1212,6 +1234,7 @@ html.motion .ceremony__card {
 /* ---------- Chapter IV: the celebration (cake ring) ---------- */
 .celebration {
   position: relative;
+  background: var(--cocoa);
 }
 
 .celebration__pin {
@@ -1364,6 +1387,7 @@ html.motion .ring__cap {
 /* ---------- Chapter V: the home ---------- */
 .home {
   position: relative;
+  background: var(--sage);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
   gap: 3vw;

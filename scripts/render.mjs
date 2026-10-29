@@ -82,7 +82,7 @@ export function renderSections() {
 
   s.statementText = esc(content.statement.text)
   s.statementPhotos = content.statement.photos
-    .map((id, i) => media(id, { cls: `statement__img statement__img--${i ? 'b' : 'a'}`, sizes: '(max-width: 900px) 45vw, 24vw' }))
+    .map((id, i) => media(id, { cls: `statement__img statement__img--${i ? 'b' : 'a'}`, gl: false, sizes: '(max-width: 900px) 45vw, 24vw' }))
     .join('')
 
   const marqueeChunk = content.marquee.map((w) => `<span>${esc(w)}</span><i>✦</i>`).join('')
