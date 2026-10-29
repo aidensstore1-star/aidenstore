@@ -142,6 +142,12 @@ main,
   z-index: 1;
 }
 
+/* Clip sideways motion here: on phones, overflow on <body> alone still lets
+   the browser widen the page and zoom out. */
+main {
+  overflow-x: clip;
+}
+
 .grain {
   position: fixed;
   inset: -50%;
@@ -698,20 +704,64 @@ html:not(.motion) .chapter {
   display: inline-block;
 }
 
-.chapter__bar {
-  position: relative;
-  width: 72px;
-  height: 1px;
-  background: var(--line);
+/* A wire flower that gains one petal per chapter. */
+.chapter__flower {
+  width: 26px;
+  height: 26px;
+  margin: -4px -2px -4px 0;
+  overflow: visible;
 }
 
-.chapter__bar i {
-  position: absolute;
-  inset: 0;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left;
+.chapter__flower .petal {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
 }
+
+.chapter__heart {
+  fill: var(--gold);
+}
+
+/* ---------- Gold wire drawing (epilogue) ---------- */
+/* The finished flower: the last thing the story makes. */
+.cta__flower {
+  width: clamp(170px, 22vw, 290px);
+  aspect-ratio: 1;
+  margin-bottom: -1rem;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.cta__flower path {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.cta__flower .petal--inner {
+  stroke-width: 1.4;
+  opacity: 0.8;
+}
+
+.cta__flower .pearl {
+  fill: #f8f2ea;
+  stroke: var(--gold);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+html.motion .cta__flower path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+
 
 /* ---------- Hero ---------- */
 .hero {
@@ -1840,9 +1890,6 @@ html.motion .cta__title .line {
     min-width: 7.5rem;
   }
 
-  .chapter__bar {
-    width: 44px;
-  }
 
   .hero__item--1 { left: 5vw; top: 11vh; width: 25vw; }
   .hero__item--2 { right: 5vw; top: 15vh; width: 24vw; }
@@ -1896,6 +1943,11 @@ html.motion .cta__title .line {
 
   html.motion .bride__word {
     font-size: 52vw;
+  }
+
+  /* The chapter pill already shows progress at the bottom of the screen. */
+  html.motion .bride__progress {
+    display: none;
   }
 
   .ceremony__cols {

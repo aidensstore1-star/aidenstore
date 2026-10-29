@@ -194,6 +194,32 @@ export function renderSections() {
     .join('')
   s.chapterCount = content.chapters.at(-1).num
 
+  // ---------- The wire flower: one petal per chapter ----------
+  // A petal pointing up from the centre, drawn as a single wire loop.
+  const PETAL = 'M0 -6 C-15 -18 -20 -46 0 -62 C20 -46 15 -18 0 -6'
+  const petals = (count, { cls = 'petal', scale = 1, offset = 0 } = {}) =>
+    Array.from(
+      { length: count },
+      (_, i) =>
+        `<path class="${cls}" pathLength="1" d="${PETAL}" transform="rotate(${offset + (i * 360) / count})${scale !== 1 ? ` scale(${scale})` : ''}"/>`,
+    ).join('')
+  const n = content.chapters.length
+  s.chapterFlower = `<svg class="chapter__flower" viewBox="-66 -66 132 132" aria-hidden="true">${petals(n)}<circle class="chapter__heart" r="6"/></svg>`
+  s.ctaFlower = `<svg class="cta__flower" viewBox="-200 -200 400 400" aria-hidden="true">
+  <g class="cta__flower-head" transform="translate(0 -40)">
+    <g transform="scale(2.4)">${petals(n)}</g>
+    <g transform="scale(1.35)">${petals(n, { cls: 'petal petal--inner', offset: 36 })}</g>
+    ${Array.from({ length: 7 }, (_, i) => {
+      const a = (i / 7) * Math.PI * 2
+      return `<circle class="pearl" cx="${(Math.cos(a) * 11).toFixed(1)}" cy="${(Math.sin(a) * 11).toFixed(1)}" r="4.5"/>`
+    }).join('')}
+    <circle class="pearl" r="5.5"/>
+  </g>
+  <path class="stem" pathLength="1" d="M0 112 C8 150 -14 176 -6 200"/>
+  <path class="leaf" pathLength="1" d="M-3 150 C-30 140 -52 152 -60 172 C-36 176 -16 168 -3 150"/>
+  <path class="leaf" pathLength="1" d="M2 128 C26 116 48 124 58 142 C34 148 14 142 2 128"/>
+</svg>`
+
   return s
 }
 

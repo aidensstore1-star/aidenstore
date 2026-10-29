@@ -52,7 +52,6 @@ export function initAnimations({ scroll, gl }) {
   const indicator = $('.chapter')
   const chapterNum = $('.chapter__num')
   const chapterTitle = $('.chapter__title')
-  const chapterBar = $('.chapter__bar i')
   const navLinks = $$('.header__nav a')
   let theme = 'ivory'
   let chapter = null
@@ -76,9 +75,6 @@ export function initAnimations({ scroll, gl }) {
       const r = sec.getBoundingClientRect()
       if (r.top <= line && r.bottom >= line) next = sec
     }
-    const first = chapters[0].getBoundingClientRect()
-    const last = chapters.at(-1).getBoundingClientRect()
-    chapterBar.style.transform = `scaleX(${clamp((line - first.top) / (last.bottom - first.top), 0, 1)})`
     if (next === chapter) return
     chapter = next
     navLinks.forEach((a) => a.classList.toggle('is-active', !!next && a.getAttribute('href') === `#${next.id}`))
@@ -520,6 +516,35 @@ export function initAnimations({ scroll, gl }) {
       onLeaveBack: () => (petals.cta = 0),
     })
   }
+
+  // ---------- The wire flower: each chapter bends one petal ----------
+  const pillPetals = $$('.chapter__flower .petal')
+  chapters.forEach((sec, i) => {
+    const next = chapters[i + 1] || $('.gallery')
+    ScrollTrigger.create({
+      trigger: sec,
+      start: 'top 60%',
+      endTrigger: next,
+      end: 'top 60%',
+      onUpdate: (self) => (pillPetals[i].style.strokeDashoffset = 1 - self.progress),
+      onLeave: () => (pillPetals[i].style.strokeDashoffset = 0),
+      onLeaveBack: () => (pillPetals[i].style.strokeDashoffset = 1),
+    })
+  })
+
+  // Epilogue: the finished flower draws itself in gold wire, petal by petal.
+  const flower = $('.cta__flower')
+  gsap
+    .timeline({ scrollTrigger: { trigger: '.cta', start: 'top 75%', end: 'center 45%', scrub: 0.8 } })
+    .to($$('.stem, .leaf', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.15, ease: 'none' }, 0)
+    .to($$('.cta__flower-head > g:first-of-type .petal', flower), { strokeDashoffset: 0, duration: 0.5, stagger: 0.12, ease: 'none' }, 0.2)
+    .to($$('.petal--inner', flower), { strokeDashoffset: 0, duration: 0.4, stagger: 0.08, ease: 'none' }, 0.6)
+    .from($$('.pearl', flower), { scale: 0, transformOrigin: '50% 50%', duration: 0.25, stagger: 0.03, ease: 'back.out(3)' }, 0.95)
+  gsap.fromTo(
+    $('.cta__flower-head', flower),
+    { rotation: -40, svgOrigin: '0 -40' },
+    { rotation: 20, svgOrigin: '0 -40', ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'bottom top', scrub: true } },
+  )
 
   // ---------- Footer wordmark rises letter by letter ----------
   gsap.fromTo(
