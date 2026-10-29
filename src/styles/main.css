@@ -238,6 +238,42 @@ main {
   pointer-events: none;
 }
 
+/* The gold wire outlining each chapter's entrance window. */
+.window-wire {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.window-wire path {
+  fill: none;
+  stroke: #e2c48d;
+  stroke-width: 5;
+  stroke-linejoin: round;
+  stroke-dasharray: 1 2;
+  stroke-dashoffset: 1.02;
+  filter: drop-shadow(0 0 6px rgb(226 196 141 / 0.7));
+}
+
+/* The embroidery hoop: a thicker band of light wood. */
+.window-wire--hoop path {
+  stroke: #d9b98a;
+  stroke-width: 12;
+  filter: drop-shadow(0 2px 6px rgb(42 31 34 / 0.35));
+}
+
+.window-wire__clasp {
+  fill: #c9a25e;
+  stroke: #8d6d39;
+  stroke-width: 1.5;
+}
+
 /* ---------- Shared pieces ---------- */
 .eyebrow {
   font-family: var(--sans);

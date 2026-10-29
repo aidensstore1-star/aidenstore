@@ -13,6 +13,38 @@ const SURFACES = { ivory: '#f3ece4', blush: '#efd9d3', sage: '#dfe3d5', cocoa: '
 
 const splitChars = (target) => SplitText.create(target, { type: 'words,chars', charsClass: 'char', wordsClass: 'word' })
 
+// ---------- Chapter entrance shapes ----------
+// Each chapter rises through a window shaped from its own world, outlined in
+// gold wire. Each returns an SVG path in the section's pixels for progress p
+// (0: just entering at the bottom, 1: filling the screen).
+const f = (n) => n.toFixed(1)
+const SHAPES = {
+  // Chapter I: a chapel arch that widens and squares off.
+  arch(p, W, H) {
+    const q = 1 - p
+    const side = 0.3 * q ** 1.3 * W
+    const r = ((W - 2 * side) / 2) * q ** 0.7
+    return `M${f(side)},${f(H)} L${f(side)},${f(r)} A${f(r)},${f(r)} 0 0 1 ${f(side + r)},0 L${f(W - side - r)},0 A${f(r)},${f(r)} 0 0 1 ${f(W - side)},${f(r)} L${f(W - side)},${f(H)} Z`
+  },
+  // The ceremony: a pointed gothic window, like the church it happens in.
+  lancet(p, W, H) {
+    const q = 1 - p
+    const side = 0.28 * q ** 1.2 * W
+    const half = (W - 2 * side) / 2
+    const rise = half * 1.5 * q ** 0.8
+    const R = Math.hypot(half, rise) * 0.72
+    return `M${f(side)},${f(H)} L${f(side)},${f(rise)} A${f(R)},${f(R)} 0 0 1 ${f(W / 2)},0 A${f(R)},${f(R)} 0 0 1 ${f(W - side)},${f(rise)} L${f(W - side)},${f(H)} Z`
+  },
+  // The celebration: a round cake plate opening like an iris.
+  iris(p, W, H) {
+    const R = Math.hypot(W / 2, H / 2) * 1.04 * p ** 1.15
+    const cx = W / 2
+    const cy = 0.5 * p * H
+    return `M${f(cx - R)},${f(cy)} a${f(R)},${f(R)} 0 1 0 ${f(2 * R)},0 a${f(R)},${f(R)} 0 1 0 ${f(-2 * R)},0 Z`
+  },
+}
+SHAPES.hoop = SHAPES.iris
+
 // A chapter whose scene lasts `scene()` pixels, then stays pinned for one more
 // screen while the next chapter slides up over it. The margin makes room for
 // the scene, because the pin adds no spacing of its own.
@@ -706,13 +738,30 @@ export function initAnimations({ scroll, gl }) {
   // While the arch rises, the chapter inside settles into place like a camera
   // coming to rest, so a hand-over never shows a still frame.
   const riseTargets = { craft: '.craft__pin', ceremony: '.ceremony__pin', celebration: '.celebration__pin', home: '.home__wall' }
-  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({
-    el,
-    top: 0,
-    p: -1,
-    gated: $$(archGated[el.id] || '_none_', el),
-    rise: $(riseTargets[el.id], el),
-  }))
+  const shapeOf = { craft: 'arch', ceremony: 'lancet', celebration: 'iris', home: 'hoop' }
+  const svgNS = 'http://www.w3.org/2000/svg'
+  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => {
+    const shape = shapeOf[el.id]
+    // The gold wire tracing the window's edge, drawn as it opens.
+    const svg = document.createElementNS(svgNS, 'svg')
+    svg.setAttribute('class', `window-wire window-wire--${shape}`)
+    svg.setAttribute('aria-hidden', 'true')
+    const wire = document.createElementNS(svgNS, 'path')
+    wire.setAttribute('pathLength', '1')
+    svg.append(wire)
+    let clasp = null
+    if (shape === 'hoop') {
+      // The brass screw clasp at the top of an embroidery hoop.
+      clasp = document.createElementNS(svgNS, 'rect')
+      clasp.setAttribute('class', 'window-wire__clasp')
+      clasp.setAttribute('width', '14')
+      clasp.setAttribute('height', '22')
+      clasp.setAttribute('rx', '3')
+      svg.append(clasp)
+    }
+    el.append(svg)
+    return { el, top: 0, p: -1, shape, svg, wire, clasp, gated: $$(archGated[el.id] || '_none_', el), rise: $(riseTargets[el.id], el) }
+  })
   // Between chapters, a gold wire draws along the top edge instead.
   const edges = $$('.statement, .gallery').map((el) => {
     const line = document.createElement('span')
@@ -792,13 +841,23 @@ export function initAnimations({ scroll, gl }) {
       if (a.el.id === 'celebration') setPreTurn(p <= 0 ? 70 : 70 * q)
       if (p >= 1 || p <= 0) {
         a.el.style.clipPath = p <= 0 ? 'inset(0 50% 0 50%)' : ''
+        a.svg.style.opacity = '0'
         continue
       }
-      // Starts as a narrow arch (a semicircle on top), widens to the full
-      // screen and squares off as it reaches the top.
-      const side = 0.3 * (1 - p) ** 1.3
-      const radius = (vw() * (1 - 2 * side)) / 2 * (1 - p) ** 0.7
-      a.el.style.clipPath = `inset(0 ${(side * 100).toFixed(2)}% 0 ${(side * 100).toFixed(2)}% round ${radius.toFixed(1)}px ${radius.toFixed(1)}px 0 0)`
+      const W = vw()
+      const H = a.el.offsetHeight || h
+      const d = SHAPES[a.shape](p, W, H)
+      a.el.style.clipPath = `path('${d}')`
+      a.wire.setAttribute('d', d)
+      // The wire draws itself around the window as it begins to open, then
+      // fades as the window fills the screen.
+      a.wire.style.strokeDashoffset = (1.02 * (1 - clamp(p / 0.45, 0, 1))).toFixed(3)
+      a.svg.style.opacity = (1 - clamp((p - 0.75) / 0.25, 0, 1)).toFixed(3)
+      if (a.clasp) {
+        const R = Math.hypot(W / 2, H / 2) * 1.04 * p ** 1.15
+        a.clasp.setAttribute('x', f(W / 2 - 7))
+        a.clasp.setAttribute('y', f(0.5 * p * H - R - 11))
+      }
     }
     for (const e of edges) {
       const p = clamp((y + h - e.top) / h, 0, 1)
