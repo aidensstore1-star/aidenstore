@@ -89,10 +89,11 @@ export function initAnimations({ scroll, gl }) {
     })
   }
 
+  let floats = []
   if (!canHover) {
     // Touch screens: the photos float gently, and a tap ripples the photo
     // under the finger.
-    heroItems.forEach((item, i) =>
+    floats = heroItems.map((item, i) =>
       gsap.to(item, { y: i % 2 ? 10 : -10, rotation: i % 2 ? 1.5 : -1.5, duration: 2.6 + i * 0.35, ease: 'sine.inOut', yoyo: true, repeat: -1 }),
     )
     hero.addEventListener('pointerdown', (e) => {
@@ -103,15 +104,17 @@ export function initAnimations({ scroll, gl }) {
     })
   }
 
-  // Each photo flies straight out from the centre of the screen, far enough to
-  // leave it whatever the screen size.
-  const flyOut = (item, axis) => {
-    const cx = item.offsetLeft + item.offsetWidth / 2 - vw() / 2
-    const cy = item.offsetTop + item.offsetHeight / 2 - vh() / 2
-    const len = Math.hypot(cx, cy) || 1
-    const dist = Math.hypot(vw(), vh()) * 0.8
-    return ((axis === 'x' ? cx : cy) / len) * dist
+  // Each photo first drifts outwards, then sweeps down into the arched window
+  // of Chapter I as it rises, as if the pieces were gathered into the story.
+  const centre = (item) => ({ x: item.offsetLeft + item.offsetWidth / 2, y: item.offsetTop + item.offsetHeight / 2 })
+  const outward = (item, axis) => {
+    const c = centre(item)
+    const dx = c.x - vw() / 2
+    const dy = c.y - vh() / 2
+    const len = Math.hypot(dx, dy) || 1
+    return ((axis === 'x' ? dx : dy) / len) * Math.min(vw(), vh()) * 0.12
   }
+  const gather = (item, axis) => (axis === 'x' ? vw() / 2 - centre(item).x : vh() * 0.84 - centre(item).y)
   // A short hold, then Chapter I rises over the opening while it is still
   // bursting apart, so there is never an empty screen between them.
   const heroScene = () => vh() * 0.35
@@ -128,9 +131,13 @@ export function initAnimations({ scroll, gl }) {
       onUpdate: (self) => {
         // Petals blow outwards and fade with the burst; once they have gone,
         // reset them so they can drift again in the epilogue.
-        const burst = clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)
-        petals.hero = 1 - burst
-        gl?.setBurst(burst >= 1 ? 0 : burst)
+        // They keep drifting through the whole hand-over, thinning out as
+        // Chapter I's arch rises.
+        const burst = self.progress
+        petals.hero = 1 - burst ** 2
+        gl?.setBurst(burst >= 1 ? 0 : burst * 0.6)
+        // The idle float only runs while the opening is at rest.
+        floats.forEach((t) => (self.progress > 0.01 ? t.pause() : t.play()))
       },
     },
   })
@@ -149,9 +156,11 @@ export function initAnimations({ scroll, gl }) {
     )
     .fromTo('.hero__sub, .hero__foot', { opacity: 1, y: 0 }, { opacity: 0, y: -80, duration: 0.3, immediateRender: false }, 0)
   heroItems.forEach((item, i) => {
-    heroExit.to(heroFigs[i], { x: () => flyOut(item, 'x'), y: () => flyOut(item, 'y'), scale: 1.9, rotation: (i % 2 ? 1 : -1) * 12, duration: 1 }, 0)
+    heroExit
+      .to(heroFigs[i], { x: () => outward(item, 'x'), y: () => outward(item, 'y'), scale: 1.12, rotation: (i % 2 ? 1 : -1) * 7, duration: 0.15, ease: 'power1.out' }, 0)
+      .to(heroFigs[i], { x: () => gather(item, 'x'), y: () => gather(item, 'y'), scale: 0.3, rotation: 0, duration: 0.45, ease: 'power1.inOut' }, 0.15 + i * 0.025)
   })
-  heroExit.to('.hero__media', { scale: 0.85, duration: 1, ease: 'none' }, 0)
+  heroExit.to({}, { duration: 1 }, 0)
 
   // Petals show in the opening and the epilogue. Driven by scroll progress, so
   // no layout reads are needed each frame.
@@ -660,7 +669,10 @@ export function initAnimations({ scroll, gl }) {
   const cta = { el: $('.cta'), top: 0, h: 1 }
   // Each chapter rises over the last through an arched window, like a chapel
   // window, that widens until it fills the screen.
-  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({ el, top: 0, p: -1 }))
+  // Labels near the top of a chapter wait until its arch is nearly open, so
+  // the arch never cuts through their words.
+  const archGated = { craft: '.craft__kicker, .craft__count', celebration: '.celebration__head' }
+  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({ el, top: 0, p: -1, gated: $$(archGated[el.id] || '_none_', el) }))
   // Between chapters, a gold wire draws along the top edge instead.
   const edges = $$('.statement, .gallery').map((el) => {
     const line = document.createElement('span')
@@ -713,8 +725,10 @@ export function initAnimations({ scroll, gl }) {
     }
     const low = under(y + h - 50)
     if (root.dataset.surfaceLow !== low) root.dataset.surfaceLow = low
+    // The chapter pill (and the active menu link) follow the section under
+    // the bottom of the screen, where the pill sits.
     let active = surfaces[0]
-    for (const s of surfaces) if (s.top <= y + h * 0.5) active = s
+    for (const s of surfaces) if (s.top <= y + h - 60) active = s
     enter(active.el)
     chapters.forEach((c, i) => {
       const end = (chapters[i + 1] || galleryMark).top
@@ -727,6 +741,7 @@ export function initAnimations({ scroll, gl }) {
       const p = clamp((y + h - a.top) / h, 0, 1)
       if (Math.abs(p - a.p) < 0.002) continue
       a.p = p
+      for (const g of a.gated) g.style.opacity = p >= 1 ? '' : clamp((p - 0.82) / 0.16, 0, 1).toFixed(3)
       if (p >= 1 || p <= 0) {
         a.el.style.clipPath = p <= 0 ? 'inset(0 50% 0 50%)' : ''
         continue
