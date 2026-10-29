@@ -1,5 +1,6 @@
 // All words, contact details and photo choices for the site live here.
-// Photo ids are file names from images/ without the .jpg extension.
+// Photo ids are file names from images/ without the .jpg extension. A photo's
+// optional `focus` (CSS object-position) keeps the piece in view when cropped.
 
 export const brand = {
   // TODO: replace with the business name once confirmed.
@@ -16,7 +17,7 @@ export const photos = {
   'hair-comb-pink-gold-wire-leaves': { title: 'Blush & gold leaf comb', type: 'Bridal accessories', alt: 'Hair comb with pink and gold wire leaves and pearls' },
   'hair-comb-red-wire-flowers-crystal': { title: 'Scarlet blossom comb', type: 'Bridal accessories', alt: 'Hair comb with red wire flowers and clear crystals' },
   'hair-comb-red-wire-flowers-wide': { title: 'Ruby wire-flower comb', type: 'Bridal accessories', alt: 'Wide hair comb covered in red wire flowers on gold wire' },
-  'hair-vine-gold-leaves-pearls': { title: 'Golden leaf hair vine', type: 'Bridal accessories', alt: 'Gold wire leaf hair vine with pearls' },
+  'hair-vine-gold-leaves-pearls': { title: 'Golden leaf hair vine', type: 'Bridal accessories', alt: 'Gold wire leaf hair vine with pearls', focus: '50% 74%' },
   'crown-and-candle-lilac-set': { title: 'Lilac crown & candle set', type: 'Holy Communion', alt: 'Floral crown and matching candle with lilac ribbon' },
   'bouquet-white-calla-lily': { title: 'White calla lily bouquet', type: 'Bouquets & florals', alt: 'Bridal bouquet of white calla lilies, baby’s breath and eucalyptus' },
   'bouquet-red-ivory-peonies': { title: 'Red & ivory peony bouquet', type: 'Bouquets & florals', alt: 'Bridal bouquet of red and ivory peonies with berries' },
@@ -95,15 +96,15 @@ export const craft = {
 }
 
 export const statement = {
-  text: 'Every comb, candle, crown and cake begins at one table. Nothing here is mass-made: each piece is made for one day, and one family.',
+  text: 'Every comb, candle, crown and cake begins at one table, made for one day and one family. This is that day, from the first pin in her hair to the last candle on the shelf.',
   photos: ['hair-comb-red-wire-flowers-wide', 'pillar-candle-burlap-lace-flower-ring'],
 }
 
 export const marquee = ['Bridal accessories', 'Ceremony candles', 'Bouquets & florals', 'Décor', 'Cakes & toppers']
 
 export const bride = {
-  title: ['For the', 'bride'],
-  text: 'Combs, vines, bouquets and baskets, made to match the dress and the day.',
+  title: ['Morning,', 'the bride'],
+  text: 'The day begins with a comb pinned into place, a vine woven through the braid and a bouquet to hold.',
   photos: [
     'hair-comb-pearl-crystal-ivory',
     'bouquet-white-calla-lily',
@@ -116,8 +117,8 @@ export const bride = {
 }
 
 export const ceremony = {
-  title: ['For the', 'ceremony'],
-  text: 'Holy Communion and christening candles and floral crowns, dressed by hand in wire flowers, pearls and ribbon.',
+  title: ['Noon,', 'the ceremony'],
+  text: 'At the altar: Holy Communion and christening candles dressed in wire flowers and pearls, and a crown of flowers for a small head.',
   // Every candle once, in the order they are shared across the columns.
   photos: [
     'tall-candle-silver-wire-flowers-pearls',
@@ -137,8 +138,8 @@ export const ceremony = {
 }
 
 export const celebration = {
-  title: ['For the', 'celebration'],
-  text: 'Birthdays, christenings, communions and showers. Each cake is designed around your colours and finished with a topper to match.',
+  title: ['Afternoon,', 'the celebration'],
+  text: 'Then the cake, in your colours and finished with a topper to match, for birthdays, christenings, communions and showers.',
   tags: ['Birthdays', 'Christenings', 'Communions', 'Baby showers', 'Weddings', 'Custom toppers'],
   ring: [
     'cake-pearl-wafer-sail-topper',
@@ -157,8 +158,8 @@ export const celebration = {
 }
 
 export const home = {
-  title: ['For the', 'home'],
-  text: 'Hoops, wreaths, garlands and trays that keep the day close long after it ends.',
+  title: ['Evening,', 'the home'],
+  text: 'And afterwards, the pieces come home: a hoop on the wall, a candle on the shelf, the day kept close.',
   // A wall of nine, read left to right, top to bottom. The middle one (5th)
   // opens the chapter full-screen before the wall pulls back.
   wall: [

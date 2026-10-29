@@ -270,11 +270,32 @@ main {
   object-fit: cover;
 }
 
-/* The same gentle warm grade the WebGL photos get. */
+/* The same warm grade the WebGL photos get, so photos taken in different
+   rooms read as one collection. */
 .media img,
 .craft__frame img,
 .ring__img img {
-  filter: sepia(0.08) saturate(0.94);
+  filter: sepia(0.16) saturate(0.86) contrast(1.04) brightness(1.02);
+}
+
+/* Arched frames, like chapel windows, with a fine gold line inside. */
+.bride__media,
+.ceremony__img {
+  border-radius: 999px 999px 6px 6px;
+}
+
+.bride__media::after,
+.ceremony__img::after {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgb(255 241 210 / 0.75);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.ceremony__img {
+  aspect-ratio: 3 / 4;
 }
 
 /* When WebGL is running it draws these photos; the <img> stays for layout and alt text. */
@@ -2256,11 +2277,11 @@ html.motion .cta__title .line {
   }
 
 
-  .hero__item--1 { left: 5vw; top: 11vh; width: 25vw; }
-  .hero__item--2 { right: 5vw; top: 15vh; width: 24vw; }
+  .hero__item--1 { left: 4vw; top: 9vh; width: 34vw; }
+  .hero__item--2 { right: 4vw; top: 13vh; width: 30vw; }
   .hero__item--3 { display: none; }
-  .hero__item--4 { right: 7vw; bottom: 9vh; width: 24vw; }
-  .hero__item--5 { left: 7vw; top: auto; bottom: 12vh; width: 20vw; }
+  .hero__item--4 { right: 5vw; bottom: 7vh; width: 32vw; }
+  .hero__item--5 { left: 6vw; top: auto; bottom: 10vh; width: 28vw; }
 
   .hero__title {
     font-size: clamp(3.2rem, 15vw, 7rem);
@@ -2294,6 +2315,7 @@ html.motion .cta__title .line {
 
   .statement__text {
     grid-column: 1 / -1;
+    font-size: 2.3rem;
     text-indent: 1.5em;
   }
 
@@ -2306,11 +2328,21 @@ html.motion .cta__title .line {
     margin-top: 10vh;
   }
 
-  .bride__card { width: 64vw; }
-  .bride__card--2 { width: 52vw; margin-top: 14vh; }
-  .bride__card--3 { width: 70vw; }
-  .bride__card--4 { width: 48vw; margin-top: 8vh; }
-  .bride__card--1 { margin-bottom: 10vh; }
+  .bride__card,
+  .bride__card--2,
+  .bride__card--3,
+  .bride__card--4 {
+    width: 78vw;
+    margin: 0;
+  }
+
+  .bride__track {
+    gap: 8vw;
+  }
+
+  .bride__end {
+    width: 62vw;
+  }
 
   html.motion .bride__word {
     font-size: 52vw;
