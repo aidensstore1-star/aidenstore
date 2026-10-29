@@ -222,10 +222,7 @@ export function initAnimations({ scroll, gl }) {
     },
   })
   craftTl
-    // A window in the dark opens from the centre to fill the screen. Both ends
-    // are written out with four values: browsers report the start back as two,
-    // which would make the window jump to a corner.
-    .fromTo(frames[0], { clipPath: 'inset(34% 32% 34% 32%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, ease: 'power2.inOut' }, 0)
+    // (The chapter's arched window has already opened onto this photo as it rose.)
     // Phone photos are only lightly enlarged, so they stay sharp.
     .fromTo(frameImgs[0], { scale: small ? 1.15 : 1.5, xPercent: 0 }, { scale: small ? 1.02 : 1.08, xPercent: small ? -3 : 0, duration: 2.6 }, 0)
     .to(craftIntro.chars, { yPercent: 0, stagger: 0.015, duration: 0.5, ease: 'power3.out' }, 0.25)
@@ -661,8 +658,11 @@ export function initAnimations({ scroll, gl }) {
   const chapters = surfaces.filter((s) => s.el.dataset.chapter)
   const galleryMark = surfaces.find((s) => s.el.id === 'gallery')
   const cta = { el: $('.cta'), top: 0, h: 1 }
-  // A gold wire draws along the top of each chapter as it rises over the last.
-  const edges = $$('.craft, .statement, .ceremony, .celebration, .home, .gallery').map((el) => {
+  // Each chapter rises over the last through an arched window, like a chapel
+  // window, that widens until it fills the screen.
+  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => ({ el, top: 0, p: -1 }))
+  // Between chapters, a gold wire draws along the top edge instead.
+  const edges = $$('.statement, .gallery').map((el) => {
     const line = document.createElement('span')
     line.className = 'wire-edge'
     line.setAttribute('aria-hidden', 'true')
@@ -674,7 +674,7 @@ export function initAnimations({ scroll, gl }) {
     return box.getBoundingClientRect().top + window.scrollY
   }
   const measure = () => {
-    for (const s of [...surfaces, ...edges]) s.top = docTop(s.el)
+    for (const s of [...surfaces, ...edges, ...arches]) s.top = docTop(s.el)
     cta.top = docTop(cta.el)
     cta.h = cta.el.offsetHeight
   }
@@ -721,6 +721,20 @@ export function initAnimations({ scroll, gl }) {
       const p = clamp((y + h * 0.4 - c.top) / (end - c.top), 0, 1)
       pillPetals[i].style.strokeDashoffset = (1.05 * (1 - p)).toFixed(3)
     })
+    for (const a of arches) {
+      const p = clamp((y + h - a.top) / h, 0, 1)
+      if (Math.abs(p - a.p) < 0.002) continue
+      a.p = p
+      if (p >= 1 || p <= 0) {
+        a.el.style.clipPath = p <= 0 ? 'inset(0 50% 0 50%)' : ''
+        continue
+      }
+      // Starts as a narrow arch (a semicircle on top), widens to the full
+      // screen and squares off as it reaches the top.
+      const side = 0.3 * (1 - p) ** 1.3
+      const radius = (vw() * (1 - 2 * side)) / 2 * (1 - p) ** 0.7
+      a.el.style.clipPath = `inset(0 ${(side * 100).toFixed(2)}% 0 ${(side * 100).toFixed(2)}% round ${radius.toFixed(1)}px ${radius.toFixed(1)}px 0 0)`
+    }
     for (const e of edges) {
       const p = clamp((y + h - e.top) / h, 0, 1)
       if (Math.abs(p - e.p) < 0.002) continue
