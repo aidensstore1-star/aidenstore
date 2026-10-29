@@ -23,6 +23,49 @@
   --header-h: 4.5rem;
 }
 
+/* Colours for the fixed header, chapter pill and cursor. They change with the
+   section underneath (see [data-surface] below) and fade smoothly, without
+   restyling the rest of the page. */
+@property --tone-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f3ece4;
+}
+
+@property --tone-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #2a1f22;
+}
+
+.header,
+.chapter,
+.cursor {
+  --tone-bg: var(--ivory);
+  --tone-ink: var(--plum);
+  transition:
+    --tone-bg 0.8s ease,
+    --tone-ink 0.8s ease;
+}
+
+html[data-surface='blush'] :is(.header, .chapter, .cursor) {
+  --tone-bg: var(--blush);
+}
+
+html[data-surface='sage'] :is(.header, .chapter, .cursor) {
+  --tone-bg: var(--sage);
+}
+
+html[data-surface='night'] :is(.header, .chapter, .cursor) {
+  --tone-bg: var(--night);
+  --tone-ink: var(--ivory);
+}
+
+html[data-surface='cocoa'] :is(.header, .chapter, .cursor) {
+  --tone-bg: var(--cocoa);
+  --tone-ink: var(--ivory);
+}
+
 *,
 *::before,
 *::after {
@@ -432,7 +475,7 @@ html.has-cursor .cursor {
   width: 6px;
   height: 6px;
   margin: -3px 0 0 -3px;
-  background: var(--ink);
+  background: var(--tone-ink);
 }
 
 .cursor__ring {
@@ -441,7 +484,7 @@ html.has-cursor .cursor {
   margin: -45px 0 0 -45px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--tone-ink);
   transform: scale(0.4);
 }
 
@@ -450,12 +493,12 @@ html.has-cursor .cursor {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--bg);
+  color: var(--tone-bg);
   opacity: 0;
 }
 
 .cursor.is-label .cursor__ring {
-  background: var(--ink);
+  background: var(--tone-ink);
 }
 
 .cursor.is-label .cursor__label {
@@ -478,7 +521,7 @@ html.has-cursor button {
   align-items: center;
   gap: 2rem;
   padding: env(safe-area-inset-top, 0px) var(--gutter) 0;
-  color: var(--ink);
+  color: var(--tone-ink);
 }
 
 /* Soft fade so the header stays readable over photos passing underneath. */
@@ -487,7 +530,7 @@ html.has-cursor button {
   position: absolute;
   inset: 0 0 -1.5rem;
   z-index: -1;
-  background: linear-gradient(var(--bg) 35%, transparent);
+  background: linear-gradient(var(--tone-bg) 35%, transparent);
   opacity: 0.92;
   pointer-events: none;
   transition: opacity 0.6s;
@@ -495,6 +538,14 @@ html.has-cursor button {
 
 html.menu-open .header::before {
   opacity: 0;
+}
+
+.header .btn::before {
+  background: var(--tone-ink);
+}
+
+.header .btn:hover {
+  color: var(--tone-bg);
 }
 
 .header__logo {
@@ -679,8 +730,8 @@ html.detail-open .chapter {
   gap: 0.9rem;
   padding: 0.55rem 1.1rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  color: var(--ink);
+  background: color-mix(in srgb, var(--tone-bg) 88%, transparent);
+  color: var(--tone-ink);
   font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.14em;
@@ -697,7 +748,7 @@ html:not(.motion) .chapter {
 
 .chapter__count {
   font-variant-numeric: tabular-nums;
-  color: var(--muted);
+  opacity: 0.6;
 }
 
 .chapter__title {
@@ -724,8 +775,9 @@ html:not(.motion) .chapter {
   stroke: var(--gold);
   stroke-width: 7;
   stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dasharray: 1 2;
+  /* Slightly past 1, so the round line caps don't leave dots before drawing. */
+  stroke-dashoffset: 1.05;
 }
 
 .chapter__heart {
@@ -742,30 +794,35 @@ html:not(.motion) .chapter {
   pointer-events: none;
 }
 
+/* Stroke widths are in the drawing's own units, chosen per scale so lines
+   look about 2px wide (non-scaling strokes would break the drawing effect). */
 .cta__flower path {
   fill: none;
   stroke: var(--gold);
-  stroke-width: 2;
+  stroke-width: 2.8;
   stroke-linecap: round;
   stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+}
+
+.cta__flower-head > g:first-of-type .petal {
+  stroke-width: 1.2;
 }
 
 .cta__flower .petal--inner {
-  stroke-width: 1.4;
+  stroke-width: 1.5;
   opacity: 0.8;
 }
 
 .cta__flower .pearl {
   fill: #f8f2ea;
   stroke: var(--gold);
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
+  stroke-width: 1.6;
 }
 
 html.motion .cta__flower path {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dasharray: 1 2;
+  /* Slightly past 1, so the round line caps don't leave dots before drawing. */
+  stroke-dashoffset: 1.05;
 }
 
 
@@ -1052,11 +1109,11 @@ html.motion .craft__wire {
 .craft__wire path {
   fill: none;
   stroke: #d8b77c;
-  stroke-width: 2.5;
+  stroke-width: 0.75;
   stroke-linecap: round;
-  vector-effect: non-scaling-stroke;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
+  stroke-dasharray: 1 2;
+  /* Slightly past 1, so the round line caps don't leave dots before drawing. */
+  stroke-dashoffset: 1.05;
   filter: drop-shadow(0 0 6px rgb(216 183 124 / 0.55));
 }
 

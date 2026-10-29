@@ -8,13 +8,8 @@ const $$ = (s, root = document) => [...root.querySelectorAll(s)]
 const vw = () => window.innerWidth
 const vh = () => window.innerHeight
 
-const THEMES = {
-  ivory: { bg: '#f3ece4', ink: '#2a1f22' },
-  blush: { bg: '#efd9d3', ink: '#2a1f22' },
-  sage: { bg: '#dfe3d5', ink: '#2a1f22' },
-  cocoa: { bg: '#221816', ink: '#f3ece4' },
-  night: { bg: '#1c1416', ink: '#f3ece4' },
-}
+// Background of each section, for the browser's address-bar colour.
+const SURFACES = { ivory: '#f3ece4', blush: '#efd9d3', sage: '#dfe3d5', cocoa: '#221816', night: '#1c1416' }
 
 const splitChars = (target) => SplitText.create(target, { type: 'words,chars', charsClass: 'char', wordsClass: 'word' })
 
@@ -31,7 +26,6 @@ const stacked = (section, scene) => {
 export function initAnimations({ scroll, gl }) {
   const small = matchMedia('(max-width: 900px)').matches
   const canHover = matchMedia('(hover: hover) and (pointer: fine)').matches
-  const root = document.documentElement
 
   // ---------- Images load a little before their chapter arrives ----------
   const warm = new IntersectionObserver(
@@ -44,51 +38,6 @@ export function initAnimations({ scroll, gl }) {
     { rootMargin: '150% 0px' },
   )
   $$('.craft, .bride, .ceremony, .celebration, .home, .gallery').forEach((s) => warm.observe(s))
-
-  // ---------- Background colour and chapter follow the scroll ----------
-  const metaTheme = $('meta[name="theme-color"]')
-  const themed = $$('[data-bg]')
-  const chapters = $$('[data-chapter]')
-  const indicator = $('.chapter')
-  const chapterNum = $('.chapter__num')
-  const chapterTitle = $('.chapter__title')
-  const navLinks = $$('.header__nav a')
-  let theme = 'ivory'
-  let chapter = null
-  gsap.set(root, { '--bg': THEMES.ivory.bg, '--ink': THEMES.ivory.ink })
-
-  const sync = () => {
-    const line = vh() * 0.5
-    let nextTheme = 'ivory'
-    for (const sec of themed) {
-      const r = sec.getBoundingClientRect()
-      if (r.top <= line && r.bottom >= line) nextTheme = sec.dataset.bg
-    }
-    if (nextTheme !== theme) {
-      theme = nextTheme
-      gsap.to(root, { '--bg': THEMES[theme].bg, '--ink': THEMES[theme].ink, duration: 0.9, ease: 'power2.out', overwrite: true })
-      metaTheme?.setAttribute('content', THEMES[theme].bg)
-    }
-
-    let next = null
-    for (const sec of chapters) {
-      const r = sec.getBoundingClientRect()
-      if (r.top <= line && r.bottom >= line) next = sec
-    }
-    if (next === chapter) return
-    chapter = next
-    navLinks.forEach((a) => a.classList.toggle('is-active', !!next && a.getAttribute('href') === `#${next.id}`))
-    if (!next) {
-      gsap.to(indicator, { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.in', overwrite: true })
-      return
-    }
-    gsap.to(indicator, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'expo.out', overwrite: true })
-    chapterNum.textContent = next.dataset.chapter
-    chapterTitle.innerHTML = `<span>${next.dataset.chapterTitle}</span>`
-    gsap.from(chapterTitle.firstChild, { yPercent: 110, duration: 0.7, ease: 'expo.out' })
-  }
-  scroll.onScroll(sync)
-  ScrollTrigger.addEventListener('refresh', sync)
 
   // ---------- Big titles rise line by line ----------
   $$('.title-xl').forEach((el) => {
@@ -136,15 +85,20 @@ export function initAnimations({ scroll, gl }) {
     })
   }
 
-  const fly = [
-    [-1, -0.8],
-    [1, -0.9],
-    [-1, 1],
-    [1, 0.9],
-    [0, -1.2],
-  ]
-  const heroScene = () => vh() * 1.1
+  // Each photo flies straight out from the centre of the screen, far enough to
+  // leave it whatever the screen size.
+  const flyOut = (item, axis) => {
+    const cx = item.offsetLeft + item.offsetWidth / 2 - vw() / 2
+    const cy = item.offsetTop + item.offsetHeight / 2 - vh() / 2
+    const len = Math.hypot(cx, cy) || 1
+    const dist = Math.hypot(vw(), vh()) * 0.8
+    return ((axis === 'x' ? cx : cy) / len) * dist
+  }
+  // A short hold, then Chapter I rises over the opening while it is still
+  // bursting apart, so there is never an empty screen between them.
+  const heroScene = () => vh() * 0.35
   const heroExit = gsap.timeline({
+    defaults: { ease: 'power2.in' },
     scrollTrigger: {
       trigger: hero,
       start: 'top top',
@@ -154,10 +108,9 @@ export function initAnimations({ scroll, gl }) {
       anticipatePin: 1,
       invalidateOnRefresh: true,
       onUpdate: (self) => {
-        // Petals blow outwards with the burst; once they have faded out, reset
-        // them so they can drift again in the epilogue.
-        const burst = clamp((self.progress * (heroScene() + vh())) / heroScene(), 0, 1)
-        gl?.setBurst(burst >= 1 ? 0 : burst)
+        // Petals blow outwards with the burst; once they have gone, reset them
+        // so they can drift again in the epilogue.
+        gl?.setBurst(self.progress >= 1 ? 0 : self.progress)
       },
     },
   })
@@ -166,20 +119,19 @@ export function initAnimations({ scroll, gl }) {
       heroSplit.chars,
       {
         x: () => gsap.utils.random(-0.55, 0.55) * vw(),
-        y: () => gsap.utils.random(-1, -0.25) * vh(),
+        y: () => gsap.utils.random(-1, -0.3) * vh(),
         rotation: () => gsap.utils.random(-140, 140),
         opacity: 0,
-        ease: 'power2.in',
-        stagger: { amount: 0.35, from: 'center' },
+        duration: 0.5,
+        stagger: { amount: 0.3, from: 'center' },
       },
       0,
     )
-    .fromTo('.hero__sub, .hero__foot', { opacity: 1, y: 0 }, { opacity: 0, y: -80, ease: 'power2.in', immediateRender: false }, 0)
-  heroFigs.forEach((fig, i) => {
-    heroExit.to(fig, { x: () => fly[i][0] * vw() * 0.6, y: () => fly[i][1] * vh() * 0.7, scale: 1.9, ease: 'power2.in' }, 0)
+    .fromTo('.hero__sub, .hero__foot', { opacity: 1, y: 0 }, { opacity: 0, y: -80, duration: 0.3, immediateRender: false }, 0)
+  heroItems.forEach((item, i) => {
+    heroExit.to(heroFigs[i], { x: () => flyOut(item, 'x'), y: () => flyOut(item, 'y'), scale: 1.9, rotation: (i % 2 ? 1 : -1) * 12, duration: 0.85 }, 0)
   })
-  // While Chapter I slides up over it, what is left of the hero sinks back.
-  heroExit.to('.hero__media', { scale: 0.82, ease: 'none', duration: 1.23 }, 1.35)
+  heroExit.to('.hero__media', { scale: 0.85, duration: 1, ease: 'none' }, 0)
 
   // Petals show in the opening and the epilogue. Driven by scroll progress, so
   // no layout reads are needed each frame.
@@ -523,6 +475,7 @@ export function initAnimations({ scroll, gl }) {
 
   // ---------- The wire flower: each chapter bends one petal ----------
   const pillPetals = $$('.chapter__flower .petal')
+  const chapters = $$('[data-chapter]')
   chapters.forEach((sec, i) => {
     const next = chapters[i + 1] || $('.gallery')
     ScrollTrigger.create({
@@ -530,9 +483,9 @@ export function initAnimations({ scroll, gl }) {
       start: 'top 60%',
       endTrigger: next,
       end: 'top 60%',
-      onUpdate: (self) => (pillPetals[i].style.strokeDashoffset = 1 - self.progress),
+      onUpdate: (self) => (pillPetals[i].style.strokeDashoffset = 1.05 * (1 - self.progress)),
       onLeave: () => (pillPetals[i].style.strokeDashoffset = 0),
-      onLeaveBack: () => (pillPetals[i].style.strokeDashoffset = 1),
+      onLeaveBack: () => (pillPetals[i].style.strokeDashoffset = 1.05),
     })
   })
 
@@ -549,6 +502,46 @@ export function initAnimations({ scroll, gl }) {
     { rotation: -40, svgOrigin: '0 -40' },
     { rotation: 20, svgOrigin: '0 -40', ease: 'none', scrollTrigger: { trigger: '.cta', start: 'top bottom', end: 'bottom top', scrub: true } },
   )
+
+  // ---------- Which section is on screen ----------
+  // Each section owns the screen from when its top reaches the middle until
+  // the next section's top does. Toggles only fire at those moments, so
+  // nothing is measured while scrolling. CSS fades the header, chapter pill
+  // and cursor to suit the section underneath.
+  const root = document.documentElement
+  const metaTheme = $('meta[name="theme-color"]')
+  const indicator = $('.chapter')
+  const chapterNum = $('.chapter__num')
+  const chapterTitle = $('.chapter__title')
+  const navLinks = $$('.header__nav a')
+  const surfaces = $$('[data-bg]')
+  let current = null
+  const enter = (sec) => {
+    if (sec === current) return
+    current = sec
+    root.dataset.surface = sec.dataset.bg
+    metaTheme?.setAttribute('content', SURFACES[sec.dataset.bg])
+    const chapter = sec.dataset.chapter ? sec : null
+    navLinks.forEach((a) => a.classList.toggle('is-active', !!chapter && a.getAttribute('href') === `#${chapter.id}`))
+    if (!chapter) {
+      gsap.to(indicator, { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.in', overwrite: true })
+      return
+    }
+    gsap.to(indicator, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'expo.out', overwrite: true })
+    chapterNum.textContent = chapter.dataset.chapter
+    chapterTitle.innerHTML = `<span>${chapter.dataset.chapterTitle}</span>`
+    gsap.from(chapterTitle.firstChild, { yPercent: 110, duration: 0.7, ease: 'expo.out' })
+  }
+  surfaces.forEach((sec, i) => {
+    const next = surfaces[i + 1]
+    ScrollTrigger.create({
+      trigger: sec,
+      start: i === 0 ? 'top top' : 'top 50%',
+      ...(next ? { endTrigger: next, end: 'top 50%' } : { end: 'max' }),
+      onToggle: (self) => self.isActive && enter(sec),
+    })
+  })
+  enter(surfaces[0])
 
   // ---------- Footer wordmark rises letter by letter ----------
   gsap.fromTo(
@@ -569,6 +562,5 @@ export function initAnimations({ scroll, gl }) {
     })
   })
 
-  sync()
   return { intro }
 }
