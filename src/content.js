@@ -116,6 +116,13 @@ export const bride = {
     'flower-basket-burgundy-roses-gold',
     'hair-comb-red-wire-flowers-wide',
   ],
+  // The morning, told in passing: a line above some of the pieces.
+  moments: {
+    0: ['8:10', 'Pearls pinned in, one by one'],
+    1: ['8:40', 'Lilies to hold'],
+    3: ['9:15', 'A pomander for the flower girl'],
+    5: ['9:40', 'Petals for the aisle'],
+  },
 }
 
 export const ceremony = {

@@ -1389,6 +1389,26 @@ html.motion .craft__count {
   color: var(--muted);
 }
 
+.bride__moment {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(1.3rem, 1.8vw, 1.9rem);
+  line-height: 1.1;
+  color: var(--rose);
+}
+
+.bride__moment span {
+  font-family: var(--sans);
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
 .bride__end {
   font-family: var(--serif);
   font-weight: 300;
@@ -2411,12 +2431,18 @@ html.motion .cta__title .line {
     gap: 8vw;
   }
 
+  /* Taller arches on phones, so each piece fills the screen. */
+  .bride__media {
+    aspect-ratio: 3 / 4.4;
+  }
+
   .bride__end {
     font-size: 2.1rem;
   }
 
   html.motion .bride__word {
     font-size: 52vw;
+    color: color-mix(in srgb, var(--rose) 38%, transparent);
   }
 
   /* The chapter pill already shows progress at the bottom of the screen. */
@@ -2467,9 +2493,9 @@ html.motion .cta__title .line {
     gap: 0;
   }
 
-  /* On phones the ring needs the height; the title already says it. */
   html.motion .celebration__text {
-    display: none;
+    font-size: 0.85rem;
+    line-height: 1.45;
   }
 
   .celebration__tags li {
@@ -2498,6 +2524,10 @@ html.motion .cta__title .line {
   }
 
   html.motion .home__wall {
+    top: 50%;
+    bottom: auto;
+    height: 133vw;
+    margin-top: -66.5vw;
     gap: 1.5vw;
     padding: 1.5vw;
   }

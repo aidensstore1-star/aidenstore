@@ -499,14 +499,18 @@ export function initAnimations({ scroll, gl }) {
     const W = wall.offsetWidth
     const H = wall.offsetHeight
     const centre = cells[4]
-    const fill = Math.max(W / centre.offsetWidth, H / centre.offsetHeight) * 1.02
+    // The middle piece first fills the whole screen.
+    const fill = Math.max(vw() / centre.offsetWidth, vh() / centre.offsetHeight) * 1.02
     let s2, cx2, cy2
     if (small) {
-      const top = homeText.offsetTop + homeText.offsetHeight + 16
+      // Phones: the wall settles under the words, nearly full width, its
+      // pieces in portrait cells so each one is recognisable.
+      const top = homeText.offsetTop + homeText.offsetHeight + 14
       const bottom = 76
-      s2 = Math.min(0.72, (H - top - bottom) / H)
+      const gutter = homeText.offsetLeft
+      s2 = Math.min((W - gutter * 2) / W, (vh() - top - bottom) / H)
       cx2 = W / 2
-      cy2 = top + (s2 * H) / 2
+      cy2 = top - wall.offsetTop + (s2 * H) / 2
     } else {
       const left = homeText.offsetLeft + homeText.offsetWidth + 32
       // The text starts at the page gutter; keep the same margin on the right.

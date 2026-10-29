@@ -98,6 +98,7 @@ export function renderSections() {
     .map(
       (id, i) => `<article class="bride__card bride__card--${(i % 4) + 1}${i === brideLast ? ' bride__card--last' : ''}">
   ${i === brideLast ? `<p class="bride__end">${esc(content.bride.end[0])} <em>${esc(content.bride.end[1])}</em></p>` : ''}
+  ${content.bride.moments?.[i] ? `<p class="bride__moment"><span>${esc(content.bride.moments[i][0])}</span>${esc(content.bride.moments[i][1])}</p>` : ''}
   ${media(id, { cls: 'bride__media', gl: false, sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
   <p class="bride__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</p>
 </article>`,
