@@ -1289,7 +1289,7 @@ html.motion .craft__count {
 /* Opaque, so the pinned Chapter I resting underneath never shows through. */
 .marquee {
   position: relative;
-  padding: 2vh 0 12vh;
+  padding: 2vh 0 3vh;
   overflow: hidden;
   background: var(--ivory);
   color: var(--plum);
@@ -2421,7 +2421,11 @@ html.motion .cta__title .line {
   }
 
   .ring {
-    --card-w: clamp(120px, 36vw, 170px);
+    --card-w: clamp(110px, 32vw, 160px);
+  }
+
+  html.motion .ring {
+    margin-top: 0;
   }
 
   /* Closer viewpoint so the ring reads as a ring: three or four cakes in
@@ -2505,13 +2509,10 @@ html.motion .cta__title .line {
     padding-top: 1rem;
   }
 
+  /* Phones: the number sits with the words, outlined in ink. */
   html.motion .step__num {
-    position: absolute;
-    right: 0;
-    bottom: 100%;
-    font-size: 7rem;
-    -webkit-text-stroke: 1px var(--ivory);
-    margin-bottom: -1.6rem;
+    font-size: 4.2rem;
+    line-height: 0.8;
   }
 
   html.motion .step__title {

@@ -467,11 +467,11 @@ export function initAnimations({ scroll, gl }) {
     onUpdate: shade,
   })
   celebrationTl
-    .fromTo(ring, { scale: 0.55, y: () => vh() * 0.2 }, { scale: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0)
+    .fromTo(ring, { scale: 0.55, y: () => vh() * 0.1 }, { scale: 1, y: 0, duration: 0.18, ease: 'power3.out' }, 0)
     .fromTo(spin, { rotationY: 50, rotationX: () => (small ? -10 : -6) }, { rotationY: (-360 * (n - 1)) / n, rotationX: () => (small ? -10 : -6), duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
     // The caption and tags wait until the ring has arrived.
-    .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.17)
+    .fromTo('.ring__now, .celebration__text', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06, ease: 'power2.out' }, 0.2)
     .from('.celebration__tags li', { y: 30, opacity: 0, stagger: 0.012, duration: 0.06, ease: 'back.out(2)' }, 0.18)
     // The home slides over; the cakes recede.
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
@@ -572,7 +572,7 @@ export function initAnimations({ scroll, gl }) {
     scrollTrigger: {
       trigger: process,
       start: 'top top',
-      end: () => `+=${stepDist() * 0.85}`,
+      end: () => `+=${stepDist() * (small ? 1.3 : 0.85)}`,
       pin: true,
       scrub: 0.8,
       anticipatePin: 1,
@@ -595,7 +595,7 @@ export function initAnimations({ scroll, gl }) {
       { scale: 1.3, xPercent: 8 },
       { scale: 1.12, xPercent: -4, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
     )
-    gsap.fromTo(
+    if (!small) gsap.fromTo(
       $('.step__num', step),
       { x: () => vw() * 0.35 },
       { x: () => -vw() * 0.15, ease: 'none', scrollTrigger: { trigger: step, containerAnimation: processScroll, start: 'left right', end: 'right left', scrub: true } },
@@ -719,6 +719,8 @@ export function initAnimations({ scroll, gl }) {
     chapters.forEach((c, i) => {
       const end = (chapters[i + 1] || galleryMark).top
       const p = clamp((y + h * 0.4 - c.top) / (end - c.top), 0, 1)
+      if (Math.abs(p - (c.p ?? -1)) < 0.004) return
+      c.p = p
       pillPetals[i].style.strokeDashoffset = (1.05 * (1 - p)).toFixed(3)
     })
     for (const a of arches) {
