@@ -6,6 +6,8 @@ import { brand, gallery, photos } from '../content.js'
 export function initDetail({ scroll, gl, galleryApi, reduced }) {
   const root = document.querySelector('.detail')
   const backdrop = root.querySelector('.detail__backdrop')
+  const blur = root.querySelector('.detail__blur')
+  const progress = root.querySelector('.detail__progress')
   const slot = root.querySelector('.detail__media')
   const img = slot.querySelector('img')
   const info = root.querySelector('.detail__info')
@@ -41,6 +43,8 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     const id = gallery[index]
     const p = photos[id] || {}
     img.src = `photos/${id}-1280.webp`
+    blur.style.backgroundImage = `url(photos/${id}-640.webp)`
+    progress.style.setProperty('--p', ((index + 1) / gallery.length).toFixed(3))
     img.alt = p.alt || ''
     type.textContent = p.type || ''
     title.textContent = p.title || ''
@@ -183,7 +187,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
   root.addEventListener(
     'touchmove',
     (e) => {
-      if (!touch || busy) return
+      if (!touch) return
       const t = e.touches[0]
       const now = performance.now()
       const dt = Math.max(1, now - touch.lt)
@@ -195,6 +199,9 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       const dx = t.clientX - touch.x
       const dy = t.clientY - touch.y
       if (!touch.axis && Math.hypot(dx, dy) > 8) touch.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y'
+      // Gestures still count during a transition (they run when it ends), but
+      // the photo only follows the finger when it is free to.
+      if (busy) return
       if (touch.axis === 'x') gsap.set(img, { x: dx, rotation: dx * 0.02, opacity: 1 - Math.min(Math.abs(dx) / 600, 0.4) })
       if (touch.axis === 'y' && dy > 0) gsap.set(img, { y: dy * 0.7, scale: 1 - Math.min(dy / 1800, 0.18) })
     },

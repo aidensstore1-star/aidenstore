@@ -2,8 +2,8 @@ import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-// Smooth scrolling. Touch scrolling is driven by Lenis too (syncTouch), so the
-// WebGL photos stay locked to the page on phones as well.
+// Smooth scrolling for mouse wheels and trackpads. Touch screens keep the
+// phone's own scrolling and momentum, which feels right under the finger.
 export function createScroll({ reduced }) {
   if (reduced) {
     return {
@@ -16,6 +16,9 @@ export function createScroll({ reduced }) {
         if (el?.scrollIntoView) el.scrollIntoView()
         else window.scrollTo(0, Number(target) || 0)
       },
+      jumpTo(target) {
+        this.scrollTo(target)
+      },
       onScroll(fn) {
         window.addEventListener('scroll', fn, { passive: true })
       },
@@ -24,9 +27,6 @@ export function createScroll({ reduced }) {
 
   const lenis = new Lenis({
     lerp: 0.085,
-    syncTouch: true,
-    syncTouchLerp: 0.085,
-    touchInertiaExponent: 1.6,
     anchors: { offset: 0 },
   })
 
@@ -40,6 +40,7 @@ export function createScroll({ reduced }) {
     stop: () => lenis.stop(),
     start: () => lenis.start(),
     scrollTo: (target, opts) => lenis.scrollTo(target, { duration: 1.6, ...opts }),
+    jumpTo: (target) => lenis.scrollTo(target, { immediate: true, force: true }),
     onScroll: (fn) => lenis.on('scroll', fn),
   }
 }

@@ -32,7 +32,7 @@ export function initGallery({ scroll, onOpen }) {
   const update = () => {
     if (!visible) return
     // Drifts on its own, except while held and for a few seconds after a touch.
-    const resting = performance.now() - (state.touchedAt || 0) < 3500
+    const resting = performance.now() - (state.touchedAt || 0) < 6000
     if (!state.dragging && !state.paused && !resting) state.target -= 0.45 + Math.min(Math.abs(scroll.velocity()), 40) * 0.15
     state.current += (state.target - state.current) * 0.075
     const velocity = state.current - state.last
@@ -82,6 +82,8 @@ export function initGallery({ scroll, onOpen }) {
     state.dragging = false
     state.touchedAt = performance.now()
     if (viewport.hasPointerCapture(e.pointerId)) viewport.releasePointerCapture(e.pointerId)
+    // After a drag, glide on a little and settle with one card centred.
+    if (state.moved >= 8) snap(state.target + (state.target - state.startTarget) * 0.25)
     const quick = performance.now() - state.startTime < 300
     if (e.type === 'pointerup' && quick && state.moved < 8 && state.downItem) open(state.downItem)
   }
@@ -110,6 +112,19 @@ export function initGallery({ scroll, onOpen }) {
     })
   })
   viewport.addEventListener('dragstart', (e) => e.preventDefault())
+
+  // Moves the row so the card nearest `target` lands in the middle.
+  function snap(target) {
+    const mid = half - itemW / 2
+    let best = Infinity
+    for (let i = 0; i < items.length; i++) {
+      let x = (i * step + target) % total
+      if (x < 0) x += total
+      x -= step
+      if (Math.abs(mid - x) < Math.abs(best)) best = mid - x
+    }
+    state.target = target + best
+  }
 
   function open(item) {
     onOpen?.(Number(item.dataset.index), item)

@@ -190,12 +190,13 @@
     </footer>
 
     <div class="detail" role="dialog" aria-modal="true" aria-label="Piece details" aria-hidden="true">
-      <div class="detail__backdrop"></div>
+      <div class="detail__backdrop"><div class="detail__blur"></div></div>
       <figure class="detail__media"><img alt="" /></figure>
       <div class="detail__info">
         <p class="detail__type"></p>
         <h2 class="detail__title"></h2>
         <p class="detail__count"></p>
+        <div class="detail__progress" aria-hidden="true"><i></i></div>
         <a class="btn btn--solid magnetic detail__enquire" href="#contact"><span>Enquire about this piece</span></a>
       </div>
       <button class="detail__close" type="button" aria-label="Close">Close <i></i></button>

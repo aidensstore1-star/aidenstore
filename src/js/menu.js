@@ -55,7 +55,11 @@ export function initMenu({ scroll }) {
     link.addEventListener('click', (e) => {
       e.preventDefault()
       const target = link.getAttribute('href')
-      hide(() => scroll.scrollTo(target))
+      // Jump while the menu still covers the page, so the visitor doesn't
+      // watch every chapter scroll past; the menu then lifts onto the chapter.
+      scroll.start()
+      scroll.jumpTo(target)
+      hide()
     })
     link.addEventListener('pointerenter', () => {
       const i = Number(link.dataset.index)
