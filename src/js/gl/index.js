@@ -45,7 +45,14 @@ export function createGL(canvas, { scroll }) {
   )
   const byElement = new Map(medias.map((m) => [m.el, m]))
 
-  const petals = new Petals({ gl, scene, viewport, count: small ? 34 : 70, pixelRatio: dpr })
+  // Only photos within about a screen of the viewport are measured and drawn.
+  const nearby = new IntersectionObserver(
+    (entries) => entries.forEach((e) => (byElement.get(e.target).near = e.isIntersecting)),
+    { rootMargin: '60% 60%' },
+  )
+  medias.forEach((m) => nearby.observe(m.el))
+
+  const petals = new Petals({ gl, scene, viewport, count: small ? 30 : 70, pixelRatio: dpr })
 
   function resize() {
     screen.w = window.innerWidth
@@ -70,7 +77,7 @@ export function createGL(canvas, { scroll }) {
     mouse[1] = -(e.clientY / screen.h - 0.5) * viewport.h
   })
 
-  const state = { strength: 0, drag: 0, dragTarget: 0, petalOpacity: () => 0 }
+  const state = { strength: 0, drag: 0, dragTarget: 0, burst: 0, petalOpacity: () => 0 }
 
   function tick(time) {
     const target = clamp(scroll.velocity() * 0.014, -0.9, 0.9)
@@ -78,7 +85,7 @@ export function createGL(canvas, { scroll }) {
     state.drag += (clamp(state.dragTarget, -1, 1) - state.drag) * 0.12
 
     for (const m of medias) m.update({ strength: state.strength, drag: state.drag, time })
-    petals.update({ time, mouse, scroll: window.scrollY * 0.00025, opacity: state.petalOpacity() })
+    petals.update({ time, mouse, scroll: window.scrollY * 0.0004, opacity: state.petalOpacity(), burst: state.burst })
     renderer.render({ scene, camera, sort: false, frustumCull: false })
   }
   gsap.ticker.add(tick)
@@ -93,6 +100,9 @@ export function createGL(canvas, { scroll }) {
     },
     setPetalOpacity(fn) {
       state.petalOpacity = fn
+    },
+    setBurst(v) {
+      state.burst = v
     },
   }
 }

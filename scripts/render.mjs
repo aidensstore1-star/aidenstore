@@ -26,13 +26,13 @@ export function renderSections() {
   const scaleSizes = (sizes, factor) =>
     factor <= 1 ? sizes : sizes.replace(/(\d+(?:\.\d+)?)vw/g, (_, n) => `${Math.round(n * factor)}vw`)
 
-  const img = (id, { sizes = '50vw', eager = false, cls = '', box = 0 } = {}) => {
+  const img = (id, { sizes = '50vw', eager = false, cls = '', box = 0, decorative = false } = {}) => {
     const { w, h } = size(id)
     if (box) sizes = scaleSizes(sizes, w / h / box)
     const small = Math.min(640, w)
     const large = Math.min(1280, w)
     const loading = eager ? 'fetchpriority="high"' : 'loading="lazy"'
-    return `<img${cls ? ` class="${cls}"` : ''} src="photos/${id}-1280.webp" srcset="photos/${id}-640.webp ${small}w, photos/${id}-1280.webp ${large}w" sizes="${sizes}" width="${w}" height="${h}" alt="${esc(photos[id]?.alt)}" ${loading} decoding="async">`
+    return `<img${cls ? ` class="${cls}"` : ''} src="photos/${id}-1280.webp" srcset="photos/${id}-640.webp ${small}w, photos/${id}-1280.webp ${large}w" sizes="${sizes}" width="${w}" height="${h}" alt="${decorative ? '' : esc(photos[id]?.alt)}" ${loading} decoding="async">`
   }
 
   const media = (id, { cls = '', gl = true, attrs = '', ...opts } = {}) => {
@@ -43,127 +43,158 @@ export function renderSections() {
   const letters = (text) =>
     [...text].map((c) => `<span class="char">${c === ' ' ? '&nbsp;' : esc(c)}</span>`).join('')
 
-  const sections = {}
+  // ['For the', 'bride'] -> "For the <em>bride</em>"
+  const titled = ([plain, accent]) => `${esc(plain)} <em>${esc(accent)}</em>`
 
-  sections.brand = esc(brand.name)
-  sections.brandLetters = letters(brand.name)
-  sections.tagline = esc(brand.tagline)
-  sections.year = String(new Date().getFullYear())
+  const s = {}
 
-  sections.preloader = content.preloader
+  s.brand = esc(brand.name)
+  s.brandLetters = letters(brand.name)
+  s.tagline = esc(brand.tagline)
+  s.year = String(new Date().getFullYear())
+
+  s.preloader = content.preloader
     .map((id) => `<img class="preloader__img" src="photos/${id}-640.webp" alt="" decoding="async">`)
     .join('')
 
-  sections.hero = content.hero
-    .map((id, i) =>
-      media(id, { cls: `hero__img hero__img--${i + 1}`, sizes: '(max-width: 768px) 40vw, 22vw', eager: i < 3 }),
+  s.hero = content.hero
+    .map(
+      (id, i) =>
+        `<div class="hero__item hero__item--${i + 1}">${media(id, { cls: 'hero__img', sizes: '(max-width: 900px) 40vw, 22vw', eager: i < 3 })}</div>`,
     )
     .join('')
 
-  const marqueeWords = content.collections.map((c) => esc(c.title))
-  const marqueeChunk = marqueeWords.map((w) => `<span>${w}</span><i>✦</i>`).join('')
-  sections.marquee = marqueeChunk.repeat(3)
-
-  sections.statementText = esc(content.statement.text)
-  sections.statementPhotos = content.statement.photos
-    .map((id, i) => media(id, { cls: `statement__img statement__img--${i ? 'b' : 'a'}`, sizes: '(max-width: 768px) 45vw, 24vw' }))
-    .join('')
-
-  sections.collections = content.collections
-    .map((c, i) => {
-      const [first, ...rest] = c.title.split(' ')
-      return `<article class="panel">
-  ${media(c.photo, { cls: 'panel__media', sizes: '(max-width: 768px) 80vw, 45vw', eager: true })}
-  <div class="panel__info">
-    <span class="panel__num">${pad(i + 1)}</span>
-    <h3 class="panel__title">${esc(first)}${rest.length ? `<br><em>${esc(rest.join(' '))}</em>` : ''}</h3>
-    <p class="panel__text">${esc(c.text)}</p>
-  </div>
-</article>`
-    })
-    .join('\n')
-  sections.collectionsCount = pad(content.collections.length)
-
-  sections.occasions = content.occasions
+  // ---------- Chapter I: the craft ----------
+  s.craftFrames = content.craft.beats
     .map(
-      (o, i) => `<li class="occasion" data-photo="photos/${o.photo}-640.webp">
-  <a class="occasion__link" href="#contact">
-    <span class="occasion__num">${pad(i + 1)}</span>
-    <span class="occasion__title">${esc(o.title)}</span>
-    <span class="occasion__thumb">${img(o.photo, { sizes: '30vw' })}</span>
-    <span class="occasion__arrow" aria-hidden="true">↗</span>
-  </a>
-</li>`,
-    )
-    .join('\n')
-
-  sections.communionTitle = `${esc(content.communion.title[0])}<br><em>${esc(content.communion.title[1])}</em>`
-  sections.communionText = esc(content.communion.text)
-  sections.communionCols = content.communion.columns
-    .map(
-      (col, i) =>
-        `<div class="communion__col communion__col--${i + 1}">${col
-          .map((id) => media(id, { cls: 'communion__img', sizes: '(max-width: 768px) 45vw, 25vw' }))
-          .join('')}</div>`,
+      (b, i) =>
+        `<figure class="craft__frame craft__frame--${i + 1}">${img(b.photo, { sizes: '100vw', box: 0.6 })}</figure>`,
     )
     .join('')
-
-  sections.cakesText = esc(content.cakes.text)
-  sections.cakesTags = content.cakes.tags.map((t) => `<li>${esc(t)}</li>`).join('')
-  const stackTotal = pad(content.cakes.stack.length)
-  sections.cakesStack = content.cakes.stack
+  s.craftIntro = `<span class="line">${esc(content.craft.intro[0])}</span><span class="line"><em>${esc(content.craft.intro[1])}</em></span>`
+  s.craftLines = content.craft.beats
     .map(
-      (c, i) => `<article class="cake-card" style="--i:${i}">
-  <div class="cake-card__inner">
-    ${media(c.photo, { cls: 'cake-card__media', gl: false, sizes: '(max-width: 768px) 90vw, 50vw', box: 0.9 })}
-    <div class="cake-card__info">
-      <span class="cake-card__num">${pad(i + 1)} / ${stackTotal}</span>
-      <h3 class="cake-card__title">${esc(photos[c.photo]?.title)}</h3>
-      <p class="cake-card__note">${esc(c.note)}</p>
-    </div>
-  </div>
+      (b, i) =>
+        `<li class="craft__line craft__line--${i + 1}"><span class="craft__line-num">${pad(i + 1)}</span><span class="line">${esc(b.line[0])}</span><span class="line"><em>${esc(b.line[1])}</em></span></li>`,
+    )
+    .join('')
+  s.craftTotal = pad(content.craft.beats.length)
+
+  s.statementText = esc(content.statement.text)
+  s.statementPhotos = content.statement.photos
+    .map((id, i) => media(id, { cls: `statement__img statement__img--${i ? 'b' : 'a'}`, sizes: '(max-width: 900px) 45vw, 24vw' }))
+    .join('')
+
+  const marqueeChunk = content.marquee.map((w) => `<span>${esc(w)}</span><i>✦</i>`).join('')
+  s.marquee = marqueeChunk.repeat(3)
+
+  // ---------- Chapter II: the bride (sideways) ----------
+  s.brideTitle = titled(content.bride.title)
+  s.brideText = esc(content.bride.text)
+  s.brideCards = content.bride.photos
+    .map(
+      (id, i) => `<article class="bride__card bride__card--${(i % 4) + 1}">
+  ${media(id, { cls: 'bride__media', sizes: '(max-width: 900px) 70vw, 30vw', box: 0.8 })}
+  <p class="bride__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</p>
 </article>`,
     )
     .join('\n')
 
-  sections.gallery = content.gallery
+  // ---------- Chapter III: the ceremony (counter-scrolling columns) ----------
+  s.ceremonyTitle = titled(content.ceremony.title)
+  s.ceremonyText = esc(content.ceremony.text)
+  s.ceremonyCols = content.ceremony.columns
+    .map(
+      (col, i) =>
+        // Each column repeats once so it is tall enough to keep moving on any screen.
+        `<div class="ceremony__col ceremony__col--${i + 1}">${[...col, ...col]
+          .map((id, j) => media(id, { cls: 'ceremony__img', gl: false, sizes: '(max-width: 900px) 32vw, 30vw', decorative: j >= col.length }))
+          .join('')}</div>`,
+    )
+    .join('')
+
+  // ---------- Chapter IV: the celebration (cake ring) ----------
+  s.celebrationTitle = titled(content.celebration.title)
+  s.celebrationText = esc(content.celebration.text)
+  s.celebrationTags = content.celebration.tags.map((t) => `<li>${esc(t)}</li>`).join('')
+  const ringTotal = content.celebration.ring.length
+  s.ringCount = String(ringTotal)
+  s.ring = content.celebration.ring
+    .map(
+      (id, i) => `<figure class="ring__card" style="--i:${i}" data-title="${esc(photos[id]?.title)}">
+  <div class="ring__img">${img(id, { sizes: '(max-width: 900px) 42vw, 18vw', box: 0.75 })}</div>
+  <figcaption class="ring__cap"><span>${pad(i + 1)} / ${pad(ringTotal)}</span>${esc(photos[id]?.title)}</figcaption>
+</figure>`,
+    )
+    .join('\n')
+
+  // ---------- Chapter V: the home ----------
+  s.homeTitle = titled(content.home.title)
+  s.homeText = esc(content.home.text)
+  const homeCol = (col, side) =>
+    `<div class="home__col home__col--${side}">${col
+      .map((id) => media(id, { cls: 'home__img', gl: false, sizes: '(max-width: 900px) 46vw, 28vw' }))
+      .join('')}</div>`
+  s.homeColA = homeCol(content.home.columns[0], 'a')
+  s.homeColB = homeCol(content.home.columns[1], 'b')
+
+  // ---------- Gallery, process ----------
+  s.gallery = content.gallery
     .map(
       (id, i) => `<button class="gallery__item" type="button" data-index="${i}" aria-label="View ${esc(photos[id]?.title)}">
-  ${media(id, { cls: 'gallery__media', attrs: 'data-bend', sizes: '(max-width: 768px) 60vw, 24vw', box: 0.75 })}
+  ${media(id, { cls: 'gallery__media', attrs: 'data-bend', sizes: '(max-width: 900px) 60vw, 24vw', box: 0.75 })}
   <span class="gallery__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</span>
 </button>`,
     )
     .join('\n')
 
-  sections.process = content.process
+  s.process = content.process
     .map(
-      (s, i) => `<li class="step">
+      (st, i) => `<li class="step">
   <span class="step__num">${pad(i + 1)}</span>
-  <h3 class="step__title">${esc(s.title)}</h3>
-  <p class="step__text">${esc(s.text)}</p>
+  <h3 class="step__title">${esc(st.title)}</h3>
+  <p class="step__text">${esc(st.text)}</p>
 </li>`,
     )
     .join('\n')
 
+  // ---------- Contact ----------
   const contacts = []
   if (brand.whatsapp) contacts.push({ label: 'WhatsApp', href: `https://wa.me/${brand.whatsapp}` })
   if (brand.email) contacts.push({ label: 'Email', href: `mailto:${brand.email}` })
   if (brand.instagram) contacts.push({ label: 'Instagram', href: `https://instagram.com/${brand.instagram}` })
   // Placeholders keep the design visible until real details are filled in.
   if (!contacts.length) contacts.push({ label: 'WhatsApp', href: '#contact' }, { label: 'Email', href: '#contact' }, { label: 'Instagram', href: '#contact' })
-  sections.ctaButtons = contacts
+  s.ctaButtons = contacts
     .map(
       (c, i) =>
         `<a class="btn${i === 0 ? ' btn--solid' : ''} magnetic" href="${esc(c.href)}"${c.href.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}><span>${esc(c.label)}</span></a>`,
     )
     .join('')
-  sections.footerLinks = contacts.map((c) => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join('')
+  s.footerLinks = contacts.map((c) => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join('')
 
-  sections.menuMedia = content.collections
-    .map((c, i) => `<img class="menu__img" data-index="${i}" src="photos/${c.photo}-640.webp" alt="" loading="lazy" decoding="async">`)
+  // ---------- Navigation ----------
+  const nav = [
+    ...content.chapters.map((c) => ({ href: `#${c.id}`, label: c.title.replace(/^The /, ''), photo: c.photo })),
+    { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies' },
+    { href: '#contact', label: 'Enquire', photo: 'bouquet-white-calla-lily' },
+  ]
+  s.navLinks = nav
+    .filter((n) => n.href !== '#contact')
+    .map((n) => `<a href="${n.href}">${esc(n.label)}</a>`)
     .join('')
+  s.menuLinks = nav
+    .map(
+      (n, i) =>
+        `<a class="menu__link" href="${n.href}" data-index="${i}"><span class="menu__num">${pad(i + 1)}</span><span class="menu__text">${esc(n.label)}</span></a>`,
+    )
+    .join('')
+  s.menuMedia = nav
+    .map((n, i) => `<img class="menu__img" data-index="${i}" src="photos/${n.photo}-640.webp" alt="" loading="lazy" decoding="async">`)
+    .join('')
+  s.chapterCount = content.chapters.at(-1).num
 
-  return sections
+  return s
 }
 
 export function htmlContent() {

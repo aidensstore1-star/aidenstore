@@ -2,12 +2,14 @@
 :root {
   --ivory: #f3ece4;
   --blush: #efd9d3;
+  --sage: #dfe3d5;
   --cocoa: #221816;
+  --night: #1c1416;
   --plum: #2a1f22;
   --rose: #b5837a;
   --gold: #b08d57;
 
-  /* --bg and --ink are animated as you scroll between sections. */
+  /* --bg and --ink are animated as you scroll between chapters. */
   --bg: var(--ivory);
   --ink: var(--plum);
   --line: color-mix(in srgb, var(--ink) 16%, transparent);
@@ -159,6 +161,7 @@ main,
   font-size: clamp(2.8rem, 7.5vw, 8.5rem);
   line-height: 0.92;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .line {
@@ -192,6 +195,7 @@ html.gl-on .media[data-gl] img {
   align-items: center;
   justify-content: center;
   gap: 0.6em;
+  min-height: 44px;
   padding: 1.15em 2.1em;
   border: 1px solid currentColor;
   border-radius: 999px;
@@ -238,6 +242,7 @@ html.gl-on .media[data-gl] img {
 }
 
 .btn--small {
+  min-height: 0;
   padding: 0.85em 1.5em;
   font-size: 0.68rem;
 }
@@ -280,7 +285,7 @@ html.gl-on .media[data-gl] img {
   z-index: 100;
   display: grid;
   place-items: center;
-  background: #1c1416;
+  background: var(--night);
   color: var(--ivory);
   overflow: hidden;
 }
@@ -326,7 +331,7 @@ html.reduced-motion .preloader {
 
 .preloader__caption {
   position: absolute;
-  top: calc(var(--gutter) * 0.6 + 0.5rem);
+  top: calc(var(--gutter) * 0.6 + 0.5rem + env(safe-area-inset-top, 0px));
   left: var(--gutter);
   font-size: 0.72rem;
   letter-spacing: 0.16em;
@@ -431,11 +436,11 @@ html.has-cursor button {
   position: fixed;
   inset: 0 0 auto;
   z-index: 70;
-  height: var(--header-h);
+  height: calc(var(--header-h) + env(safe-area-inset-top, 0px));
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding: 0 var(--gutter);
+  padding: env(safe-area-inset-top, 0px) var(--gutter) 0;
   color: var(--ink);
 }
 
@@ -448,6 +453,7 @@ html.has-cursor button {
   background: linear-gradient(var(--bg) 35%, transparent);
   opacity: 0.92;
   pointer-events: none;
+  transition: opacity 0.6s;
 }
 
 html.menu-open .header::before {
@@ -465,8 +471,8 @@ html.menu-open .header::before {
 
 .header__nav {
   display: flex;
-  gap: 2.2rem;
-  font-size: 0.72rem;
+  gap: 2rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -489,7 +495,8 @@ html.menu-open .header::before {
   transition: transform 0.5s var(--ease-out);
 }
 
-.header__nav a:hover::after {
+.header__nav a:hover::after,
+.header__nav a.is-active::after {
   transform: scaleX(1);
   transform-origin: left;
 }
@@ -543,7 +550,7 @@ html.menu-open .header {
   grid-template-columns: 1fr minmax(0, 30vw);
   grid-template-rows: 1fr auto;
   gap: 2rem var(--gutter);
-  padding: calc(var(--header-h) + 4vh) var(--gutter) 2.2rem;
+  padding: calc(var(--header-h) + 3vh + env(safe-area-inset-top, 0px)) var(--gutter) calc(2.2rem + env(safe-area-inset-bottom, 0px));
   background: var(--cocoa);
   color: var(--ivory);
   clip-path: circle(0% at calc(100% - var(--gutter)) 2.2rem);
@@ -563,7 +570,7 @@ html.menu-open .header {
   overflow: hidden;
   font-family: var(--serif);
   font-weight: 300;
-  font-size: clamp(2.4rem, min(8vh, 12vw), 6.5rem);
+  font-size: clamp(2.2rem, min(7vh, 11vw), 6rem);
   line-height: 1.08;
 }
 
@@ -616,6 +623,64 @@ html.menu-open .header {
   gap: 1.5rem;
 }
 
+/* ---------- Chapter indicator ---------- */
+.chapter {
+  position: fixed;
+  left: var(--gutter);
+  bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  z-index: 64;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+}
+
+html:not(.motion) .chapter {
+  display: none;
+}
+
+.chapter__count {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.chapter__title {
+  display: inline-block;
+  min-width: 8.5rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.chapter__title span {
+  display: inline-block;
+}
+
+.chapter__bar {
+  position: relative;
+  width: 72px;
+  height: 1px;
+  background: var(--line);
+}
+
+.chapter__bar i {
+  position: absolute;
+  inset: 0;
+  background: var(--ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
 /* ---------- Hero ---------- */
 .hero {
   position: relative;
@@ -627,6 +692,7 @@ html.menu-open .header {
   gap: 2.4rem;
   padding: calc(var(--header-h) + 4vh) var(--gutter) 8rem;
   text-align: center;
+  overflow: hidden;
 }
 
 .hero__media {
@@ -634,16 +700,20 @@ html.menu-open .header {
   inset: 0;
 }
 
-.hero__img {
+.hero__item {
   position: absolute;
   will-change: transform;
 }
 
-.hero__img--1 { left: 5vw; top: 15vh; width: 15vw; }
-.hero__img--2 { right: 6vw; top: 13vh; width: 19vw; }
-.hero__img--3 { left: 16vw; bottom: 10vh; width: 10vw; }
-.hero__img--4 { right: 13vw; bottom: 9vh; width: 13vw; }
-.hero__img--5 { left: 46vw; top: 5vh; width: 6.5vw; }
+.hero__item--1 { left: 5vw; top: 15vh; width: 15vw; }
+.hero__item--2 { right: 6vw; top: 12vh; width: 13vw; }
+.hero__item--3 { left: 16vw; bottom: 10vh; width: 10vw; }
+.hero__item--4 { right: 13vw; bottom: 9vh; width: 13vw; }
+.hero__item--5 { left: 46vw; top: 5vh; width: 6.5vw; }
+
+.hero__img {
+  will-change: transform;
+}
 
 .hero__title {
   position: relative;
@@ -655,8 +725,11 @@ html.menu-open .header {
 }
 
 .hero__title .line {
-  overflow: hidden;
   padding: 0 0.05em 0.06em;
+}
+
+html.motion .hero__title .line {
+  overflow: hidden;
 }
 
 .hero__title .line--indent {
@@ -713,22 +786,209 @@ html.menu-open .header {
   60%, 100% { transform: translateY(100%); }
 }
 
-/* Elements animated in by JavaScript start hidden. */
-html.js:not(.reduced-motion) .hero__title .char,
-html.js:not(.reduced-motion) .cta__title .char,
-html.js:not(.reduced-motion) .cakes__title .char {
-  transform: translateY(115%);
+html.motion .hero__sub,
+html.motion .hero__foot,
+html.motion .header {
+  opacity: 0;
 }
 
-html.js:not(.reduced-motion) .hero__sub,
-html.js:not(.reduced-motion) .hero__foot,
-html.js:not(.reduced-motion) .header {
-  opacity: 0;
+/* ---------- Chapter I: the craft ---------- */
+.craft {
+  position: relative;
+  color: var(--ivory);
+  background: var(--night);
+}
+
+.craft__pin {
+  position: relative;
+  display: grid;
+  gap: 2rem;
+  padding: 14vh var(--gutter);
+}
+
+.craft__frames {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.craft__frame {
+  overflow: hidden;
+  aspect-ratio: 3 / 4;
+}
+
+.craft__frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.craft__shade {
+  display: none;
+}
+
+.craft__kicker {
+  color: rgb(243 236 228 / 0.7);
+}
+
+.craft__intro,
+.craft__line {
+  font-family: var(--serif);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+
+.craft__intro {
+  font-size: clamp(2.8rem, 8vw, 9.5rem);
+}
+
+.craft__lines {
+  display: grid;
+  gap: 2rem;
+}
+
+.craft__line {
+  font-size: clamp(2.4rem, 6.5vw, 7.5rem);
+}
+
+.craft__line em,
+.craft__intro em {
+  color: #e6b7ae;
+}
+
+.craft__line-num {
+  display: block;
+  margin-bottom: 1rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: rgb(243 236 228 / 0.6);
+}
+
+.craft__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: rgb(243 236 228 / 0.7);
+}
+
+/* Cinematic version: one full-screen scene that changes as you scroll. */
+html.motion .craft__pin {
+  display: block;
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  overflow: hidden;
+}
+
+html.motion .craft__frames {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+html.motion .craft__frame {
+  position: absolute;
+  inset: 0;
+  aspect-ratio: auto;
+  will-change: clip-path;
+}
+
+html.motion .craft__frame img {
+  will-change: transform;
+}
+
+html.motion .craft__shade {
+  display: block;
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to top, rgb(28 20 22 / 0.78), rgb(28 20 22 / 0) 55%),
+    radial-gradient(ellipse at center, rgb(28 20 22 / 0.15), rgb(28 20 22 / 0.55));
+}
+
+html.motion .craft__kicker {
+  position: absolute;
+  top: calc(var(--header-h) + 2vh + env(safe-area-inset-top, 0px));
+  left: var(--gutter);
+}
+
+html.motion .craft__intro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 0 var(--gutter);
+}
+
+html.motion .craft__intro .line,
+html.motion .craft__line .line {
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+html.motion .craft__lines {
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(11vh + env(safe-area-inset-bottom, 0px));
+  display: block;
+}
+
+html.motion .craft__line {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+html.motion .craft__count {
+  position: absolute;
+  right: var(--gutter);
+  top: calc(var(--header-h) + 2vh + env(safe-area-inset-top, 0px));
+}
+
+/* ---------- Statement ---------- */
+.statement {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 2vw;
+  row-gap: 6vh;
+  padding: 18vh var(--gutter) 14vh;
+}
+
+.statement__text {
+  grid-column: 2 / 12;
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2rem, 4.4vw, 5rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-indent: 2.5em;
+}
+
+/* Split words inherit text-indent; only the paragraph's first line should be indented. */
+.statement__text .word {
+  text-indent: 0;
+}
+
+.statement__img--a {
+  grid-column: 2 / 5;
+  margin-top: 4vh;
+}
+
+.statement__img--b {
+  grid-column: 8 / 11;
+  margin-top: 16vh;
 }
 
 /* ---------- Marquee ---------- */
 .marquee {
-  padding: 4vh 0 10vh;
+  padding: 2vh 0 12vh;
   overflow: hidden;
 }
 
@@ -764,90 +1024,124 @@ html.js:not(.reduced-motion) .header {
   -webkit-text-stroke: 1px var(--ink);
 }
 
-/* ---------- Statement ---------- */
-.statement {
+/* ---------- Chapter II: the bride (sideways) ---------- */
+.bride__pin {
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: 2vw;
-  row-gap: 6vh;
-  padding: 12vh var(--gutter) 18vh;
+  overflow-x: auto;
+  padding: 12vh 0;
 }
 
-.statement .eyebrow {
-  grid-column: 1 / -1;
+.bride__word {
+  display: none;
 }
 
-.statement__text {
-  grid-column: 2 / 12;
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(1.75rem, 3.7vw, 4.2rem);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-  text-indent: 2.5em;
-}
-
-/* Split words inherit text-indent; only the paragraph's first line should be indented. */
-.statement__text .word {
-  text-indent: 0;
-}
-
-.statement__img--a {
-  grid-column: 2 / 5;
-  margin-top: 4vh;
-}
-
-.statement__img--b {
-  grid-column: 8 / 11;
-  margin-top: 16vh;
-}
-
-/* ---------- Collections (horizontal) ---------- */
-.collections__pin {
+.bride__track {
   position: relative;
-  height: 100vh;
-  height: 100svh;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  padding-top: calc(var(--header-h) + 3vh);
-}
-
-.collections__head {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 1rem 2rem;
+  align-items: center;
+  gap: clamp(2rem, 6vw, 7rem);
+  width: max-content;
   padding: 0 var(--gutter);
 }
 
-.collections__head .eyebrow {
-  grid-column: 1 / -1;
+.bride__head {
+  flex: none;
+  width: min(32rem, 80vw);
+  display: grid;
+  gap: 1.4rem;
 }
 
-.collections__head .title-xl {
-  font-size: clamp(2.4rem, 5.2vw, 5.8rem);
+.bride__text {
+  max-width: 24rem;
+  color: var(--muted);
 }
 
-.collections__progress {
+.bride__card {
+  flex: none;
+  display: grid;
+  gap: 0.9rem;
+  width: clamp(200px, 24vw, 400px);
+}
+
+.bride__card--1 { margin-bottom: 16vh; }
+.bride__card--2 { width: clamp(170px, 19vw, 320px); margin-top: 20vh; }
+.bride__card--3 { width: clamp(220px, 28vw, 460px); margin-bottom: 4vh; }
+.bride__card--4 { width: clamp(160px, 17vw, 300px); margin-top: 12vh; }
+
+.bride__media {
+  aspect-ratio: 4 / 5;
+}
+
+.bride__cap {
   display: flex;
-  align-items: center;
   gap: 0.8rem;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 600;
   letter-spacing: 0.1em;
-  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
 }
 
-.collections__bar {
-  position: relative;
-  width: clamp(80px, 12vw, 180px);
+.bride__cap span {
+  color: var(--muted);
+}
+
+.bride__end {
+  flex: none;
+  width: clamp(14rem, 26vw, 26rem);
+  font-family: var(--serif);
+  font-weight: 300;
+  font-size: clamp(2.2rem, 4vw, 4.4rem);
+  line-height: 1;
+}
+
+.bride__progress {
+  display: none;
+}
+
+html.motion .bride__pin {
+  height: 100vh;
+  height: 100svh;
+  display: flex;
+  align-items: center;
+  padding: var(--header-h) 0 0;
+  overflow: hidden;
+}
+
+html.motion .bride__track {
+  will-change: transform;
+}
+
+html.motion .bride__word {
+  display: block;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 2;
+  margin: 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 300;
+  font-size: clamp(9rem, 34vw, 36rem);
+  line-height: 1;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--rose) 16%, transparent);
+  pointer-events: none;
+  transform: translateY(-50%);
+  will-change: transform;
+}
+
+html.motion .bride__progress {
+  display: block;
+  position: absolute;
+  left: var(--gutter);
+  right: var(--gutter);
+  bottom: calc(5vh + env(safe-area-inset-bottom, 0px));
   height: 1px;
   background: var(--line);
 }
 
-.collections__bar i {
+.bride__progress i {
   position: absolute;
   inset: 0;
   background: var(--ink);
@@ -855,328 +1149,248 @@ html.js:not(.reduced-motion) .header {
   transform-origin: left;
 }
 
-.collections__track {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: clamp(3rem, 9vw, 10rem);
-  padding: 0 var(--gutter);
-  width: max-content;
+/* ---------- Chapter III: the ceremony ---------- */
+.ceremony__pin {
+  position: relative;
+  display: grid;
+  gap: 6vh;
+  padding: 14vh var(--gutter);
+}
+
+.ceremony__cols {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2vw;
+  align-items: start;
+}
+
+.ceremony__col {
+  display: grid;
+  gap: 2vw;
+}
+
+.ceremony__card {
+  display: grid;
+  justify-items: center;
+  gap: 1.4rem;
+  text-align: center;
+}
+
+.ceremony__text {
+  max-width: 28rem;
+  color: var(--muted);
+}
+
+html.motion .ceremony__pin {
+  height: 100vh;
+  height: 100svh;
+  padding: 0;
+  overflow: hidden;
+  display: block;
+}
+
+html.motion .ceremony__cols {
+  position: absolute;
+  inset: 0 var(--gutter);
+}
+
+html.motion .ceremony__col {
   will-change: transform;
 }
 
-.panel {
-  display: flex;
-  align-items: flex-end;
-  gap: clamp(1.5rem, 3vw, 3.5rem);
+html.motion .ceremony__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(36rem, 86vw);
+  padding: clamp(1.6rem, 4vw, 3.4rem) clamp(1.2rem, 3vw, 3rem);
+  background: var(--bg);
+  box-shadow: 0 30px 80px -30px rgb(42 31 34 / 0.35);
+  transform: translate(-50%, -50%);
 }
 
-.panel__media {
-  --h: 56svh;
-  width: min(46vw, calc(var(--h) * var(--ar)));
-  flex: none;
-}
-
-.panel__info {
-  width: clamp(16rem, 22vw, 24rem);
-  padding-bottom: 1vh;
-}
-
-.panel__num {
-  display: block;
-  margin-bottom: 1.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-
-.panel__title {
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(2.4rem, 4.6vw, 5.2rem);
-  line-height: 0.92;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.4rem;
-}
-
-.panel__text {
-  max-width: 22rem;
-  color: var(--muted);
-}
-
-/* Without the pinned sideways scroll, let the row scroll on its own. */
-html:not(.js) .collections__pin,
-html.reduced-motion .collections__pin {
-  height: auto;
-  padding-bottom: 10vh;
-}
-
-html:not(.js) .collections__track,
-html.reduced-motion .collections__track {
-  width: auto;
-  overflow-x: auto;
-  padding-top: 6vh;
-  padding-bottom: 2rem;
-}
-
-html:not(.js) .panel,
-html.reduced-motion .panel {
-  flex: none;
-}
-
-.collections__end {
-  width: clamp(16rem, 30vw, 28rem);
-  display: grid;
-  gap: 1.5rem;
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: clamp(2rem, 3.6vw, 3.6rem);
-  line-height: 1;
-}
-
-.collections__end .link {
-  font-family: var(--sans);
-  font-style: normal;
-  justify-self: start;
-}
-
-/* ---------- Occasions ---------- */
-.occasions {
+/* ---------- Chapter IV: the celebration (cake ring) ---------- */
+.celebration {
   position: relative;
-  padding: 18vh var(--gutter) 16vh;
 }
 
-.occasions .title-xl {
-  margin: 1.5rem 0 8vh;
-}
-
-.occasions__list {
-  border-top: 1px solid var(--line);
-}
-
-.occasion {
-  border-bottom: 1px solid var(--line);
-}
-
-.occasion__link {
+.celebration__pin {
+  position: relative;
   display: grid;
-  grid-template-columns: 4rem 1fr auto auto;
-  align-items: center;
-  gap: 1.5rem;
-  padding: clamp(1.2rem, 3.2vh, 2.4rem) 0;
+  gap: 6vh;
+  padding: 16vh var(--gutter) 12vh;
 }
 
-.occasion__num {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--muted);
-}
-
-.occasion__title {
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(2.4rem, 6.4vw, 7rem);
-  line-height: 1;
-  letter-spacing: -0.02em;
-  transition: transform 0.7s var(--ease-out), color 0.5s;
-}
-
-.occasion__link:hover .occasion__title {
-  transform: translateX(2.5vw);
-  font-style: italic;
-  color: var(--rose);
-}
-
-.occasion__thumb {
+.celebration__word {
   display: none;
 }
 
-.occasion__arrow {
-  font-size: clamp(1.4rem, 2.6vw, 2.6rem);
-  font-weight: 300;
-  transition: transform 0.6s var(--ease-out);
+.celebration__head {
+  display: grid;
+  gap: 1.2rem;
 }
 
-.occasion__link:hover .occasion__arrow {
-  transform: rotate(45deg);
+.ring {
+  --card-w: clamp(140px, 16vw, 250px);
 }
 
-.occasions__float {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 30;
-  width: clamp(200px, 20vw, 320px);
+.ring__spin {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1.5rem;
+}
+
+.ring__img {
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  pointer-events: none;
-  clip-path: inset(50% 50% 50% 50%);
-  will-change: transform, clip-path;
 }
 
-.occasions__float img {
+.ring__img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* ---------- Communion ---------- */
-.communion {
-  position: relative;
+.ring__cap {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: 4vw;
-  padding: 18vh var(--gutter) 22vh;
+  gap: 0.2rem;
+  margin-top: 0.8rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
-.communion__sticky {
-  position: sticky;
-  top: 22vh;
-  align-self: start;
-  display: grid;
-  gap: 2rem;
-  justify-items: start;
-}
-
-.communion .title-xl {
-  font-size: clamp(2.8rem, 5.6vw, 6.6rem);
-}
-
-.communion__text {
-  max-width: 26rem;
-  color: var(--muted);
-  font-size: 1.05rem;
-}
-
-.communion__cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2.5vw;
-  align-items: start;
-}
-
-.communion__col {
-  display: grid;
-  gap: 2.5vw;
-  will-change: transform;
-}
-
-.communion__col--2 {
-  margin-top: 22vh;
-}
-
-/* ---------- Cakes ---------- */
-.cakes {
-  position: relative;
-  padding: 18vh var(--gutter) 14vh;
-}
-
-.cakes__head {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 3vh 2vw;
-  margin-bottom: 12vh;
-}
-
-.cakes__head .eyebrow {
-  grid-column: 1 / -1;
-}
-
-.cakes__title {
-  grid-column: 1 / 9;
-  font-family: var(--serif);
-  font-weight: 300;
-  font-size: clamp(3.6rem, 12vw, 14rem);
-  line-height: 0.84;
-  letter-spacing: -0.04em;
-}
-
-.cakes__title .line {
-  overflow: hidden;
-  padding-bottom: 0.06em;
-}
-
-.cakes__title .line:nth-child(2) {
-  padding-left: 1.2em;
-}
-
-.cakes__text {
-  grid-column: 9 / 13;
-  align-self: end;
+.ring__cap span {
   color: var(--muted);
 }
 
-.cakes__tags {
-  grid-column: 1 / -1;
+.celebration__foot {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 2vh;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1.5rem 3rem;
 }
 
-.cakes__tags li {
-  padding: 0.55em 1.2em;
+.celebration__text {
+  max-width: 30rem;
+  color: var(--muted);
+}
+
+.celebration__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  max-width: 36rem;
+}
+
+.celebration__tags li {
+  padding: 0.5em 1.1em;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
-.cakes__stack {
-  display: grid;
-  gap: 8vh;
-}
-
-.cake-card {
-  position: sticky;
-  top: calc(var(--header-h) + 2vh + var(--i) * 1.1rem);
-  height: min(78vh, 52rem);
-}
-
-.cake-card__inner {
-  height: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  background: #2e2220;
-  border: 1px solid rgb(243 236 228 / 0.08);
+html.motion .celebration__pin {
+  height: 100vh;
+  height: 100svh;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 2vh;
+  padding: calc(var(--header-h) + 3vh + env(safe-area-inset-top, 0px)) var(--gutter) calc(4vh + 3.4rem + env(safe-area-inset-bottom, 0px));
   overflow: hidden;
-  transform-origin: 50% 0;
-  will-change: transform, filter;
 }
 
-.cake-card__media {
-  aspect-ratio: auto;
-  height: 100%;
-}
-
-.cake-card__info {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(1.5rem, 4vw, 4rem);
-}
-
-.cake-card__num {
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--muted);
-}
-
-.cake-card__title {
+html.motion .celebration__word {
+  display: block;
+  position: absolute;
+  top: 52%;
+  left: 0;
+  margin: 0;
   font-family: var(--serif);
+  font-style: italic;
   font-weight: 300;
-  font-size: clamp(2.4rem, 4.6vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: -0.02em;
+  font-size: clamp(9rem, 30vw, 32rem);
+  line-height: 1;
+  white-space: nowrap;
+  color: transparent;
+  -webkit-text-stroke: 1px rgb(243 236 228 / 0.16);
+  pointer-events: none;
+  transform: translateY(-50%);
+  will-change: transform;
 }
 
-.cake-card__note {
-  max-width: 22rem;
+html.motion .celebration__head {
+  position: relative;
+}
+
+html.motion .celebration__head .title-xl {
+  font-size: clamp(2.4rem, 6vw, 6.5rem);
+}
+
+html.motion .ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  perspective: 1700px;
+  perspective-origin: 50% 30%;
+}
+
+html.motion .ring__spin {
+  position: relative;
+  display: block;
+  width: var(--card-w);
+  aspect-ratio: 3 / 4;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+html.motion .ring__card {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(calc(var(--i) * 360deg / var(--n))) translateZ(var(--radius, 400px));
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+html.motion .ring__cap {
+  text-align: center;
+  justify-items: center;
+}
+
+/* ---------- Chapter V: the home ---------- */
+.home {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 3vw;
+  align-items: start;
+  padding: 16vh var(--gutter) 18vh;
+}
+
+.home__col {
+  display: grid;
+  gap: 3vw;
+}
+
+.home__col--b {
+  margin-top: 26vh;
+}
+
+.home__text {
+  position: sticky;
+  top: 32vh;
+  display: grid;
+  justify-items: center;
+  gap: 1.6rem;
+  text-align: center;
+}
+
+.home__body {
+  max-width: 24rem;
   color: var(--muted);
 }
 
@@ -1276,6 +1490,7 @@ html.reduced-motion .gallery__item {
 /* ---------- Process ---------- */
 .process {
   padding: 14vh var(--gutter) 10vh;
+  overflow: hidden;
 }
 
 .process__list {
@@ -1333,6 +1548,7 @@ html.reduced-motion .gallery__item {
   gap: 2.4rem;
   padding: 20vh var(--gutter) 22vh;
   text-align: center;
+  overflow: hidden;
 }
 
 .cta__title {
@@ -1344,8 +1560,11 @@ html.reduced-motion .gallery__item {
 }
 
 .cta__title .line {
-  overflow: hidden;
   padding: 0 0.05em 0.06em;
+}
+
+html.motion .cta__title .line {
+  overflow: hidden;
 }
 
 .cta__title .line--indent {
@@ -1366,7 +1585,7 @@ html.reduced-motion .gallery__item {
 
 /* ---------- Footer ---------- */
 .footer {
-  padding: 8vh var(--gutter) 2rem;
+  padding: 8vh var(--gutter) calc(2rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--line);
   overflow: hidden;
 }
@@ -1415,7 +1634,7 @@ html.reduced-motion .gallery__item {
   grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
   align-items: center;
   gap: 4vw;
-  padding: calc(var(--header-h) + 2vh) var(--gutter) 6vh;
+  padding: calc(var(--header-h) + 2vh + env(safe-area-inset-top, 0px)) var(--gutter) calc(6vh + env(safe-area-inset-bottom, 0px));
   visibility: hidden;
   pointer-events: none;
 }
@@ -1483,7 +1702,7 @@ html.reduced-motion .gallery__item {
 
 .detail__close {
   position: absolute;
-  top: 1.2rem;
+  top: calc(1.2rem + env(safe-area-inset-top, 0px));
   right: var(--gutter);
   display: flex;
   align-items: center;
@@ -1520,7 +1739,7 @@ html.reduced-motion .gallery__item {
 
 .detail__nav {
   position: absolute;
-  bottom: 2rem;
+  bottom: calc(2rem + env(safe-area-inset-bottom, 0px));
   width: 52px;
   height: 52px;
   border: 1px solid color-mix(in srgb, var(--plum) 30%, transparent);
@@ -1567,11 +1786,26 @@ html.reduced-motion .gallery__item {
     display: none;
   }
 
-  .hero__img--1 { left: 5vw; top: 11vh; width: 25vw; }
-  .hero__img--2 { right: 5vw; top: 15vh; width: 36vw; }
-  .hero__img--3 { display: none; }
-  .hero__img--4 { right: 7vw; bottom: 9vh; width: 24vw; }
-  .hero__img--5 { left: 7vw; top: auto; bottom: 12vh; width: 20vw; }
+  .chapter {
+    left: 50%;
+    transform: translateX(-50%);
+    gap: 0.7rem;
+    padding: 0.5rem 0.9rem;
+  }
+
+  .chapter__title {
+    min-width: 7.5rem;
+  }
+
+  .chapter__bar {
+    width: 44px;
+  }
+
+  .hero__item--1 { left: 5vw; top: 11vh; width: 25vw; }
+  .hero__item--2 { right: 5vw; top: 15vh; width: 24vw; }
+  .hero__item--3 { display: none; }
+  .hero__item--4 { right: 7vw; bottom: 9vh; width: 24vw; }
+  .hero__item--5 { left: 7vw; top: auto; bottom: 12vh; width: 20vw; }
 
   .hero__title {
     font-size: clamp(3.2rem, 15vw, 7rem);
@@ -1581,12 +1815,20 @@ html.reduced-motion .gallery__item {
     padding-left: 0.6em;
   }
 
+  .hero__foot {
+    justify-content: center;
+  }
+
   .hero__foot > span:first-child {
     display: none;
   }
 
-  .hero__foot {
-    justify-content: center;
+  .craft__frames {
+    grid-template-columns: 1fr;
+  }
+
+  html.motion .craft__lines {
+    bottom: calc(14vh + env(safe-area-inset-bottom, 0px));
   }
 
   .statement__text {
@@ -1603,92 +1845,69 @@ html.reduced-motion .gallery__item {
     margin-top: 10vh;
   }
 
-  .collections__head {
-    grid-template-columns: 1fr;
+  .bride__card { width: 64vw; }
+  .bride__card--2 { width: 52vw; margin-top: 14vh; }
+  .bride__card--3 { width: 70vw; }
+  .bride__card--4 { width: 48vw; margin-top: 8vh; }
+  .bride__card--1 { margin-bottom: 10vh; }
+
+  html.motion .bride__word {
+    font-size: 52vw;
   }
 
-  .panel {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1.2rem;
+  .ceremony__cols {
+    gap: 2.5vw;
   }
 
-  .panel__media {
-    --h: 44svh;
-    width: min(76vw, calc(var(--h) * var(--ar)));
+  .ceremony__col {
+    gap: 2.5vw;
   }
 
-  .panel__info {
-    width: min(76vw, 22rem);
+  .ring {
+    --card-w: clamp(110px, 31vw, 160px);
   }
 
-  .panel__num {
-    margin-bottom: 0.6rem;
+  html.motion .ring {
+    perspective: 900px;
   }
 
-  .panel__title {
-    font-size: clamp(2.2rem, 9vw, 3.2rem);
-    margin-bottom: 0.6rem;
-  }
-
-  .panel__text {
-    font-size: 0.92rem;
-  }
-
-  .occasion__link {
-    grid-template-columns: 2.4rem 1fr auto;
-  }
-
-  .occasion__thumb {
-    display: block;
-    width: 3.6rem;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    overflow: hidden;
-  }
-
-  .occasion__thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .occasion__arrow,
-  .occasions__float {
+  /* On phones the ring needs the height; the title already says it. */
+  html.motion .celebration__text {
     display: none;
   }
 
-  .communion {
-    grid-template-columns: 1fr;
-    gap: 8vh;
+  .celebration__tags li {
+    font-size: 0.62rem;
   }
 
-  .communion__sticky {
+  .gallery__head {
+    grid-template-columns: 1fr;
+  }
+
+  .celebration__foot {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .celebration__text {
+    font-size: 0.92rem;
+  }
+
+  .home {
+    grid-template-columns: 1fr 1fr;
+    gap: 4vw;
+  }
+
+  .home__text {
+    grid-column: 1 / -1;
+    order: -1;
     position: relative;
     top: 0;
+    margin-bottom: 4vh;
   }
 
-  .cakes__title,
-  .cakes__text {
-    grid-column: 1 / -1;
-  }
-
-  .cake-card {
-    height: min(78svh, 46rem);
-  }
-
-  .cake-card__inner {
-    grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto;
-  }
-
-  .cake-card__info {
-    gap: 0.6rem;
-    padding: 1.4rem;
-  }
-
-  .cake-card__title {
-    font-size: clamp(2rem, 8vw, 3rem);
+  .home__col--b {
+    margin-top: 14vh;
   }
 
   .process__list {
@@ -1700,7 +1919,7 @@ html.reduced-motion .gallery__item {
     grid-template-columns: 1fr;
     grid-template-rows: minmax(0, 1fr) auto;
     align-items: stretch;
-    padding-bottom: 6.5rem;
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0px));
   }
 
   .detail__media {
@@ -1716,7 +1935,7 @@ html.reduced-motion .gallery__item {
   }
 
   .detail__nav {
-    bottom: 1.4rem;
+    bottom: calc(1.4rem + env(safe-area-inset-bottom, 0px));
   }
 
   .footer__brand {

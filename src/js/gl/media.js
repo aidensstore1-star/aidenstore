@@ -105,6 +105,7 @@ export class Media {
     this.revealed = false
     this.hidden = false
     this.loaded = false
+    this.near = false
     this.bend = el.hasAttribute('data-bend') ? 0.45 : 0
 
     this.texture = new Texture(gl, {
@@ -182,6 +183,11 @@ export class Media {
   }
 
   update({ strength, drag, time }) {
+    // Skip layout reads entirely for photos nowhere near the screen.
+    if (!this.near) {
+      this.mesh.visible = false
+      return
+    }
     const rect = this.el.getBoundingClientRect()
     const { w: sw, h: sh } = this.screen
     const margin = 120

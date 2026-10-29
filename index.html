@@ -17,7 +17,7 @@
     <div class="preloader" aria-hidden="true">
       <div class="preloader__stack"><!--@preloader--></div>
       <p class="preloader__brand"><!--@brandLetters--></p>
-      <p class="preloader__caption">Handmade for weddings, communions &amp; celebrations</p>
+      <p class="preloader__caption">A story in five chapters</p>
       <div class="preloader__bar"><span></span></div>
       <p class="preloader__count"><span class="preloader__num">0</span>%</p>
     </div>
@@ -31,12 +31,7 @@
 
     <header class="header">
       <a class="header__logo" href="#top" aria-label="<!--@brand--> home"><!--@brand--></a>
-      <nav class="header__nav" aria-label="Main">
-        <a href="#collections">Collections</a>
-        <a href="#communion">Communion</a>
-        <a href="#cakes">Cakes</a>
-        <a href="#gallery">Gallery</a>
-      </nav>
+      <nav class="header__nav" aria-label="Main"><!--@navLinks--></nav>
       <a class="btn btn--small magnetic header__cta" href="#contact"><span>Enquire</span></a>
       <button class="header__menu" type="button" aria-expanded="false" aria-controls="menu">
         <span class="header__menu-label">Menu</span><i></i><i></i>
@@ -44,15 +39,15 @@
     </header>
 
     <div class="menu" id="menu" aria-hidden="true">
-      <nav class="menu__nav" aria-label="Menu">
-        <a class="menu__link" href="#collections" data-index="0"><span class="menu__num">01</span><span class="menu__text">Collections</span></a>
-        <a class="menu__link" href="#communion" data-index="1"><span class="menu__num">02</span><span class="menu__text">Communion</span></a>
-        <a class="menu__link" href="#cakes" data-index="4"><span class="menu__num">03</span><span class="menu__text">Cakes</span></a>
-        <a class="menu__link" href="#gallery" data-index="2"><span class="menu__num">04</span><span class="menu__text">Gallery</span></a>
-        <a class="menu__link" href="#contact" data-index="3"><span class="menu__num">05</span><span class="menu__text">Enquire</span></a>
-      </nav>
+      <nav class="menu__nav" aria-label="Menu"><!--@menuLinks--></nav>
       <div class="menu__media"><!--@menuMedia--></div>
       <div class="menu__foot"><span><!--@tagline--></span><span class="menu__links"><!--@footerLinks--></span></div>
+    </div>
+
+    <div class="chapter" aria-hidden="true">
+      <span class="chapter__count"><span class="chapter__num">I</span> / <!--@chapterCount--></span>
+      <span class="chapter__title">The craft</span>
+      <span class="chapter__bar"><i></i></span>
     </div>
 
     <main id="top">
@@ -63,11 +58,27 @@
           <span class="line line--indent">for the days</span>
           <span class="line">you’ll <em>remember</em></span>
         </h1>
-        <p class="hero__sub">Bridal accessories, ceremony candles, florals and celebration cakes — made by hand for weddings, Holy Communions and every celebration in between.</p>
+        <p class="hero__sub">Bridal accessories, ceremony candles, florals and celebration cakes, made by hand for weddings, Holy Communions and every celebration in between.</p>
         <div class="hero__foot">
-          <span>Weddings · Holy Communion · Christenings · Celebrations</span>
+          <span>A story in five chapters</span>
           <span class="hero__scroll">Scroll <i></i></span>
         </div>
+      </section>
+
+      <section class="craft" id="craft" data-bg="night" data-chapter="I" data-chapter-title="The craft">
+        <div class="craft__pin">
+          <div class="craft__frames"><!--@craftFrames--></div>
+          <div class="craft__shade" aria-hidden="true"></div>
+          <p class="craft__kicker eyebrow">Chapter I — The craft</p>
+          <h2 class="craft__intro"><!--@craftIntro--></h2>
+          <ol class="craft__lines"><!--@craftLines--></ol>
+          <p class="craft__count"><span class="craft__index">01</span> / <!--@craftTotal--></p>
+        </div>
+      </section>
+
+      <section class="statement" data-bg="ivory">
+        <p class="statement__text"><!--@statementText--></p>
+        <!--@statementPhotos-->
       </section>
 
       <section class="marquee" aria-hidden="true">
@@ -75,80 +86,85 @@
         <div class="marquee__row marquee__row--rev"><div class="marquee__inner"><!--@marquee--></div></div>
       </section>
 
-      <section class="statement">
-        <p class="eyebrow">(01) — The craft</p>
-        <p class="statement__text"><!--@statementText--></p>
-        <!--@statementPhotos-->
+      <section class="bride" id="bride" data-bg="ivory" data-chapter="II" data-chapter-title="The bride">
+        <div class="bride__pin">
+          <p class="bride__word" aria-hidden="true">the bride</p>
+          <div class="bride__track">
+            <header class="bride__head">
+              <p class="eyebrow">Chapter II — The bride</p>
+              <h2 class="title-xl"><!--@brideTitle--></h2>
+              <p class="bride__text"><!--@brideText--></p>
+            </header>
+            <!--@brideCards-->
+            <p class="bride__end">Made to match <em>the dress</em></p>
+          </div>
+          <div class="bride__progress" aria-hidden="true"><i></i></div>
+        </div>
       </section>
 
-      <section class="collections" id="collections">
-        <div class="collections__pin">
-          <header class="collections__head">
-            <p class="eyebrow">(02) — Collections</p>
-            <h2 class="title-xl">Five ways <em>to dress a day</em></h2>
-            <div class="collections__progress"><span class="collections__index">01</span><span class="collections__bar"><i></i></span><span><!--@collectionsCount--></span></div>
-          </header>
-          <div class="collections__track">
-            <!--@collections-->
-            <div class="collections__end">
-              <p>Every piece is one of a kind.</p>
-              <a class="link" href="#gallery">See the gallery ↓</a>
-            </div>
+      <section class="ceremony" id="ceremony" data-bg="blush" data-chapter="III" data-chapter-title="The ceremony">
+        <div class="ceremony__pin">
+          <div class="ceremony__cols"><!--@ceremonyCols--></div>
+          <div class="ceremony__card">
+            <p class="eyebrow">Chapter III — The ceremony</p>
+            <h2 class="title-xl"><!--@ceremonyTitle--></h2>
+            <p class="ceremony__text"><!--@ceremonyText--></p>
+            <a class="link" href="#contact">Enquire about a set →</a>
           </div>
         </div>
       </section>
 
-      <section class="occasions">
-        <p class="eyebrow">(03) — Occasions</p>
-        <h2 class="title-xl">Made for every <em>occasion</em></h2>
-        <ul class="occasions__list"><!--@occasions--></ul>
-        <div class="occasions__float" aria-hidden="true"><img alt="" /></div>
-      </section>
-
-      <section class="communion" id="communion" data-bg="blush">
-        <div class="communion__sticky">
-          <p class="eyebrow">(04) — Keepsakes</p>
-          <h2 class="title-xl"><!--@communionTitle--></h2>
-          <p class="communion__text"><!--@communionText--></p>
-          <a class="link" href="#contact">Enquire about a set →</a>
+      <section class="celebration" id="celebration" data-bg="cocoa" data-chapter="IV" data-chapter-title="The celebration">
+        <div class="celebration__pin">
+          <p class="celebration__word" aria-hidden="true">celebrate</p>
+          <header class="celebration__head">
+            <p class="eyebrow">Chapter IV — The celebration</p>
+            <h2 class="title-xl"><!--@celebrationTitle--></h2>
+          </header>
+          <div class="ring" style="--n: <!--@ringCount-->">
+            <div class="ring__spin"><!--@ring--></div>
+          </div>
+          <div class="celebration__foot">
+            <p class="celebration__text"><!--@celebrationText--></p>
+            <ul class="celebration__tags"><!--@celebrationTags--></ul>
+          </div>
         </div>
-        <div class="communion__cols"><!--@communionCols--></div>
       </section>
 
-      <section class="cakes" id="cakes" data-bg="cocoa">
-        <header class="cakes__head">
-          <p class="eyebrow">(05) — The cake studio</p>
-          <h2 class="cakes__title"><span class="line">Cakes</span><span class="line"><em>for every</em></span><span class="line">celebration</span></h2>
-          <p class="cakes__text"><!--@cakesText--></p>
-          <ul class="cakes__tags"><!--@cakesTags--></ul>
-        </header>
-        <div class="cakes__stack"><!--@cakesStack--></div>
+      <section class="home" id="home" data-bg="sage" data-chapter="V" data-chapter-title="The home">
+        <!--@homeColA-->
+        <div class="home__text">
+          <p class="eyebrow">Chapter V — The home</p>
+          <h2 class="title-xl"><!--@homeTitle--></h2>
+          <p class="home__body"><!--@homeText--></p>
+        </div>
+        <!--@homeColB-->
       </section>
 
       <section class="gallery" id="gallery" data-bg="ivory">
         <header class="gallery__head">
-          <p class="eyebrow">(06) — Gallery</p>
+          <p class="eyebrow">The whole collection</p>
           <h2 class="title-xl">Every piece, <em>by hand</em></h2>
-          <p class="gallery__hint">Drag to explore — tap a piece to see it up close</p>
+          <p class="gallery__hint">Drag to explore. Tap a piece to see it up close.</p>
         </header>
         <div class="gallery__viewport" data-cursor="Drag">
           <div class="gallery__track"><!--@gallery--></div>
         </div>
       </section>
 
-      <section class="process">
-        <p class="eyebrow">(07) — How it works</p>
+      <section class="process" data-bg="ivory">
+        <p class="eyebrow">How it works</p>
         <ol class="process__list"><!--@process--></ol>
       </section>
 
       <section class="cta" id="contact" data-bg="ivory">
-        <p class="eyebrow">Enquiries</p>
+        <p class="eyebrow">Epilogue — Your day</p>
         <h2 class="cta__title">
           <span class="line">Let’s make</span>
           <span class="line line--indent">something</span>
           <span class="line"><em>beautiful</em></span>
         </h2>
-        <p class="cta__text">Tell us about your celebration — the date, the occasion and what you have in mind.</p>
+        <p class="cta__text">Tell us about your celebration: the date, the occasion and what you have in mind.</p>
         <div class="cta__buttons"><!--@ctaButtons--></div>
       </section>
     </main>

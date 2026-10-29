@@ -11,6 +11,7 @@ const vertex = /* glsl */ `
   uniform vec2 uMouse;
   uniform float uSize;
   uniform float uScroll;
+  uniform float uBurst;
 
   varying float vRotation;
   varying float vFlip;
@@ -25,6 +26,10 @@ const vertex = /* glsl */ `
     p.x = position.x - 0.5 + sin(uTime * (0.25 + aRandom.y * 0.4) + aRandom.z * 6.2831) * 0.05;
 
     vec3 world = vec3(p.x * uViewport.x * 1.15, p.y * uViewport.y * 1.2, p.z);
+
+    // When the opening scene bursts apart, petals blow outwards and towards you.
+    world.xy += normalize(world.xy + 0.0001) * uBurst * uBurst * (1.5 + aRandom.x * 3.0);
+    world.z += uBurst * aRandom.y * 2.5;
 
     // Petals float away from the pointer.
     vec2 diff = world.xy - uMouse;
@@ -115,6 +120,7 @@ export class Petals {
         uSize: { value: 54 * pixelRatio },
         uScroll: { value: 0 },
         uOpacity: { value: 0 },
+        uBurst: { value: 0 },
       },
     })
     this.program.setBlendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
@@ -129,8 +135,9 @@ export class Petals {
     this.uniforms.uSize.value = 54 * pixelRatio
   }
 
-  update({ time, mouse, scroll, opacity }) {
+  update({ time, mouse, scroll, opacity, burst }) {
     this.uniforms.uTime.value = time
+    this.uniforms.uBurst.value = burst
     this.uniforms.uMouse.value = mouse
     this.uniforms.uScroll.value = scroll
     this.uniforms.uOpacity.value = opacity

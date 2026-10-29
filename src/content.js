@@ -59,7 +59,7 @@ export const photos = {
 // The five photos floating around the opening headline.
 export const hero = [
   'bouquet-red-ivory-peonies',
-  'hair-comb-pearl-crystal-ivory',
+  'pillar-candle-ivory-coral-roses-front',
   'tall-candle-silver-wire-flowers-pearls',
   'cake-pearl-wafer-sail-topper',
   'hoop-wreath-wood-navy-blush-roses',
@@ -75,46 +75,82 @@ export const preloader = [
   'tall-candle-ombre-wire-flowers',
 ]
 
-export const statement = {
-  text: 'Every comb, candle, crown and cake begins at one table — petals shaped from wire, pearls threaded one by one, buttercream piped to order. Nothing here is mass-made: each piece is made for one day, and one family.',
-  photos: ['hair-comb-red-wire-flowers-wide', 'pillar-candle-ivory-coral-roses-front'],
-}
-
-export const collections = [
-  { title: 'Bridal accessories', text: 'Combs, vines and crowns in wire, pearl and crystal — made to match the dress.', photo: 'hair-comb-pearl-crystal-ivory' },
-  { title: 'Ceremony candles', text: 'Communion, christening and wedding candles, dressed by hand in wire flowers and ribbon.', photo: 'tall-candle-silver-wire-flowers-pearls' },
-  { title: 'Bouquets & florals', text: 'Bouquets, pomanders and flower-girl baskets that stay perfect long after the day.', photo: 'bouquet-red-ivory-peonies' },
-  { title: 'Décor', text: 'Hoops, wreaths, garlands and trays to dress the venue, the table and the home.', photo: 'triangle-wreaths-pair-gold-burgundy-ranunculus' },
-  { title: 'Cakes & toppers', text: 'Celebration cakes designed around your colours, finished with a topper to match.', photo: 'cake-lilac-ombre-babys-breath' },
+// The story, in the order you scroll through it. `photo` is shown in the menu.
+export const chapters = [
+  { id: 'craft', num: 'I', title: 'The craft', photo: 'tall-candle-ombre-wire-flowers' },
+  { id: 'bride', num: 'II', title: 'The bride', photo: 'hair-comb-pearl-crystal-ivory' },
+  { id: 'ceremony', num: 'III', title: 'The ceremony', photo: 'crown-and-candle-lilac-set' },
+  { id: 'celebration', num: 'IV', title: 'The celebration', photo: 'cake-lilac-ombre-babys-breath' },
+  { id: 'home', num: 'V', title: 'The home', photo: 'hoop-wreath-wood-navy-blush-roses' },
 ]
 
-export const occasions = [
-  { title: 'Weddings', photo: 'bouquet-white-calla-lily' },
-  { title: 'Holy Communion', photo: 'crown-and-candle-lilac-set' },
-  { title: 'Christenings', photo: 'pillar-candles-pair-pastel-lace' },
-  { title: 'Birthdays', photo: 'cake-white-wafer-strawberry-topper' },
-  { title: 'Home & gifts', photo: 'hoop-wreath-gold-babys-breath' },
-]
-
-export const communion = {
-  title: ['Holy Communion', '& Christening'],
-  text: 'Candles dressed in wire flowers and pearls, floral crowns with ribbon to match — keepsakes for a child’s most important day.',
-  columns: [
-    ['tall-candle-ombre-wire-flowers', 'tall-candles-collection-four', 'tall-candle-pink-wire-flower-cluster'],
-    ['tall-candle-ivory-roses-gold', 'crown-and-candle-lilac-set', 'pillar-candle-ivory-coral-roses-side'],
+// Chapter I: one photo per beat, each with the line shown over it.
+export const craft = {
+  intro: ['It begins with', 'a single petal'],
+  beats: [
+    { photo: 'tall-candle-ombre-wire-flowers', line: ['Wire, bent', 'petal by petal'] },
+    { photo: 'hair-vine-gold-leaves-pearls', line: ['Pearls, threaded', 'one by one'] },
+    { photo: 'cake-blue-piped-flowers-lace', line: ['Cream, piped', 'to order'] },
   ],
 }
 
-export const cakes = {
-  text: 'Birthdays, christenings, communions and showers — each cake is designed around your colours and theme, and finished with a topper to match.',
+export const statement = {
+  text: 'Every comb, candle, crown and cake begins at one table. Nothing here is mass-made: each piece is made for one day, and one family.',
+  photos: ['hair-comb-red-wire-flowers-wide', 'pillar-candle-burlap-lace-flower-ring'],
+}
+
+export const marquee = ['Bridal accessories', 'Ceremony candles', 'Bouquets & florals', 'Décor', 'Cakes & toppers']
+
+export const bride = {
+  title: ['For the', 'bride'],
+  text: 'Combs, vines, bouquets and baskets, made to match the dress and the day.',
+  photos: [
+    'hair-comb-pearl-crystal-ivory',
+    'bouquet-white-calla-lily',
+    'hair-comb-pink-gold-wire-leaves',
+    'pomander-babys-breath-white-ribbon',
+    'hair-comb-red-wire-flowers-crystal',
+    'flower-basket-burgundy-roses-gold',
+    'hair-comb-red-wire-flowers-wide',
+  ],
+}
+
+export const ceremony = {
+  title: ['For the', 'ceremony'],
+  text: 'Holy Communion and christening candles and floral crowns, dressed by hand in wire flowers, pearls and ribbon.',
+  columns: [
+    ['tall-candle-silver-wire-flowers-pearls', 'crown-and-candle-lilac-set', 'tall-candle-pink-wire-flower-cluster'],
+    ['tall-candles-collection-four', 'tall-candle-ombre-wire-flowers', 'pillar-candles-pair-pastel-lace'],
+    ['tall-candle-ivory-roses-gold', 'pillar-candle-small-pastel-lace', 'pillar-candle-ivory-coral-roses-side'],
+  ],
+}
+
+export const celebration = {
+  title: ['For the', 'celebration'],
+  text: 'Birthdays, christenings, communions and showers. Each cake is designed around your colours and finished with a topper to match.',
   tags: ['Birthdays', 'Christenings', 'Communions', 'Baby showers', 'Weddings', 'Custom toppers'],
-  stack: [
-    { photo: 'cake-blue-piped-flowers-lace', note: 'Hand-piped lace and buttercream blooms' },
-    { photo: 'cake-white-wafer-strawberry-topper', note: 'Wafer-paper frills, one perfect strawberry' },
-    { photo: 'cake-fresh-fruit-2', note: 'Whipped cream and fresh seasonal fruit' },
-    { photo: 'cake-rainbow-wafer-paper', note: 'Pastel rainbow with wafer-paper ruffles' },
-    { photo: 'cake-mocha-rosettes-topper', note: 'Mocha rosettes and a gold topper' },
-    { photo: 'cake-mango-side-1', note: 'Mango, cream and a sunny ombré' },
+  ring: [
+    'cake-pearl-wafer-sail-topper',
+    'cake-lilac-ombre-babys-breath',
+    'cake-white-wafer-strawberry-topper',
+    'cake-fresh-fruit-2',
+    'cake-rainbow-wafer-paper',
+    'cake-mocha-rosettes-topper',
+    'cake-mango-side-1',
+    'cake-coconut-yellow-flowers',
+    'cake-blue-butterflies',
+    'cake-lion-one-month',
+    'cake-minimal-line-drawing',
+    'cake-blue-piped-flowers-lace',
+  ],
+}
+
+export const home = {
+  title: ['For the', 'home'],
+  text: 'Hoops, wreaths, garlands and trays that keep the day close long after it ends.',
+  columns: [
+    ['hoop-wreath-wood-navy-blush-roses', 'triangle-wreaths-pair-gold-burgundy-ranunculus', 'tulle-garlands-burgundy-roses-with-basket'],
+    ['wood-tray-navy-blush-roses', 'hoop-wreath-gold-babys-breath', 'pillar-candles-pair-red-roses-burlap', 'triangle-wreath-gold-burgundy-ranunculus'],
   ],
 }
 
@@ -145,7 +181,7 @@ export const gallery = [
 ]
 
 export const process = [
-  { title: 'Share your day', text: 'The date, your colours, the feeling you want — or a photo of something you love.' },
+  { title: 'Share your day', text: 'The date, your colours, the feeling you want, or a photo of something you love.' },
   { title: 'Design it together', text: 'Choose from past pieces or start something new. Every detail can be changed.' },
   { title: 'Made by hand', text: 'Shaped, piped, threaded and finished by hand, ready for your celebration.' },
 ]

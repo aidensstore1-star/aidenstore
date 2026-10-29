@@ -16,12 +16,15 @@ import { initGallery } from './js/gallery.js'
 import { initDetail } from './js/detail.js'
 import { initCursor } from './js/cursor.js'
 import { initMenu } from './js/menu.js'
-import { initOccasions } from './js/occasions.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
+// Phones show and hide the address bar while scrolling; don't re-measure for that.
+ScrollTrigger.config({ ignoreMobileResize: true })
 
 const html = document.documentElement
 const reduced = html.classList.contains('reduced-motion')
+// Switches on the pinned, cinematic layouts in CSS (set here so they only apply when the script runs).
+if (!reduced) html.classList.add('motion')
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 window.scrollTo(0, 0)
@@ -48,7 +51,6 @@ if (reduced) {
   let detail
   const galleryApi = initGallery({ scroll, gl, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })
-  initOccasions()
   const { intro } = initAnimations({ scroll, gl })
   ScrollTrigger.refresh()
 
