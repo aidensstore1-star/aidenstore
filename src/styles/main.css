@@ -40,6 +40,7 @@
 
 .header,
 .chapter,
+.nudge,
 .cursor {
   --tone-bg: var(--ivory);
   --tone-ink: var(--plum);
@@ -49,23 +50,23 @@
 }
 
 html[data-surface='blush'] :is(.header, .cursor),
-html[data-surface-low='blush'] .chapter {
+html[data-surface-low='blush'] :is(.chapter, .nudge) {
   --tone-bg: var(--blush);
 }
 
 html[data-surface='sage'] :is(.header, .cursor),
-html[data-surface-low='sage'] .chapter {
+html[data-surface-low='sage'] :is(.chapter, .nudge) {
   --tone-bg: var(--sage);
 }
 
 html[data-surface='night'] :is(.header, .cursor),
-html[data-surface-low='night'] .chapter {
+html[data-surface-low='night'] :is(.chapter, .nudge) {
   --tone-bg: var(--night);
   --tone-ink: var(--ivory);
 }
 
 html[data-surface='cocoa'] :is(.header, .cursor),
-html[data-surface-low='cocoa'] .chapter {
+html[data-surface-low='cocoa'] :is(.chapter, .nudge) {
   --tone-bg: var(--cocoa);
   --tone-ink: var(--ivory);
 }
@@ -730,6 +731,77 @@ html.detail-open .chapter {
   opacity: 0 !important;
   visibility: hidden;
   transition: opacity 0.3s, visibility 0.3s;
+}
+
+/* ---------- Keep-scrolling prompt ---------- */
+.nudge {
+  position: fixed;
+  left: 50%;
+  bottom: calc(1.2rem + env(safe-area-inset-bottom, 0px));
+  z-index: 66;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.45rem 1.15rem 0.45rem 0.45rem;
+  border: 1px solid color-mix(in srgb, var(--tone-ink) 16%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--tone-bg) 92%, transparent);
+  color: var(--tone-ink);
+  box-shadow: 0 16px 40px -20px rgb(20 10 12 / 0.55);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 1.2rem);
+  transition:
+    opacity 0.5s ease,
+    transform 0.7s var(--ease-out),
+    --tone-bg 0.35s ease,
+    --tone-ink 0.35s ease;
+}
+
+.nudge.is-shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+html.detail-open .nudge,
+html.menu-open .nudge {
+  opacity: 0;
+}
+
+.nudge__arrow {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  background: var(--tone-ink);
+  color: var(--tone-bg);
+}
+
+.nudge__arrow svg {
+  width: 0.7rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  animation: nudge-bob 1.3s ease-in-out infinite;
+}
+
+.nudge:not(.is-shown) .nudge__arrow svg,
+html.reduced-motion .nudge__arrow svg {
+  animation: none;
+}
+
+@keyframes nudge-bob {
+  0%, 100% { transform: translateY(-2px); }
+  50% { transform: translateY(3px); }
 }
 
 /* ---------- Menu ---------- */
@@ -2853,6 +2925,11 @@ html.motion .cta__title .line {
 
   .chapter__title {
     min-width: 7.5rem;
+  }
+
+  /* Above the chapter pill, which sits in the middle on phones. */
+  .nudge {
+    bottom: calc(4.3rem + env(safe-area-inset-bottom, 0px));
   }
 
 

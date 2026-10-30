@@ -16,6 +16,7 @@ import { initGallery } from './js/gallery.js'
 import { initDetail } from './js/detail.js'
 import { initCursor } from './js/cursor.js'
 import { initMenu } from './js/menu.js'
+import { initNudge } from './js/nudge.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 // Phones show and hide the address bar while scrolling; don't re-measure for that.
@@ -39,6 +40,7 @@ await (document.fonts ? document.fonts.ready : Promise.resolve())
 
 initMenu({ scroll })
 initCursor()
+const nudge = initNudge()
 
 if (reduced) {
   // Calm version: no WebGL, no smooth scrolling, everything already in place.
@@ -46,6 +48,8 @@ if (reduced) {
   document.querySelectorAll('.gallery__item').forEach((item, i) => {
     item.addEventListener('click', () => detail.open(i, item))
   })
+  await preloaderDone
+  nudge.start()
 } else {
   const gl = createGL(document.querySelector('.gl'), { scroll })
   let detail
@@ -59,4 +63,5 @@ if (reduced) {
   await preloaderDone
   intro()
   scroll.start()
+  nudge.start()
 }
