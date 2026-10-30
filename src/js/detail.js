@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { brand, gallery, photos } from '../content.js'
+import { brand, gallery, houseOf, houses, photos } from '../content.js'
 
 // Full-screen view of one gallery piece. Opening grows the photo out of the
 // gallery card it was tapped from; closing shrinks it back.
@@ -46,11 +46,11 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     blur.style.backgroundImage = `url(photos/${id}-640.webp)`
     progress.style.setProperty('--p', ((index + 1) / gallery.length).toFixed(3))
     img.alt = p.alt || ''
-    type.textContent = p.type || ''
+    type.textContent = `${houses[houseOf(id)].name} · ${p.type || ''}`
     title.textContent = p.title || ''
     count.textContent = `${String(index + 1).padStart(2, '0')} / ${String(gallery.length).padStart(2, '0')}`
     if (brand.whatsapp) {
-      enquire.href = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`Hello! I'd love to ask about the ${p.title}.`)}`
+      enquire.href = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`${houses[houseOf(id)].enquiry} the ${p.title}.`)}`
       enquire.target = '_blank'
       enquire.rel = 'noopener'
     } else {
@@ -170,7 +170,10 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
       .to(info.children, { opacity: 0, x: -40 * dir, duration: 0.35, stagger: 0.03, ease: 'power2.in' }, 0)
       .add(async () => {
         if (media) media.hidden = false
-        fill(index + dir)
+        // Step past pieces hidden by the gallery filter.
+        let to = index + dir
+        for (let k = 0; k < gallery.length && galleryApi && !galleryApi.isShown((to + gallery.length) % gallery.length); k++) to += dir
+        fill(to)
         source = document.querySelector(`.gallery__item[data-index="${index}"]`)
         const next = gl?.get(source.querySelector('.media'))
         if (next) next.hidden = true

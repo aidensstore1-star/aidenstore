@@ -4,6 +4,11 @@ Website for a handmade wedding and celebration business: bridal accessories,
 ceremony candles, florals, décor, cakes and cake toppers, for weddings,
 Holy Communions, christenings and birthdays.
 
+The business is shown as two named sections, like departments in a shop:
+**Aiden’s Decor** (bridal accessories, ceremony candles and crowns, bouquets,
+home décor) and **Anita’s Cakes** (celebration cakes and toppers). The names
+are set in `src/content.js` (`houses`) and are still to be confirmed.
+
 It's a single page with heavy motion:
 
 - a loading screen that flicks through photos and lifts away
@@ -39,7 +44,8 @@ Cloudflare Pages, GitHub Pages).
 
 ### Still to fill in
 
-- The business name (currently the placeholder "Atelier")
+- The business name (currently the placeholder "Atelier") and the two
+  section names (Aiden’s Decor, Anita’s Cakes)
 - WhatsApp number, email and Instagram handle (the buttons are placeholders
   until these are set)
 - The draft wording, for the owner to check

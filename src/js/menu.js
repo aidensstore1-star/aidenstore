@@ -9,6 +9,7 @@ export function initMenu({ scroll }) {
   const texts = links.map((l) => l.querySelector('.menu__text'))
   const imgs = [...menu.querySelectorAll('.menu__img')]
   const foot = menu.querySelector('.menu__foot')
+  const groups = [...menu.querySelectorAll('.menu__group')]
   let open = false
   let tl = null
 
@@ -26,6 +27,7 @@ export function initMenu({ scroll }) {
       .fromTo(menu, { clipPath: `circle(0% at calc(100% - 3rem) 2rem)` }, { clipPath: `circle(150% at calc(100% - 3rem) 2rem)`, duration: 1.1, ease: 'expo.inOut' })
       .fromTo(texts, { yPercent: 110 }, { yPercent: 0, duration: 1.1, stagger: 0.07, ease: 'expo.out' }, 0.45)
       .fromTo(foot, { opacity: 0 }, { opacity: 0.7, duration: 0.8 }, 0.8)
+      .fromTo(groups, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.8, stagger: 0.1, ease: 'expo.out' }, 0.5)
     imgs[0] && gsap.set(imgs[0], { opacity: 1 })
   }
 

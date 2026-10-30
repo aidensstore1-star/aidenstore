@@ -12,6 +12,38 @@ export const brand = {
   instagram: '', // handle without @
 }
 
+// The business runs as two named sections, like departments in a shop. Each
+// section's chapters and photos are matched by `house` below.
+// TODO: confirm both names with the owner.
+export const houses = {
+  decor: {
+    name: 'Aiden’s Decor',
+    short: 'Decor',
+    line: 'Bridal accessories, ceremony candles, bouquets and décor for the home, made in wire, pearl and flower.',
+    sections: [
+      { label: 'Bridal accessories', href: '#bride' },
+      { label: 'Ceremony candles & crowns', href: '#ceremony' },
+      { label: 'Home décor', href: '#home' },
+    ],
+    photo: 'hair-comb-pearl-crystal-ivory',
+    enquiry: 'Hello Aiden’s Decor! I’d love to ask about',
+  },
+  cakes: {
+    name: 'Anita’s Cakes',
+    short: 'Cakes',
+    line: 'Celebration cakes designed around your colours, finished with a topper made to match.',
+    sections: [
+      { label: 'Celebration cakes', href: '#celebration' },
+      { label: 'Cake toppers', href: '#celebration' },
+    ],
+    photo: 'cake-pearl-wafer-sail-topper',
+    enquiry: 'Hello Anita’s Cakes! I’d love to order',
+  },
+}
+
+// Which house a photo belongs to: cakes are Anita's, everything else Aiden's.
+export const houseOf = (id) => (photos[id]?.type === 'Cakes' ? 'cakes' : 'decor')
+
 export const photos = {
   'hair-comb-pearl-crystal-ivory': { title: 'Pearl & crystal bridal comb', type: 'Bridal accessories', alt: 'Bridal hair comb with pearls, crystals and ivory wire leaves' },
   'hair-comb-pink-gold-wire-leaves': { title: 'Blush & gold leaf comb', type: 'Bridal accessories', alt: 'Hair comb with pink and gold wire leaves and pearls' },
@@ -79,10 +111,10 @@ export const preloader = [
 // The story, in the order you scroll through it. `photo` is shown in the menu.
 export const chapters = [
   { id: 'craft', num: 'I', title: 'The craft', photo: 'tall-candle-ombre-wire-flowers' },
-  { id: 'bride', num: 'II', title: 'The bride', photo: 'hair-comb-pearl-crystal-ivory' },
-  { id: 'ceremony', num: 'III', title: 'The ceremony', photo: 'crown-and-candle-lilac-set' },
-  { id: 'celebration', num: 'IV', title: 'The celebration', photo: 'cake-lilac-ombre-babys-breath' },
-  { id: 'home', num: 'V', title: 'The home', photo: 'hoop-wreath-wood-navy-blush-roses' },
+  { id: 'bride', num: 'II', title: 'The bride', photo: 'hair-comb-pearl-crystal-ivory', house: 'decor' },
+  { id: 'ceremony', num: 'III', title: 'The ceremony', photo: 'crown-and-candle-lilac-set', house: 'decor' },
+  { id: 'celebration', num: 'IV', title: 'The celebration', photo: 'cake-lilac-ombre-babys-breath', house: 'cakes' },
+  { id: 'home', num: 'V', title: 'The home', photo: 'hoop-wreath-wood-navy-blush-roses', house: 'decor' },
 ]
 
 // Chapter I: one photo per beat, each with the line shown over it.
@@ -96,7 +128,7 @@ export const craft = {
 }
 
 export const statement = {
-  text: 'Every comb, candle, crown and cake begins at one table, made for one day and one family. This is that day, from the first pin in her hair to the last candle on the shelf.',
+  text: 'Every comb, candle, crown and cake begins at one family’s table, where two houses share the work. This is one day, from the first pin in her hair to the last candle on the shelf.',
   photos: ['hair-comb-red-wire-flowers-wide', 'pillar-candle-burlap-lace-flower-ring'],
 }
 

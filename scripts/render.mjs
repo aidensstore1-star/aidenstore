@@ -65,6 +65,33 @@ export function renderSections() {
     )
     .join('')
 
+  // ---------- The two houses (the shop's sections) ----------
+  const { houses, houseOf } = content
+  s.houseNames = `${esc(houses.decor.name)} &amp; ${esc(houses.cakes.name)}`
+  s.houses = Object.entries(houses)
+    .map(
+      ([key, h], i) => `<article class="house house--${key}">
+  <a class="house__door" href="${h.sections[0].href}" aria-label="${esc(h.name)}">
+    ${media(h.photo, { cls: 'house__media', gl: false, sizes: '(max-width: 900px) 80vw, 36vw', box: 0.75 })}
+  </a>
+  <div class="house__info">
+    <p class="house__num">${pad(i + 1)} · ${esc(h.short)}</p>
+    <h3 class="house__name">${esc(h.name)}</h3>
+    <p class="house__line">${esc(h.line)}</p>
+    <ul class="house__sections">${h.sections
+      .filter((sec, j, all) => all.findIndex((x) => x.label === sec.label) === j)
+      .map((sec) => `<li><a class="link" href="${sec.href}">${esc(sec.label)}</a></li>`)
+      .join('')}</ul>
+  </div>
+</article>`,
+    )
+    .join('\n')
+  // A small shop sign above each chapter that belongs to a house.
+  for (const c of content.chapters) {
+    const key = `houseTag${c.id[0].toUpperCase()}${c.id.slice(1)}`
+    s[key] = c.house ? `<p class="house-tag house-tag--${c.house}">${esc(houses[c.house].name)}</p>` : ''
+  }
+
   // ---------- Chapter I: the craft ----------
   s.craftFrames = content.craft.beats
     .map(
@@ -155,12 +182,16 @@ export function renderSections() {
   // ---------- Gallery, process ----------
   s.gallery = content.gallery
     .map(
-      (id, i) => `<button class="gallery__item" type="button" data-index="${i}" aria-label="View ${esc(photos[id]?.title)}">
+      (id, i) => `<button class="gallery__item" type="button" data-index="${i}" data-house="${houseOf(id)}" aria-label="View ${esc(photos[id]?.title)}">
   ${media(id, { cls: 'gallery__media', gl: false, sizes: '(max-width: 900px) 60vw, 24vw', box: 0.75 })}
   <span class="gallery__cap"><span>${pad(i + 1)}</span>${esc(photos[id]?.title)}</span>
 </button>`,
     )
     .join('\n')
+
+  s.galleryFilters = [['all', 'Everything'], ...Object.entries(houses).map(([k, h]) => [k, h.name])]
+    .map(([k, label], i) => `<button class="gallery__filter${i ? '' : ' is-active'}" type="button" data-filter="${k}" aria-pressed="${i ? 'false' : 'true'}">${esc(label)}</button>`)
+    .join('')
 
   s.process = content.process
     .map(
@@ -182,31 +213,53 @@ export function renderSections() {
   if (brand.instagram) contacts.push({ label: 'Instagram', href: `https://instagram.com/${brand.instagram}` })
   // Placeholders keep the design visible until real details are filled in.
   if (!contacts.length) contacts.push({ label: 'WhatsApp', href: '#contact' }, { label: 'Email', href: '#contact' }, { label: 'Instagram', href: '#contact' })
+  // One enquiry button per house (a WhatsApp message to that house once the
+  // number is set), then the other ways to get in touch.
+  const houseHref = (h) => (brand.whatsapp ? `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(h.enquiry + ' ')}` : '#contact')
+  s.ctaHouses = Object.values(content.houses)
+    .map((h) => {
+      const href = houseHref(h)
+      return `<a class="btn btn--solid btn--house magnetic" href="${esc(href)}"${href.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}><span>${esc(h.name)}</span></a>`
+    })
+    .join('')
   s.ctaButtons = contacts
     .map(
-      (c, i) =>
-        `<a class="btn${i === 0 ? ' btn--solid' : ''} magnetic" href="${esc(c.href)}"${c.href.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}><span>${esc(c.label)}</span></a>`,
+      (c) =>
+        `<a class="btn magnetic" href="${esc(c.href)}"${c.href.startsWith('http') ? ' target="_blank" rel="noopener"' : ''}><span>${esc(c.label)}</span></a>`,
     )
     .join('')
   s.footerLinks = contacts.map((c) => `<a href="${esc(c.href)}">${esc(c.label)}</a>`).join('')
 
   // ---------- Navigation ----------
+  // The menu lists the story, then each house's chapters under its name.
+  const label = (c) => {
+    const word = c.title.replace(/^The /, '')
+    return word[0].toUpperCase() + word.slice(1)
+  }
+  const chapter = (id) => content.chapters.find((c) => c.id === id)
   const nav = [
-    ...content.chapters.map((c) => {
-      const word = c.title.replace(/^The /, '')
-      return { href: `#${c.id}`, label: word[0].toUpperCase() + word.slice(1), photo: c.photo }
-    }),
-    { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies' },
+    { href: '#craft', label: 'The story', photo: chapter('craft').photo },
+    ...Object.entries(houses).flatMap(([key, h]) =>
+      content.chapters
+        .filter((c) => c.house === key)
+        .map((c, j) => ({ href: `#${c.id}`, label: key === 'cakes' ? 'Cakes & toppers' : label(c), photo: c.photo, group: j ? null : h.name })),
+    ),
+    { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies', group: 'Both houses' },
     { href: '#contact', label: 'Enquire', photo: 'bouquet-white-calla-lily' },
   ]
-  s.navLinks = nav
-    .filter((n) => n.href !== '#contact')
-    .map((n) => `<a href="${n.href}">${esc(n.label)}</a>`)
-    .join('')
+  // The header links to each house as a whole, highlighted on any of its chapters.
+  s.navLinks = [
+    `<a href="#craft" data-chapters="craft">The story</a>`,
+    ...Object.entries(houses).map(([key, h]) => {
+      const ids = content.chapters.filter((c) => c.house === key).map((c) => c.id)
+      return `<a href="#${ids[0]}" data-chapters="${ids.join(' ')}">${esc(h.name)}</a>`
+    }),
+    `<a href="#gallery" data-chapters="">Gallery</a>`,
+  ].join('')
   s.menuLinks = nav
     .map(
       (n, i) =>
-        `<a class="menu__link" href="${n.href}" data-index="${i}"><span class="menu__num">${pad(i + 1)}</span><span class="menu__text">${esc(n.label)}</span></a>`,
+        `${n.group ? `<p class="menu__group">${esc(n.group)}</p>` : ''}<a class="menu__link" href="${n.href}" data-index="${i}"><span class="menu__num">${pad(i + 1)}</span><span class="menu__text">${esc(n.label)}</span></a>`,
     )
     .join('')
   s.menuMedia = nav

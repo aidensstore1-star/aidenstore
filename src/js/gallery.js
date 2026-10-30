@@ -7,6 +7,8 @@ export function initGallery({ scroll, onOpen }) {
   const viewport = document.querySelector('.gallery__viewport')
   const items = [...document.querySelectorAll('.gallery__item')]
   if (!viewport || !items.length) return null
+  // The pieces currently shown (the gallery can be filtered by house).
+  let shown = items
 
   const OFFSETS = [-50, -55, -47, -53, -45, -52]
   const state = { current: 0, target: 0, last: 0, dragging: false, startX: 0, startTarget: 0, moved: 0, paused: false }
@@ -21,7 +23,7 @@ export function initGallery({ scroll, onOpen }) {
     itemW = items[0].offsetWidth
     half = viewport.clientWidth / 2
     step = itemW + Math.max(28, window.innerWidth * 0.035)
-    total = items.length * step
+    total = shown.length * step
   }
   measure()
   window.addEventListener('resize', measure)
@@ -38,18 +40,18 @@ export function initGallery({ scroll, onOpen }) {
     state.last = state.current
     lean += (Math.max(-9, Math.min(9, velocity * 0.35)) - lean) * 0.15
 
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < shown.length; i++) {
       let x = (i * step + state.current) % total
       if (x < 0) x += total
       x -= step
       // n: -1 at the left edge, 0 in the middle, 1 at the right edge.
       const n = (x + itemW / 2 - half) / half
       if (n < -1.6 || n > 1.6) {
-        items[i].style.transform = `translate3d(${x}px, -50%, 0)`
+        shown[i].style.transform = `translate3d(${x}px, -50%, 0)`
         continue
       }
       const depth = -Math.abs(n) * 110
-      items[i].style.transform = `translate3d(${x}px, ${OFFSETS[i % OFFSETS.length]}%, ${depth.toFixed(1)}px) rotateY(${(-n * 22).toFixed(2)}deg) skewX(${lean.toFixed(2)}deg)`
+      shown[i].style.transform = `translate3d(${x}px, ${OFFSETS[i % OFFSETS.length]}%, ${depth.toFixed(1)}px) rotateY(${(-n * 22).toFixed(2)}deg) skewX(${lean.toFixed(2)}deg)`
     }
   }
   gsap.ticker.add(update, false, true)
@@ -97,11 +99,13 @@ export function initGallery({ scroll, onOpen }) {
     { passive: false },
   )
   // Keyboard: bring a focused item into view; Enter/Space opens it.
-  items.forEach((item, i) => {
+  items.forEach((item) => {
     item.addEventListener('click', (e) => {
       if (e.detail === 0) open(item)
     })
     item.addEventListener('focus', () => {
+      const i = shown.indexOf(item)
+      if (i < 0) return
       let x = (i * step + state.target) % total
       if (x < 0) x += total
       x -= step
@@ -114,7 +118,7 @@ export function initGallery({ scroll, onOpen }) {
   function snap(target) {
     const mid = half - itemW / 2
     let best = Infinity
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < shown.length; i++) {
       let x = (i * step + target) % total
       if (x < 0) x += total
       x -= step
@@ -127,8 +131,39 @@ export function initGallery({ scroll, onOpen }) {
     onOpen?.(Number(item.dataset.index), item)
   }
 
+  // Filter buttons: show everything, or one house's pieces.
+  const filters = [...document.querySelectorAll('.gallery__filter')]
+  filters.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.filter
+      filters.forEach((b) => {
+        b.classList.toggle('is-active', b === btn)
+        b.setAttribute('aria-pressed', String(b === btn))
+      })
+      const next = items.filter((item) => key === 'all' || item.dataset.house === key)
+      gsap.to(shown, {
+        opacity: 0,
+        y: 30,
+        duration: 0.3,
+        stagger: 0.01,
+        ease: 'power2.in',
+        onComplete: () => {
+          items.forEach((item) => (item.hidden = !next.includes(item)))
+          shown = next
+          measure()
+          state.current = state.target = state.last = 0
+          snap(0)
+          state.current = state.target
+          update()
+          gsap.fromTo(shown, { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 0.7, stagger: 0.03, ease: 'expo.out', clearProps: 'opacity,y' })
+        },
+      })
+    }),
+  )
+
   return {
     items,
+    isShown: (i) => shown.includes(items[i]),
     pause: () => (state.paused = true),
     resume: () => (state.paused = false),
   }

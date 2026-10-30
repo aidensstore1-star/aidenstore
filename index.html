@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title><!--@brand--> — Handmade bridal accessories, candles, florals &amp; cakes</title>
+    <title><!--@houseNames--> — Handmade bridal accessories, candles, florals &amp; cakes</title>
     <meta name="description" content="<!--@tagline-->, made by hand for weddings, Holy Communions, christenings and celebrations." />
     <meta name="theme-color" content="#f3ece4" />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232a1f22'/%3E%3Ctext x='32' y='43' font-family='Georgia,serif' font-size='32' font-style='italic' text-anchor='middle' fill='%23f3ece4'%3EA%3C/text%3E%3C/svg%3E" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232a1f22'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='24' font-style='italic' text-anchor='middle' fill='%23f3ece4'%3EA%26amp;A%3C/text%3E%3C/svg%3E" />
     <script>
       // Decide the motion level before first paint.
       document.documentElement.classList.add('js')
@@ -85,6 +85,14 @@
         <!--@statementPhotos-->
       </section>
 
+      <section class="houses on-light" id="houses" data-bg="ivory">
+        <header class="houses__head">
+          <p class="eyebrow">One table, two houses</p>
+          <h2 class="title-xl">Choose <em>your house</em></h2>
+        </header>
+        <div class="houses__doors"><!--@houses--></div>
+      </section>
+
       <section class="marquee on-light" aria-hidden="true">
         <div class="marquee__row"><div class="marquee__inner"><!--@marquee--></div></div>
         <div class="marquee__row marquee__row--rev"><div class="marquee__inner"><!--@marquee--></div></div>
@@ -95,7 +103,8 @@
           <p class="bride__word" aria-hidden="true">the bride</p>
           <div class="bride__track">
             <header class="bride__head">
-              <p class="eyebrow">Chapter II · 9:00</p>
+              <!--@houseTagBride-->
+            <p class="eyebrow">Chapter II · 9:00</p>
               <h2 class="title-xl"><!--@brideTitle--></h2>
               <p class="bride__text"><!--@brideText--></p>
             </header>
@@ -110,6 +119,7 @@
           <!--@ceremonyFinale-->
           <!--@ceremonyCols-->
           <div class="ceremony__card">
+            <!--@houseTagCeremony-->
             <p class="eyebrow">Chapter III · 12:00</p>
             <h2 class="title-xl"><!--@ceremonyTitle--></h2>
             <p class="ceremony__text"><!--@ceremonyText--></p>
@@ -122,6 +132,7 @@
         <div class="celebration__pin">
           <p class="celebration__word" aria-hidden="true">celebrate</p>
           <header class="celebration__head">
+            <!--@houseTagCelebration-->
             <p class="eyebrow">Chapter IV · 16:00</p>
             <h2 class="title-xl"><!--@celebrationTitle--></h2>
           </header>
@@ -139,6 +150,7 @@
       <section class="home on-light" id="home" data-bg="sage" data-chapter="V" data-chapter-title="The home">
         <div class="home__pin">
           <div class="home__text">
+            <!--@houseTagHome-->
             <p class="eyebrow">Chapter V · 21:00</p>
             <h2 class="title-xl"><!--@homeTitle--></h2>
             <p class="home__body"><!--@homeText--></p>
@@ -152,6 +164,7 @@
           <p class="eyebrow">The whole collection</p>
           <h2 class="title-xl">Every piece, <em>by hand</em></h2>
           <p class="gallery__hint">Drag to explore. Tap a piece to see it up close.</p>
+          <div class="gallery__filters" role="group" aria-label="Show pieces from"><!--@galleryFilters--></div>
         </header>
         <div class="gallery__viewport" data-cursor="Drag">
           <div class="gallery__track"><!--@gallery--></div>
@@ -174,7 +187,8 @@
           <span class="line line--indent">something</span>
           <span class="line"><em>beautiful</em></span>
         </h2>
-        <p class="cta__text">Tell us about your day: the date, the occasion and what you have in mind.</p>
+        <p class="cta__text">Tell us about your day: the date, the occasion and what you have in mind. Choose the house you’d like to talk to.</p>
+        <div class="cta__houses"><!--@ctaHouses--></div>
         <div class="cta__buttons"><!--@ctaButtons--></div>
       </section>
     </main>
@@ -186,7 +200,7 @@
       </div>
       <p class="footer__brand" aria-hidden="true"><!--@brandLetters--></p>
       <div class="footer__bottom">
-        <span>© <!--@year--> <!--@brand--></span>
+        <span>© <!--@year--> <!--@houseNames--></span>
         <span>Made by hand, one piece at a time</span>
         <a href="#top" class="footer__top-link">Back to top ↑</a>
       </div>

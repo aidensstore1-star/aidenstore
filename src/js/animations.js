@@ -320,6 +320,39 @@ export function initAnimations({ scroll, gl }) {
     )
   })
 
+  // ---------- The two houses: a pair of doors opening ----------
+  $$('.house').forEach((house, i) => {
+    const side = i ? 1 : -1
+    const door = $('.house__media', house)
+    // Desktop: the two arched doors swing open from the middle like a pair of
+    // shop doors; phones: each slides in from its own side as it arrives.
+    gsap.fromTo(
+      door,
+      { rotationY: side * (small ? 28 : 42), x: () => -side * (small ? -vw() * 0.35 : vw() * 0.1), transformPerspective: 1200, transformOrigin: i ? '100% 50%' : '0% 50%' },
+      { rotationY: 0, x: 0, ease: 'power2.out', scrollTrigger: { trigger: house, start: 'top bottom', end: small ? 'top 35%' : 'top 25%', scrub: 0.8 } },
+    )
+    const name = splitChars($('.house__name', house))
+    gsap.from(name.chars, {
+      yPercent: 110,
+      opacity: 0,
+      stagger: 0.03,
+      duration: 1.2,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: $('.house__name', house), start: 'top 88%', once: true },
+    })
+    gsap.from([$('.house__num', house), $('.house__line', house), ...$$('.house__sections li', house)], {
+      y: 24,
+      opacity: 0,
+      stagger: 0.06,
+      duration: 1,
+      ease: 'expo.out',
+      scrollTrigger: { trigger: $('.house__info', house), start: 'top 90%', once: true },
+    })
+  })
+  $$('.house-tag').forEach((tag) =>
+    gsap.from(tag, { scale: 0.6, opacity: 0, duration: 0.9, ease: 'back.out(2)', scrollTrigger: { trigger: tag, start: 'top 92%', once: true } }),
+  )
+
   // ---------- Marquee: speeds up and leans with scrolling ----------
   const marquee = $('.marquee')
   let marqueeVisible = false
@@ -792,7 +825,7 @@ export function initAnimations({ scroll, gl }) {
     if (sec === current) return
     current = sec
     const chapter = sec.dataset.chapter ? sec : null
-    navLinks.forEach((a) => a.classList.toggle('is-active', !!chapter && a.getAttribute('href') === `#${chapter.id}`))
+    navLinks.forEach((a) => a.classList.toggle('is-active', !!chapter && (a.dataset.chapters || '').split(' ').includes(chapter.id)))
     if (!chapter) {
       gsap.to(indicator, { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.in', overwrite: true })
       return
