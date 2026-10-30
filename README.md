@@ -9,14 +9,21 @@ The business is shown as two named sections, like departments in a shop:
 home décor) and **Anita’s Cakes** (celebration cakes and toppers). The names
 are set in `src/content.js` (`houses`) and are still to be confirmed.
 
-It's a single page with heavy motion:
+It's a single page that tells one wedding day in five chapters (the night
+before, 9:00 the bride, 12:00 the ceremony, 16:00 the celebration, 21:00 the
+home), with heavy motion:
 
-- a loading screen that flicks through photos and lifts away
-- WebGL photos that ripple on hover and bend with scroll speed
-- tumbling rose petals around the opening and closing sections
-- a pinned section that scrolls sideways through the collections
-- an endless, curved gallery you can drag; tap a piece to see it full size
-- stacked cake cards, a cursor-following photo list, and smooth scrolling
+- a loading screen that flicks through photos and lifts away; the opening
+  headline bursts apart and its photos gather into Chapter I
+- each chapter rises through its own window traced in gold wire: a chapel
+  arch, a gothic window, a cake-plate iris and an embroidery hoop
+- the bride's pieces pass sideways, turning in 3D; candle columns run against
+  each other and part like curtains; a 3D ring of cakes turns as you scroll;
+  a wall of home pieces pulls back from a single wreath
+- an endless, curved gallery you can drag and filter by house; tap a piece to
+  see it full size and swipe between pieces
+- a chapter indicator whose wire flower gains a petal per chapter, and an
+  epilogue where the finished flower draws itself
 
 Visitors with "reduce motion" switched on get a calm version without the effects.
 
