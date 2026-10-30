@@ -51,6 +51,16 @@ npm run build    # production files in dist/
 `dist/` is plain static files and can go on any static host (Netlify, Vercel,
 Cloudflare Pages, GitHub Pages).
 
+## Preview link
+
+The built site is published with GitHub Pages from the `gh-pages` branch:
+https://jeremygideonbareh.github.io/mixslidea/
+
+That branch holds only the files from `dist/` (and only the photos the page
+uses), plus `.nojekyll` and a `robots.txt` that keeps the preview out of
+search engines. To update it, build and replace the branch's contents with
+the new `dist/`.
+
 ## Changing the content
 
 - **Business name, contact details, wording and which photo goes where:**
