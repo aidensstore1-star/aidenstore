@@ -756,16 +756,23 @@ html.detail-open .chapter {
   pointer-events: none;
   opacity: 0;
   transform: translate(-50%, 1.2rem);
+  /* Leaves quickly when scrolling starts again... */
+  transition:
+    opacity 0.25s ease,
+    transform 0.4s ease,
+    --tone-bg 0.35s ease,
+    --tone-ink 0.35s ease;
+}
+
+/* ...and arrives a little more gently. */
+.nudge.is-shown {
+  opacity: 1;
+  transform: translate(-50%, 0);
   transition:
     opacity 0.5s ease,
     transform 0.7s var(--ease-out),
     --tone-bg 0.35s ease,
     --tone-ink 0.35s ease;
-}
-
-.nudge.is-shown {
-  opacity: 1;
-  transform: translate(-50%, 0);
 }
 
 html.detail-open .nudge,

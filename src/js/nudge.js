@@ -1,5 +1,6 @@
-// A small "keep scrolling" prompt. It appears when the visitor stops partway
-// through the story, and goes again as soon as they scroll, tap or drag.
+// A small "keep scrolling" prompt. It appears as soon as the visitor stops
+// scrolling partway through the story (once the page has come to rest, so
+// not between flicks), and goes again as soon as they scroll, tap or drag.
 export function initNudge() {
   const el = document.querySelector('.nudge')
   const text = el.querySelector('.nudge__text')
@@ -21,11 +22,11 @@ export function initNudge() {
     timer = setTimeout(show, ms)
   }
 
-  const wake = () => wait(2600)
+  const wake = () => wait(700)
   return {
-    // The opening gets a little longer to play first.
+    // The opening gets a moment to play first.
     start() {
-      wait(4000)
+      wait(3000)
       for (const type of ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown']) window.addEventListener(type, wake, { passive: true })
     },
   }
