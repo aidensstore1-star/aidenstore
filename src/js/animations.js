@@ -44,6 +44,13 @@ const SHAPES = {
   },
 }
 SHAPES.hoop = SHAPES.iris
+// The bride: an oval dressing-table mirror, taller than it is wide.
+SHAPES.mirror = (p, W, H) => {
+  const k = 1.35
+  const rx = Math.hypot(W / 2, H / (2 * k)) * 1.04 * p ** 1.15
+  const cy = 0.5 * p * H
+  return `M${f(W / 2 - rx)},${f(cy)} a${f(rx)},${f(rx * k)} 0 1 0 ${f(2 * rx)},0 a${f(rx)},${f(rx * k)} 0 1 0 ${f(-2 * rx)},0 Z`
+}
 
 // A chapter whose scene lasts `scene()` pixels, then stays pinned for one more
 // screen while the next chapter slides up over it. The margin makes room for
@@ -70,7 +77,7 @@ export function initAnimations({ scroll, gl }) {
       }),
     { rootMargin: '150% 0px' },
   )
-  $$('.craft, .bride, .ceremony, .celebration, .home, .gallery').forEach((s) => warm.observe(s))
+  $$('.craft, .sign, .bride, .ceremony, .celebration, .home, .gallery').forEach((s) => warm.observe(s))
 
   // Mouse and trackpad users click rather than tap.
   if (canHover) $('.gallery__hint').textContent = 'Drag to explore. Click a piece to see it up close.'
@@ -353,6 +360,60 @@ export function initAnimations({ scroll, gl }) {
     gsap.from(tag, { scale: 0.6, opacity: 0, duration: 0.9, ease: 'back.out(2)', scrollTrigger: { trigger: tag, start: 'top 92%', once: true } }),
   )
 
+  // ---------- Section signs: walking into each section of the shop ----------
+  // As a section arrives, its name slides past in both directions and its
+  // pieces swing in from the sides while the sign is lowered on its chains.
+  // The sign swings and settles, its name rises letter by letter, and it stays
+  // pinned while the section's first chapter rises over it.
+  $$('.sign').forEach((sign) => {
+    const board = $('.sign__board', sign)
+    const [wordA, wordB] = $$('.sign__word', sign)
+    const pics = $$('.sign__media', sign)
+    const name = splitChars($('.sign__name', sign))
+    // The pinned scene, in screens.
+    const S = small ? 1.5 : 1.3
+    ScrollTrigger.create({ trigger: sign, start: 'top top', ...stacked(sign, () => vh() * S), pin: true, anticipatePin: 1, invalidateOnRefresh: true })
+    // The sign swings from the top of its chains.
+    const pivot = () => gsap.set(board, { transformOrigin: `50% ${-board.offsetTop}px` })
+    pivot()
+    ScrollTrigger.addEventListener('refreshInit', pivot)
+    // From the moment the sign enters the screen until the next chapter has
+    // covered it: one screen arriving, the scene, one screen leaving.
+    const T = 2 + S
+    const tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: { trigger: sign, start: 'top bottom', end: () => `+=${vh() * T}`, scrub: 0.8, invalidateOnRefresh: true },
+    })
+    const slide = (el) => Math.max(0, el.scrollWidth - vw()) * 0.8
+    tl.fromTo(wordA, { x: () => vw() * 0.15 }, { x: () => -slide(wordA), duration: T }, 0)
+      .fromTo(wordB, { x: () => -slide(wordB) }, { x: () => vw() * 0.15, duration: T }, 0)
+      .fromTo(board, { y: () => -(board.offsetTop + board.offsetHeight + 60) }, { y: 0, duration: 1.15, ease: 'power2.out' }, 0.05)
+    const swing = [9, -6, 3.5, -1.6, 0]
+    for (let k = 1; k < swing.length; k++) {
+      tl.fromTo(board, { rotation: swing[k - 1] }, { rotation: swing[k], duration: 0.32, ease: 'sine.inOut', immediateRender: k === 1 }, 0.1 + (k - 1) * 0.32)
+    }
+    const from = [
+      { x: -0.6, y: 0.2, r: -16 },
+      { x: 0.6, y: -0.1, r: 14 },
+      { x: 0.3, y: 0.7, r: 10 },
+    ]
+    pics.forEach((pic, i) => {
+      const settled = 1.2 + i * 0.2
+      tl.fromTo(
+        pic,
+        { x: () => vw() * from[i].x, y: () => vh() * from[i].y, rotation: from[i].r },
+        { x: 0, y: 0, rotation: [-4, 3, -2][i], duration: settled - (0.1 + i * 0.08), ease: 'power3.out' },
+        0.1 + i * 0.08,
+      ).to(pic, { y: () => -vh() * (0.06 + i * 0.03), duration: 1 + S - settled }, settled)
+    })
+    tl.from(name.chars, { yPercent: 120, rotationX: -80, opacity: 0, transformPerspective: 600, stagger: 0.035, duration: 0.45, ease: 'back.out(1.7)' }, 0.85)
+      .from([$('.sign__num', sign), $('.sign__line', sign)], { y: 24, opacity: 0, stagger: 0.1, duration: 0.4, ease: 'power2.out' }, 1.05)
+      .from($$('.sign__aisles li', sign), { x: (i) => (i % 2 ? 60 : -60), opacity: 0, stagger: 0.08, duration: 0.45, ease: 'power2.out' }, 1.2)
+      // The first chapter rises over it; the sign sinks back into the dark.
+      .to(board, { scale: 0.9, duration: 1 }, 1 + S)
+      .to($('.sign__scrim', sign), { opacity: 0.55, duration: 1 }, 1 + S)
+  })
+
   // ---------- Marquee: speeds up and leans with scrolling ----------
   const marquee = $('.marquee')
   let marqueeVisible = false
@@ -495,7 +556,7 @@ export function initAnimations({ scroll, gl }) {
     .fromTo(finale, { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1.04, duration: 0.42, ease: 'power2.out' }, 0.62)
     .to(card, { scale: 0.92, duration: 0.3, ease: 'power2.inOut' }, 0.62)
     .to({}, { duration: 0.1 })
-    // The celebration slides over; the ceremony recedes.
+    // The décor slides over; the ceremony recedes.
     .to(finale, { scale: 0.9, opacity: 0.5, duration: 0.45 }, 1)
     .to(card, { scale: 0.8, opacity: 0.4, duration: 0.45 }, 1)
 
@@ -579,9 +640,10 @@ export function initAnimations({ scroll, gl }) {
     onUpdate: shade,
   })
   celebrationTl
-    .fromTo(spin, { rotationY: 50, rotationX: () => (small ? -10 : -6) }, { rotationY: (-360 * (n - 1)) / n, rotationX: () => (small ? -10 : -6), duration: 1 }, 0)
+    // Starts with the first cake in front, so the count opens at 01.
+    .fromTo(spin, { rotationY: 10, rotationX: () => (small ? -10 : -6) }, { rotationY: (-360 * (n - 1)) / n, rotationX: () => (small ? -10 : -6), duration: 1 }, 0)
     .fromTo('.celebration__word', { x: () => vw() * 0.4 }, { x: () => -$('.celebration__word').scrollWidth + vw() * 0.3, duration: 1 }, 0)
-    // The home slides over; the cakes recede.
+    // The gallery slides over; the cakes recede.
     .to('.ring, .celebration__head, .celebration__foot', { scale: 0.9, opacity: 0.35, duration: 0.36 }, 1)
   shade()
 
@@ -659,7 +721,7 @@ export function initAnimations({ scroll, gl }) {
   homeTl
     .fromTo(homeText, { autoAlpha: 0, x: () => (small ? 0 : -80), y: () => (small ? -30 : 0) }, { autoAlpha: 1, x: 0, y: 0, duration: 0.25, ease: 'power3.out' }, 0.8)
     .to({}, { duration: 0.08 })
-    // The gallery slides over; the wall recedes.
+    // The cakes sign slides over; the wall recedes.
     .to('.home__pin', { scale: 0.9, opacity: 0.4, duration: 0.45 })
 
 
@@ -766,13 +828,14 @@ export function initAnimations({ scroll, gl }) {
   // window, that widens until it fills the screen.
   // Labels near the top of a chapter wait until its arch is nearly open, so
   // the arch never cuts through their words.
-  const archGated = { craft: '.craft__kicker, .craft__count', celebration: '.celebration__head' }
+  const archGated = { craft: '.craft__kicker, .craft__count', celebration: '.celebration__head, .ring__now' }
   // While the arch rises, the chapter inside settles into place like a camera
   // coming to rest, so a hand-over never shows a still frame.
+  // (Not the bride: its track's own transform is animated.)
   const riseTargets = { craft: '.craft__pin', ceremony: '.ceremony__pin', celebration: '.celebration__pin', home: '.home__wall' }
-  const shapeOf = { craft: 'arch', ceremony: 'lancet', celebration: 'iris', home: 'hoop' }
+  const shapeOf = { craft: 'arch', bride: 'mirror', ceremony: 'lancet', celebration: 'iris', home: 'hoop' }
   const svgNS = 'http://www.w3.org/2000/svg'
-  const arches = $$('.craft, .ceremony, .celebration, .home').map((el) => {
+  const arches = $$('.craft, .bride, .ceremony, .celebration, .home').map((el) => {
     const shape = shapeOf[el.id]
     // The gold wire tracing the window's edge, drawn as it opens.
     const svg = document.createElementNS(svgNS, 'svg')
@@ -792,10 +855,11 @@ export function initAnimations({ scroll, gl }) {
       svg.append(clasp)
     }
     el.append(svg)
-    return { el, top: 0, p: -1, shape, svg, wire, clasp, gated: $$(archGated[el.id] || '_none_', el), rise: $(riseTargets[el.id], el) }
+    return { el, top: 0, p: -1, shape, svg, wire, clasp, gated: $$(archGated[el.id] || '_none_', el), rise: riseTargets[el.id] ? $(riseTargets[el.id], el) : null }
   })
-  // Between chapters, a gold wire draws along the top edge instead.
-  const edges = $$('.statement, .gallery').map((el) => {
+  // Between chapters, and as each section's sign arrives, a gold wire draws
+  // along the top edge instead.
+  const edges = $$('.statement, .sign, .gallery').map((el) => {
     const line = document.createElement('span')
     line.className = 'wire-edge'
     line.setAttribute('aria-hidden', 'true')
@@ -806,7 +870,18 @@ export function initAnimations({ scroll, gl }) {
     const box = el.parentElement.classList.contains('pin-spacer') ? el.parentElement : el
     return box.getBoundingClientRect().top + window.scrollY
   }
+  // The cake plate opens around the ring: while it rises, the ring sits at
+  // the plate's centre, so cakes show through it from the start.
+  const ringMid = () => {
+    let y = ring.offsetHeight / 2
+    for (let el = ring; el && el !== celebration; el = el.offsetParent) y += el.offsetTop
+    return y
+  }
   const measure = () => {
+    for (const a of arches) {
+      a.h = a.el.offsetHeight || vh()
+      if (a.el === celebration) a.centre = ringMid()
+    }
     for (const s of [...surfaces, ...edges, ...arches]) s.top = docTop(s.el)
     cta.top = docTop(cta.el)
     cta.h = cta.el.offsetHeight
@@ -825,7 +900,7 @@ export function initAnimations({ scroll, gl }) {
     if (sec === current) return
     current = sec
     const chapter = sec.dataset.chapter ? sec : null
-    navLinks.forEach((a) => a.classList.toggle('is-active', !!chapter && (a.dataset.chapters || '').split(' ').includes(chapter.id)))
+    navLinks.forEach((a) => a.classList.toggle('is-active', !!sec.id && (a.dataset.chapters || '').split(' ').includes(sec.id)))
     if (!chapter) {
       gsap.to(indicator, { autoAlpha: 0, y: 20, duration: 0.5, ease: 'power2.in', overwrite: true })
       return
@@ -864,11 +939,14 @@ export function initAnimations({ scroll, gl }) {
       a.p = p
       for (const g of a.gated) g.style.opacity = p >= 1 ? '' : clamp((p - 0.9) / 0.1, 0, 1).toFixed(3)
       const q = 1 - p
+      const W = vw()
+      const H = a.h
       if (a.rise) {
         const rising = p > 0 && p < 1
         // Its own GPU layer only while it moves, so it isn't repainted each frame.
         a.rise.style.willChange = rising ? 'transform' : ''
-        a.rise.style.transform = rising ? `translate3d(0, ${(-7 * q).toFixed(2)}vh, 0) scale(${(1 + 0.12 * q).toFixed(4)})` : ''
+        const shift = a.centre ? `${(q * (0.5 * p * H - a.centre)).toFixed(1)}px` : `${(-7 * q).toFixed(2)}vh`
+        a.rise.style.transform = rising ? `translate3d(0, ${shift}, 0) scale(${(1 + 0.12 * q).toFixed(4)})` : ''
       }
       if (a.el.id === 'celebration') setPreTurn(p <= 0 ? 70 : 70 * q)
       if (p >= 1 || p <= 0) {
@@ -876,8 +954,6 @@ export function initAnimations({ scroll, gl }) {
         a.svg.style.opacity = '0'
         continue
       }
-      const W = vw()
-      const H = a.el.offsetHeight || h
       const d = SHAPES[a.shape](p, W, H)
       a.el.style.clipPath = `path('${d}')`
       a.wire.setAttribute('d', d)
@@ -916,7 +992,7 @@ export function initAnimations({ scroll, gl }) {
 
   // ---------- Photos when WebGL is not drawing them ----------
   $$('.media').forEach((fig) => {
-    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.bride, .ceremony, .home, .process, .gallery')) return
+    if (gl?.get(fig) || fig.classList.contains('hero__img') || fig.closest('.sign, .bride, .ceremony, .home, .process, .gallery')) return
     gsap.from(fig.querySelector('img'), {
       clipPath: 'inset(100% 0 0 0)',
       scale: 1.25,

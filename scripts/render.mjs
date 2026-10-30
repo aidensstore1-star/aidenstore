@@ -68,14 +68,17 @@ export function renderSections() {
   // ---------- The two houses (the shop's sections) ----------
   const { houses, houseOf } = content
   s.houseNames = `${esc(houses.decor.name)} &amp; ${esc(houses.cakes.name)}`
+  s.decorName = esc(houses.decor.name)
+  s.cakesName = esc(houses.cakes.name)
+  s.heroSub = `<strong>${esc(houses.decor.name)}</strong> for bridal accessories, ceremony candles and décor. <strong>${esc(houses.cakes.name)}</strong> for celebration cakes and toppers. All made by hand, for weddings, Holy Communions and every celebration in between.`
   s.houses = Object.entries(houses)
     .map(
       ([key, h], i) => `<article class="house house--${key}">
-  <a class="house__door" href="${h.sections[0].href}" aria-label="${esc(h.name)}">
+  <a class="house__door" href="#${key}" aria-label="${esc(h.name)}">
     ${media(h.photo, { cls: 'house__media', gl: false, sizes: '(max-width: 900px) 80vw, 36vw', box: 0.75 })}
   </a>
   <div class="house__info">
-    <p class="house__num">${pad(i + 1)} · ${esc(h.short)}</p>
+    <p class="house__num">Section ${pad(i + 1)} · ${esc(h.namedFor)}</p>
     <h3 class="house__name">${esc(h.name)}</h3>
     <p class="house__line">${esc(h.line)}</p>
     <ul class="house__sections">${h.sections
@@ -86,6 +89,29 @@ export function renderSections() {
 </article>`,
     )
     .join('\n')
+  // Each section opens with its own shop sign: the name on a board hung on
+  // gold chains, what's inside it, and a few of its pieces around it.
+  Object.entries(houses).forEach(([key, h], i) => {
+    const [first, ...rest] = h.name.split(' ')
+    const word = `${esc(h.name)} · `.repeat(3)
+    s[`sign${key[0].toUpperCase()}${key.slice(1)}`] = `<div class="sign__pin">
+  <p class="sign__word sign__word--a" aria-hidden="true">${word}</p>
+  <p class="sign__word sign__word--b" aria-hidden="true">${word}</p>
+  ${h.sign.map((id, j) => media(id, { cls: `sign__media sign__media--${j + 1}`, gl: false, sizes: '(max-width: 900px) 34vw, 18vw', box: 0.75, decorative: true })).join('\n  ')}
+  <div class="sign__board">
+    <i class="sign__chain sign__chain--l" aria-hidden="true"></i><i class="sign__chain sign__chain--r" aria-hidden="true"></i>
+    <p class="sign__num">Section ${pad(i + 1)}</p>
+    <h2 class="sign__name">${esc(first)} <em>${esc(rest.join(' '))}</em></h2>
+    <p class="sign__line">${esc(h.namedFor)}</p>
+    <ul class="sign__aisles">${h.sections
+      .filter((sec, j, all) => all.findIndex((x) => x.label === sec.label) === j)
+      .map((sec) => `<li><a href="${sec.href}">${esc(sec.label)}</a></li>`)
+      .join('')}</ul>
+  </div>
+  <div class="sign__scrim" aria-hidden="true"></div>
+</div>`
+  })
+
   // A small shop sign above each chapter that belongs to a house.
   for (const c of content.chapters) {
     const key = `houseTag${c.id[0].toUpperCase()}${c.id.slice(1)}`
@@ -244,17 +270,18 @@ export function renderSections() {
         .filter((c) => c.house === key)
         .map((c, j) => ({ href: `#${c.id}`, label: key === 'cakes' ? 'Cakes & toppers' : label(c), photo: c.photo, group: j ? null : h.name })),
     ),
-    { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies', group: 'Both houses' },
+    { href: '#gallery', label: 'Gallery', photo: 'bouquet-red-ivory-peonies', group: 'Both sections' },
     { href: '#contact', label: 'Enquire', photo: 'bouquet-white-calla-lily' },
   ]
-  // The header links to each house as a whole, highlighted on any of its chapters.
+  // The header links to each house's sign, highlighted on the sign and on
+  // any of its chapters.
   s.navLinks = [
     `<a href="#craft" data-chapters="craft">The story</a>`,
     ...Object.entries(houses).map(([key, h]) => {
       const ids = content.chapters.filter((c) => c.house === key).map((c) => c.id)
-      return `<a href="#${ids[0]}" data-chapters="${ids.join(' ')}">${esc(h.name)}</a>`
+      return `<a href="#${key}" data-chapters="${[key, ...ids].join(' ')}">${esc(h.name)}</a>`
     }),
-    `<a href="#gallery" data-chapters="">Gallery</a>`,
+    `<a href="#gallery" data-chapters="gallery">Gallery</a>`,
   ].join('')
   s.menuLinks = nav
     .map(

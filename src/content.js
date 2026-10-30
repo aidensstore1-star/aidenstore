@@ -12,31 +12,37 @@ export const brand = {
   instagram: '', // handle without @
 }
 
-// The business runs as two named sections, like departments in a shop. Each
+// The business runs as two named sections, like departments in a shop: the
+// décor under her son's name and the cakes under her daughter's. Each
 // section's chapters and photos are matched by `house` below.
-// TODO: confirm both names with the owner.
+// TODO: confirm both names (and the spelling of her son's name) with the owner.
 export const houses = {
   decor: {
     name: 'Aiden’s Decor',
     short: 'Decor',
-    line: 'Bridal accessories, ceremony candles, bouquets and décor for the home, made in wire, pearl and flower.',
+    namedFor: 'Named for our son',
+    line: 'Bridal accessories, ceremony candles and crowns, bouquets and décor for the hall and the home, made in wire, pearl and flower.',
     sections: [
       { label: 'Bridal accessories', href: '#bride' },
       { label: 'Ceremony candles & crowns', href: '#ceremony' },
-      { label: 'Home décor', href: '#home' },
+      { label: 'Wedding & home décor', href: '#home' },
     ],
     photo: 'hair-comb-pearl-crystal-ivory',
+    // Shown around the section's sign as you walk in.
+    sign: ['hair-vine-gold-leaves-pearls', 'tall-candle-silver-wire-flowers-pearls', 'triangle-wreath-gold-burgundy-ranunculus'],
     enquiry: 'Hello Aiden’s Decor! I’d love to ask about',
   },
   cakes: {
     name: 'Anita’s Cakes',
     short: 'Cakes',
+    namedFor: 'Named for our daughter',
     line: 'Celebration cakes designed around your colours, finished with a topper made to match.',
     sections: [
       { label: 'Celebration cakes', href: '#celebration' },
       { label: 'Cake toppers', href: '#celebration' },
     ],
     photo: 'cake-pearl-wafer-sail-topper',
+    sign: ['cake-white-wafer-strawberry-topper', 'cake-sheet-lilac-rosettes', 'cake-lion-one-month'],
     enquiry: 'Hello Anita’s Cakes! I’d love to order',
   },
 }
@@ -108,13 +114,14 @@ export const preloader = [
   'tall-candle-ombre-wire-flowers',
 ]
 
-// The story, in the order you scroll through it. `photo` is shown in the menu.
+// The story, in the order you scroll through it: the decor section's three
+// chapters, then the cakes. `photo` is shown in the menu.
 export const chapters = [
   { id: 'craft', num: 'I', title: 'The craft', photo: 'tall-candle-ombre-wire-flowers' },
   { id: 'bride', num: 'II', title: 'The bride', photo: 'hair-comb-pearl-crystal-ivory', house: 'decor' },
   { id: 'ceremony', num: 'III', title: 'The ceremony', photo: 'crown-and-candle-lilac-set', house: 'decor' },
-  { id: 'celebration', num: 'IV', title: 'The celebration', photo: 'cake-lilac-ombre-babys-breath', house: 'cakes' },
-  { id: 'home', num: 'V', title: 'The home', photo: 'hoop-wreath-wood-navy-blush-roses', house: 'decor' },
+  { id: 'home', num: 'IV', title: 'The décor', photo: 'hoop-wreath-wood-navy-blush-roses', house: 'decor' },
+  { id: 'celebration', num: 'V', title: 'The cake', photo: 'cake-lilac-ombre-babys-breath', house: 'cakes' },
 ]
 
 // Chapter I: one photo per beat, each with the line shown over it.
@@ -128,7 +135,7 @@ export const craft = {
 }
 
 export const statement = {
-  text: 'Every comb, candle, crown and cake begins at one family’s table, where two houses share the work. This is one day, from the first pin in her hair to the last candle on the shelf.',
+  text: 'Every comb, candle, crown and cake begins at our family’s table, in two sections named for our son and our daughter. This is one day, from the first pin in the bride’s hair to the last slice of cake.',
   photos: ['hair-comb-red-wire-flowers-wide', 'pillar-candle-burlap-lace-flower-ring'],
 }
 
@@ -179,8 +186,8 @@ export const ceremony = {
 }
 
 export const celebration = {
-  title: ['Afternoon,', 'the celebration'],
-  text: 'Then the cake, in your colours and finished with a topper to match, for birthdays, christenings, communions and showers.',
+  title: ['Evening,', 'the cake'],
+  text: 'And as the evening begins, the cake: in your colours, finished with a topper to match. For weddings, birthdays, christenings, communions and showers.',
   tags: ['Birthdays', 'Christenings', 'Communions', 'Baby showers', 'Weddings', 'Custom toppers'],
   ring: [
     'cake-pearl-wafer-sail-topper',
@@ -199,8 +206,8 @@ export const celebration = {
 }
 
 export const home = {
-  title: ['Evening,', 'the home'],
-  text: 'And afterwards, the pieces come home: a hoop on the wall, a candle on the shelf, the day kept close.',
+  title: ['Afternoon,', 'the décor'],
+  text: 'By afternoon the hall is dressed: hoops on the doors, garlands on the chairs, a tray for the rings. And when the day is over, every piece goes home with you.',
   // A wall of nine, read left to right, top to bottom. The middle one (5th)
   // opens the chapter full-screen before the wall pulls back.
   wall: [

@@ -4,24 +4,33 @@ Website for a handmade wedding and celebration business: bridal accessories,
 ceremony candles, florals, décor, cakes and cake toppers, for weddings,
 Holy Communions, christenings and birthdays.
 
-The business is shown as two named sections, like departments in a shop:
-**Aiden’s Decor** (bridal accessories, ceremony candles and crowns, bouquets,
-home décor) and **Anita’s Cakes** (celebration cakes and toppers). The names
-are set in `src/content.js` (`houses`) and are still to be confirmed.
+The business is shown like a shop with two named sections: **Aiden’s Decor**,
+named for the owner's son (bridal accessories, ceremony candles and crowns,
+bouquets, wedding and home décor) and **Anita’s Cakes**, named for her daughter
+(celebration cakes and toppers). The names are set in `src/content.js`
+(`houses`) and are still to be confirmed.
 
-It's a single page that tells one wedding day in five chapters (the night
-before, 9:00 the bride, 12:00 the ceremony, 16:00 the celebration, 21:00 the
-home), with heavy motion:
+It's a single page that tells one wedding day in five chapters, walking
+through one section at a time:
+
+- the night before (how the pieces are made), then a pair of doors to choose
+  a section
+- **Aiden’s Decor**: its sign is lowered on gold chains and swings to rest,
+  then 9:00 the bride, 12:00 the ceremony and 16:00 the décor
+- **Anita’s Cakes**: its own sign, then 20:00 the cake
+
+With heavy motion:
 
 - a loading screen that flicks through photos and lifts away; the opening
   headline bursts apart and its photos gather into Chapter I
 - each chapter rises through its own window traced in gold wire: a chapel
-  arch, a gothic window, a cake-plate iris and an embroidery hoop
+  arch, a dressing-table mirror, a gothic window, an embroidery hoop and a
+  cake plate
 - the bride's pieces pass sideways, turning in 3D; candle columns run against
-  each other and part like curtains; a 3D ring of cakes turns as you scroll;
-  a wall of home pieces pulls back from a single wreath
-- an endless, curved gallery you can drag and filter by house; tap a piece to
-  see it full size and swipe between pieces
+  each other and part like curtains; a wall of décor pulls back from a single
+  wreath; a 3D ring of cakes turns as you scroll
+- an endless, curved gallery you can drag and filter by section; tap a piece
+  to see it full size and swipe between pieces
 - a chapter indicator whose wire flower gains a petal per chapter, and an
   epilogue where the finished flower draws itself
 
@@ -52,7 +61,8 @@ Cloudflare Pages, GitHub Pages).
 ### Still to fill in
 
 - The business name (currently the placeholder "Atelier") and the two
-  section names (Aiden’s Decor, Anita’s Cakes)
+  section names (Aiden’s Decor, Anita’s Cakes), including the spelling of her
+  son's name (written both "Aiden" and "Adien" in the chat)
 - WhatsApp number, email and Instagram handle (the buttons are placeholders
   until these are set)
 - The draft wording, for the owner to check

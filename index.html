@@ -58,7 +58,7 @@
           <span class="line line--indent">for the days</span>
           <span class="line">you’ll <em>remember</em></span>
         </h1>
-        <p class="hero__sub">Bridal accessories, ceremony candles, florals and celebration cakes, made by hand for weddings, Holy Communions and every celebration in between.</p>
+        <p class="hero__sub"><!--@heroSub--></p>
         <div class="hero__foot">
           <span>A story in five chapters</span>
           <span class="hero__scroll">Scroll <i></i></span>
@@ -87,8 +87,8 @@
 
       <section class="houses on-light" id="houses" data-bg="ivory">
         <header class="houses__head">
-          <p class="eyebrow">One table, two houses</p>
-          <h2 class="title-xl">Choose <em>your house</em></h2>
+          <p class="eyebrow">One family, two sections</p>
+          <h2 class="title-xl">Choose <em>a section</em></h2>
         </header>
         <div class="houses__doors"><!--@houses--></div>
       </section>
@@ -96,6 +96,10 @@
       <section class="marquee on-light" aria-hidden="true">
         <div class="marquee__row"><div class="marquee__inner"><!--@marquee--></div></div>
         <div class="marquee__row marquee__row--rev"><div class="marquee__inner"><!--@marquee--></div></div>
+      </section>
+
+      <section class="sign sign--decor on-dark" id="decor" data-bg="night" aria-label="<!--@decorName-->">
+        <!--@signDecor-->
       </section>
 
       <section class="bride" id="bride" data-bg="ivory" data-chapter="II" data-chapter-title="The bride">
@@ -128,12 +132,28 @@
         </div>
       </section>
 
-      <section class="celebration on-dark" id="celebration" data-bg="cocoa" data-chapter="IV" data-chapter-title="The celebration">
+      <section class="home on-light" id="home" data-bg="sage" data-chapter="IV" data-chapter-title="The décor">
+        <div class="home__pin">
+          <div class="home__text">
+            <!--@houseTagHome-->
+            <p class="eyebrow">Chapter IV · 16:00</p>
+            <h2 class="title-xl"><!--@homeTitle--></h2>
+            <p class="home__body"><!--@homeText--></p>
+          </div>
+          <div class="home__wall"><!--@homeWall--></div>
+        </div>
+      </section>
+
+      <section class="sign sign--cakes on-light" id="cakes" data-bg="blush" aria-label="<!--@cakesName-->">
+        <!--@signCakes-->
+      </section>
+
+      <section class="celebration on-dark" id="celebration" data-bg="cocoa" data-chapter="V" data-chapter-title="The cake">
         <div class="celebration__pin">
           <p class="celebration__word" aria-hidden="true">celebrate</p>
           <header class="celebration__head">
             <!--@houseTagCelebration-->
-            <p class="eyebrow">Chapter IV · 16:00</p>
+            <p class="eyebrow">Chapter V · 20:00</p>
             <h2 class="title-xl"><!--@celebrationTitle--></h2>
           </header>
           <div class="ring" style="--n: <!--@ringCount-->">
@@ -144,18 +164,6 @@
             <p class="celebration__text"><!--@celebrationText--></p>
             <ul class="celebration__tags"><!--@celebrationTags--></ul>
           </div>
-        </div>
-      </section>
-
-      <section class="home on-light" id="home" data-bg="sage" data-chapter="V" data-chapter-title="The home">
-        <div class="home__pin">
-          <div class="home__text">
-            <!--@houseTagHome-->
-            <p class="eyebrow">Chapter V · 21:00</p>
-            <h2 class="title-xl"><!--@homeTitle--></h2>
-            <p class="home__body"><!--@homeText--></p>
-          </div>
-          <div class="home__wall"><!--@homeWall--></div>
         </div>
       </section>
 
@@ -187,7 +195,7 @@
           <span class="line line--indent">something</span>
           <span class="line"><em>beautiful</em></span>
         </h2>
-        <p class="cta__text">Tell us about your day: the date, the occasion and what you have in mind. Choose the house you’d like to talk to.</p>
+        <p class="cta__text">Tell us about your day: the date, the occasion and what you have in mind. Choose the section you’d like to talk to.</p>
         <div class="cta__houses"><!--@ctaHouses--></div>
         <div class="cta__buttons"><!--@ctaButtons--></div>
       </section>
