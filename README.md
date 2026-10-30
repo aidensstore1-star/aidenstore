@@ -5,20 +5,19 @@ ceremony candles, florals, décor, cakes and cake toppers, for weddings,
 Holy Communions, christenings and birthdays.
 
 The business is shown like a shop with two named sections: a décor section
-named for the owner's son (bridal accessories, ceremony candles and crowns,
-bouquets, wedding and home décor) and a cakes section named for her daughter
-(celebration cakes and toppers). Until the names are confirmed they show as
-the placeholders **[Son]’s Decor** and **[Daughter]’s Cakes**, set in
-`src/content.js` (`houses`).
+named for the owner's son, **Aiden’s Decor** (bridal accessories, ceremony
+candles and crowns, bouquets, wedding and home décor) and a cakes section
+named for her daughter, **Alita’s Cakes** (celebration cakes and toppers). The
+names are set in `src/content.js` (`houses`).
 
 It's a single page that tells one wedding day in five chapters, walking
 through one section at a time:
 
 - the night before (how the pieces are made), then a pair of doors to choose
   a section
-- **[Son]’s Decor**: its sign is lowered on gold chains and swings to rest,
+- **Aiden’s Decor**: its sign is lowered on gold chains and swings to rest,
   then 9:00 the bride, 12:00 the ceremony and 16:00 the décor
-- **[Daughter]’s Cakes**: its own sign, then 20:00 the cake
+- **Alita’s Cakes**: its own sign, then 20:00 the cake
 
 With heavy motion:
 
@@ -72,10 +71,7 @@ the new `dist/`.
 
 ### Still to fill in
 
-- The business name (currently the placeholder "Atelier") and the two
-  section names (replace [Son] and [Daughter]; the chat suggested Aiden’s
-  Decor and Anita’s Cakes, with her son's name written both "Aiden" and
-  "Adien")
+- The business name (currently the placeholder "Atelier")
 - WhatsApp number, email and Instagram handle (the buttons are placeholders
   until these are set)
 - The draft wording, for the owner to check

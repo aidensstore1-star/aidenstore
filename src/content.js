@@ -15,12 +15,9 @@ export const brand = {
 // The business runs as two named sections, like departments in a shop: the
 // décor under her son's name and the cakes under her daughter's. Each
 // section's chapters and photos are matched by `house` below.
-// Placeholder names until the owner confirms them (the chat suggested
-// "Aiden’s Decor" and "Anita’s Cakes"; check the spelling of her son's name).
-// TODO: replace [Son] and [Daughter] with their names.
 export const houses = {
   decor: {
-    name: '[Son]’s Decor',
+    name: 'Aiden’s Decor',
     short: 'Decor',
     namedFor: 'Named for our son',
     line: 'Bridal accessories, ceremony candles and crowns, bouquets and décor for the hall and the home, made in wire, pearl and flower.',
@@ -32,10 +29,10 @@ export const houses = {
     photo: 'hair-comb-pearl-crystal-ivory',
     // Shown around the section's sign as you walk in.
     sign: ['hair-vine-gold-leaves-pearls', 'tall-candle-silver-wire-flowers-pearls', 'triangle-wreath-gold-burgundy-ranunculus'],
-    enquiry: 'Hello [Son]’s Decor! I’d love to ask about',
+    enquiry: 'Hello Aiden’s Decor! I’d love to ask about',
   },
   cakes: {
-    name: '[Daughter]’s Cakes',
+    name: 'Alita’s Cakes',
     short: 'Cakes',
     namedFor: 'Named for our daughter',
     line: 'Celebration cakes designed around your colours, finished with a topper made to match.',
@@ -45,11 +42,11 @@ export const houses = {
     ],
     photo: 'cake-pearl-wafer-sail-topper',
     sign: ['cake-white-wafer-strawberry-topper', 'cake-sheet-lilac-rosettes', 'cake-lion-one-month'],
-    enquiry: 'Hello [Daughter]’s Cakes! I’d love to order',
+    enquiry: 'Hello Alita’s Cakes! I’d love to order',
   },
 }
 
-// Which house a photo belongs to: cakes are Anita's, everything else Aiden's.
+// Which house a photo belongs to: cakes are Alita's, everything else Aiden's.
 export const houseOf = (id) => (photos[id]?.type === 'Cakes' ? 'cakes' : 'decor')
 
 export const photos = {
