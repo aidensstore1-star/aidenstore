@@ -1543,6 +1543,10 @@ html.motion .statement__wire path {
   color: var(--muted);
 }
 
+.house__all {
+  margin-top: 0.8rem;
+}
+
 .house__sections {
   display: flex;
   flex-wrap: wrap;
@@ -1720,6 +1724,10 @@ html.motion .sign__pin {
 .sign__aisles a {
   display: inline-block;
   padding: 0.6rem 0;
+}
+
+.sign__aisles .sign__all {
+  color: var(--sign-accent);
 }
 
 /* A few of the section's pieces, arched, around the sign. */
@@ -2829,6 +2837,11 @@ html.motion .cta__title .line {
   font-size: 0.8rem;
   letter-spacing: 0.1em;
   color: color-mix(in srgb, var(--plum) 60%, transparent);
+}
+
+.detail__more {
+  justify-self: start;
+  font-size: 0.85rem;
 }
 
 .detail__info .btn--solid {

@@ -53,16 +53,23 @@ Cloudflare Pages, GitHub Pages).
 ## Admin panel and database
 
 The admin panel is at `/admin/`. It signs in through Supabase, and only
-people on the admin team get in. Phase 1 has signing in, password reset and
-the dashboard; the other pages arrive in later phases.
+people on the admin team get in. It has the dashboard and publishing so far;
+the other pages arrive in later phases.
+
+The site is built from the database: pressing **Publish** rebuilds it with
+the latest content (about a minute). Each section has its own page
+(`/decor/`, `/cakes/`) and every product has one too (`/decor/<product>/`),
+for search engines and for sharing.
 
 The database (tables, security rules, photo storage) is in `supabase/`.
 `supabase/README.md` explains who can do what and how to set up the hosted
 project. Useful commands:
 
 ```sh
-npm run db:seed-file   # rewrite supabase/seed.sql from src/content.js
-npm run db:test        # check the security rules on a throwaway local Postgres
+npm run content          # fetch content and photos from Supabase (or use src/content.js)
+npm run db:seed-file     # rewrite supabase/seed.sql from src/content.js
+npm run db:test          # check the security rules on a throwaway local Postgres
+npm run db:upload-photos # once: put the site's photos into Supabase storage
 ```
 
 To run the admin panel locally, copy `.env.example` to `.env.local` and fill

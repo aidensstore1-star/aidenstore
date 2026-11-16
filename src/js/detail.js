@@ -15,6 +15,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
   const title = root.querySelector('.detail__title')
   const count = root.querySelector('.detail__count')
   const enquire = root.querySelector('.detail__enquire')
+  const more = root.querySelector('.detail__more')
   const closeBtn = root.querySelector('.detail__close')
   const navs = root.querySelectorAll('.detail__nav')
   const chrome = [closeBtn, ...navs]
@@ -48,6 +49,8 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     img.alt = p.alt || ''
     type.textContent = `${houses[houseOf(id)].name} · ${p.type || ''}`
     title.textContent = p.title || ''
+    // The piece's own page in its section.
+    more.href = `${p.section || houseOf(id)}/${p.slug || id}/`
     count.textContent = `${String(index + 1).padStart(2, '0')} / ${String(gallery.length).padStart(2, '0')}`
     if (brand.whatsapp) {
       enquire.href = `https://wa.me/${brand.whatsapp}?text=${encodeURIComponent(`${houses[houseOf(id)].enquiry} the ${p.title}.`)}`
@@ -260,7 +263,7 @@ export function initDetail({ scroll, gl, galleryApi, reduced }) {
     if (e.key === 'ArrowLeft') go(-1)
     if (e.key === 'Tab') {
       // Keep focus inside the dialog.
-      const focusables = [closeBtn, enquire, ...navs]
+      const focusables = [closeBtn, more, enquire, ...navs]
       const i = focusables.indexOf(document.activeElement)
       e.preventDefault()
       focusables[(i + (e.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus()

@@ -1,8 +1,9 @@
-// Builds the repeated parts of index.html from src/content.js at build time,
-// so the page ships as plain HTML (readable without JavaScript).
+// Builds the repeated parts of index.html from the site's content at build
+// time (src/content.js, or what scripts/fetch-content.mjs fetched from
+// Supabase), so the page ships as plain HTML (readable without JavaScript).
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import * as content from '../src/content.js'
+import { loadContent } from './content-source.mjs'
 
 const root = path.resolve(import.meta.dirname, '..')
 const loadManifest = () => JSON.parse(readFileSync(path.join(root, 'src', 'photo-manifest.json'), 'utf8'))
@@ -11,13 +12,13 @@ const esc = (s = '') =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const pad = (n) => String(n).padStart(2, '0')
 
-export function renderSections() {
+export function renderSections(content) {
   const manifest = loadManifest()
   const { brand, photos } = content
 
   const size = (id) => {
     const m = manifest[id]
-    if (!m) throw new Error(`Photo "${id}" is listed in content.js but missing from images/`)
+    if (!m) throw new Error(`Photo "${id}" is used on the page but has no file in public/photos/`)
     return m
   }
 
@@ -85,6 +86,7 @@ export function renderSections() {
       .filter((sec, j, all) => all.findIndex((x) => x.label === sec.label) === j)
       .map((sec) => `<li><a class="link" href="${sec.href}">${esc(sec.label)}</a></li>`)
       .join('')}</ul>
+    <a class="btn magnetic house__all" href="${key}/"><span>See everything in ${esc(h.name)}</span></a>
   </div>
 </article>`,
     )
@@ -106,7 +108,7 @@ export function renderSections() {
     <ul class="sign__aisles">${h.sections
       .filter((sec, j, all) => all.findIndex((x) => x.label === sec.label) === j)
       .map((sec) => `<li><a href="${sec.href}">${esc(sec.label)}</a></li>`)
-      .join('')}</ul>
+      .join('')}<li><a class="sign__all" href="${key}/">See everything →</a></li></ul>
   </div>
   <div class="sign__scrim" aria-hidden="true"></div>
 </div>`
@@ -328,8 +330,10 @@ export function renderSections() {
 export function htmlContent() {
   return {
     name: 'html-content',
-    transformIndexHtml(html) {
-      const sections = renderSections()
+    // Only the story page (index.html) has these placeholders.
+    async transformIndexHtml(html, ctx) {
+      if (path.basename(ctx.filename) !== 'index.html' || path.dirname(ctx.filename) !== root) return html
+      const sections = renderSections(await loadContent())
       return html.replace(/<!--@(\w+)-->/g, (match, key) => {
         if (!(key in sections)) throw new Error(`index.html uses unknown section "${key}"`)
         return sections[key]

@@ -290,6 +290,41 @@ input {
   border-bottom: 1px solid var(--line);
 }
 
+/* Publish */
+.publish {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+
+.publish .note {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  color: var(--plum);
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge--ok {
+  background: #dfe9d8;
+  color: #2f5a2a;
+}
+
+.badge--busy {
+  background: #f4e6c8;
+  color: #6d4f12;
+}
+
+.badge--bad {
+  background: #f3d9d4;
+  color: var(--danger);
+}
+
 /* Phones: the menu becomes a row of tabs under the header. */
 @media (max-width: 760px) {
   .panel {
@@ -323,6 +358,14 @@ input {
   .stats {
     grid-template-columns: 1fr 1fr;
     gap: 0.7rem;
+  }
+
+  .publish {
+    grid-template-columns: 1fr;
+  }
+
+  .publish .note {
+    grid-row: auto;
   }
 
   .activity li {

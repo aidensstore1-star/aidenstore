@@ -4,8 +4,8 @@ import '@fontsource-variable/manrope'
 import './admin.css'
 import { configured, supabase } from './supabase.js'
 
-// The admin panel. Phase 1: signing in, password reset, and the dashboard
-// shell. The other pages arrive in later phases.
+// The admin panel: signing in, password reset, the dashboard and publishing.
+// The other pages arrive in later phases.
 //
 // Everything shown comes from the database, so text is always set with
 // textContent (never as HTML) to keep anything typed into the site from
@@ -170,8 +170,21 @@ const pages = [
   { id: 'content', label: 'Site text', soon: 'phase 3' },
   { id: 'gallery', label: 'Gallery', soon: 'phase 3' },
   { id: 'settings', label: 'Settings', soon: 'phase 3' },
-  { id: 'publish', label: 'Publish', soon: 'phase 2' },
+  { id: 'publish', label: 'Publish' },
 ]
+
+// Shows a page of the panel; remembered in the address (#publish) so a
+// reload stays on it.
+const views = { dashboard: (el) => dashboard(el), publish: (el) => publish(el) }
+let stopPage = null
+function go(id, content, nav) {
+  if (!views[id]) id = 'dashboard'
+  stopPage?.()
+  stopPage = null
+  for (const b of nav.querySelectorAll('.nav__item')) b.setAttribute('aria-current', b.dataset.page === id ? 'page' : 'false')
+  history.replaceState(null, '', id === 'dashboard' ? location.pathname : `#${id}`)
+  views[id](content)
+}
 
 const dateTime = (iso) =>
   iso ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)) : '—'
@@ -222,9 +235,10 @@ async function openPanel() {
         'button.nav__item',
         {
           type: 'button',
-          'aria-current': p.id === 'dashboard' ? 'page' : false,
+          'data-page': p.id,
           disabled: Boolean(p.soon),
           title: p.soon ? `Coming in ${p.soon}` : false,
+          onclick: () => go(p.id, content, nav),
         },
         p.label,
         p.soon ? h('span.nav__soon', 'soon') : null,
@@ -247,7 +261,28 @@ async function openPanel() {
       content,
     ),
   )
-  dashboard(content)
+  go(location.hash.slice(1), content, nav)
+}
+
+// ---------- Publishing ----------
+
+// When the live site last fetched its content, from the build-info.json that
+// every build writes. A publish is live once the live site's content is
+// newer than the moment it was requested.
+async function liveBuild() {
+  try {
+    const res = await fetch(new URL('../build-info.json', location.href), { cache: 'no-store' })
+    return res.ok ? await res.json() : null
+  } catch {
+    return null
+  }
+}
+
+function publishState(entry, build) {
+  const asked = Date.parse(entry.created_at)
+  if (build?.contentFetchedAt && Date.parse(build.contentFetchedAt) >= asked) return { label: 'Live', tone: 'ok' }
+  if (Date.now() - asked < 15 * 60 * 1000) return { label: 'Building…', tone: 'busy' }
+  return { label: 'Didn’t go live: check the build in Cloudflare', tone: 'bad' }
 }
 
 async function dashboard(content) {
@@ -260,6 +295,7 @@ async function dashboard(content) {
 
   const stat = (label, value, hint) => h('div.stat', h('p.stat__value', String(value ?? 0)), h('p.stat__label', label), hint ? h('p.muted', hint) : null)
   const last = summary.last_publish
+  const lastState = last ? publishState(last, await liveBuild()) : null
   content.replaceChildren(
     h('h1', 'Dashboard'),
     h(
@@ -272,7 +308,9 @@ async function dashboard(content) {
     h(
       'div.box',
       h('h2', 'Last publish'),
-      last ? h('p', `${last.status} · ${dateTime(last.created_at)}${last.message ? ` · ${last.message}` : ''}`) : h('p.muted', 'Nothing published from here yet.'),
+      last
+        ? h('p', h(`span.badge.badge--${lastState.tone}`, lastState.label), ` ${dateTime(last.created_at)}${last.message ? ` · ${last.message}` : ''}`)
+        : h('p.muted', 'Nothing published from here yet.'),
     ),
     h(
       'div.box',
@@ -285,6 +323,86 @@ async function dashboard(content) {
         : h('p.muted', 'No changes yet.'),
     ),
   )
+}
+
+async function publish(content) {
+  const note = h('p.note', { role: 'status' })
+  const form = h(
+    'form.form.publish',
+    h('label', 'What changed? (optional)', h('input', { name: 'message', maxlength: 200, placeholder: 'e.g. New cake prices' })),
+    note,
+    h('button.btn', { type: 'submit' }, 'Publish changes'),
+  )
+  const liveLine = h('p.muted')
+  const historyBox = h('div.box', h('h2', 'History'), h('p.muted', 'Loading…'))
+  content.replaceChildren(
+    h('h1', 'Publish'),
+    h('p', 'Changes made here appear on the website once you publish. The site is rebuilt with everything saved so far, which takes about a minute.'),
+    h('div.box', form, liveLine),
+    historyBox,
+  )
+
+  let timer = 0
+  let alive = true
+  stopPage = () => {
+    alive = false
+    clearTimeout(timer)
+  }
+
+  async function refresh() {
+    const [{ data: log, error }, { data: team }, build] = await Promise.all([
+      supabase.from('publish_log').select('created_at, message, requested_by').order('created_at', { ascending: false }).limit(15),
+      supabase.from('admins').select('user_id, email'),
+      liveBuild(),
+    ])
+    if (!alive) return
+    liveLine.textContent = build ? `The live site was built ${dateTime(build.builtAt)}.` : ''
+    if (error) return historyBox.replaceChildren(h('h2', 'History'), h('p.note', friendly(error)))
+    const who = Object.fromEntries((team || []).map((t) => [t.user_id, t.email]))
+    const states = (log || []).map((e) => publishState(e, build))
+    historyBox.replaceChildren(
+      h('h2', 'History'),
+      log?.length
+        ? h(
+            'ul.activity',
+            log.map((e, i) =>
+              h(
+                'li',
+                h('span', h(`span.badge.badge--${states[i].tone}`, states[i].label), ` ${e.message || 'Published'}`),
+                h('span.muted', `${who[e.requested_by] || 'Someone'} · ${dateTime(e.created_at)}`),
+              ),
+            ),
+          )
+        : h('p.muted', 'Nothing published from here yet.'),
+    )
+    // Keep checking while a publish is on its way.
+    if (states.some((s) => s.tone === 'busy')) timer = setTimeout(refresh, 10000)
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault()
+    busy(form, true)
+    note.textContent = 'Starting…'
+    try {
+      const { data } = await supabase.auth.getSession()
+      const res = await fetch(new URL('../api/publish', location.href), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${data.session?.access_token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: form.elements.message.value }),
+      })
+      const body = await res.json().catch(() => ({}))
+      note.textContent =
+        body.message || (res.status === 404 ? 'Publishing only works on the live site (it needs Cloudflare).' : 'Couldn’t start publishing. Please try again.')
+      if (res.ok) form.reset()
+    } catch {
+      note.textContent = 'Can’t reach the server. Check your internet connection.'
+    }
+    busy(form, false)
+    clearTimeout(timer)
+    refresh()
+  })
+
+  refresh()
 }
 
 // ---------- Start ----------

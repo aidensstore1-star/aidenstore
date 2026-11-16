@@ -70,6 +70,32 @@ orders and payments, and the admin team.
    The **service (secret) key** is only ever stored as a Cloudflare secret
    for the server code. Never put it in a `VITE_` variable or in the code.
 
+8. **Upload the site's current photos** into the `public-media` bucket, once,
+   from your own computer (the service key stays there):
+   ```sh
+   SUPABASE_SERVICE_KEY=<service key> npm run db:upload-photos
+   ```
+9. **Set up publishing** in Cloudflare Pages: *Settings → Builds → Deploy
+   hooks*, add a hook for the production branch, and save its address as the
+   secret `DEPLOY_HOOK_URL` (*Settings → Variables and secrets*). Also set
+   `SITE_URL` to the site's address. The admin panel's Publish button calls
+   `functions/api/publish.js`, which checks the person is an admin and then
+   calls the hook.
+
+## How content reaches the site
+
+The site is built from the database, not read from it while visitors
+browse: `npm run build` first runs `npm run content`
+(`scripts/fetch-content.mjs`), which reads what visitors may see with the
+publishable key, downloads any new photos and writes
+`src/content.generated.js`. Without Supabase settings it uses
+`src/content.js` instead, so the site still builds on its own.
+
+The texts and sections refer to photos by product (its slug), so replacing a
+product's photo updates every place it appears. A hidden product drops out
+of lists; a slot that needs one photo shows another from the same section
+and the build prints a warning.
+
 ## Changing the database later
 
 Add a new file to `migrations/` (named `<timestamp>_<what>.sql`); never edit

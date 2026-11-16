@@ -5,13 +5,15 @@
   "type": "module",
   "scripts": {
     "images": "node scripts/prepare-images.mjs",
-    "predev": "npm run images",
+    "predev": "npm run images && npm run content",
     "dev": "vite",
-    "prebuild": "npm run images",
+    "prebuild": "npm run images && npm run content",
     "build": "vite build",
     "preview": "vite preview",
     "db:seed-file": "node scripts/make-seed.mjs",
-    "db:test": "npm run db:seed-file && bash scripts/test-db.sh"
+    "db:test": "npm run db:seed-file && bash scripts/test-db.sh",
+    "content": "node scripts/fetch-content.mjs",
+    "db:upload-photos": "node scripts/upload-photos.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.3.0",
