@@ -97,7 +97,7 @@ Under *Settings → Variables and secrets* of the Pages project:
 | Name | Kind | What for |
 |---|---|---|
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` | plain | the build and the Functions read the database |
-| `SITE_URL` | plain | canonical links, sitemap and `robots.txt` (search engines are kept out until it's set) |
+| `SITE_URL` | plain | canonical links, sitemap and `robots.txt` (search engines are kept out until it's the shop's own domain, not `*.pages.dev`) |
 | `NODE_VERSION` | plain | `22` |
 | `DEPLOY_HOOK_URL` | secret | the admin panel's Publish button |
 | `SUPABASE_SERVICE_KEY` | secret | orders and team invitations (server side only) |

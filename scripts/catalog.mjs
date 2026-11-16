@@ -383,11 +383,13 @@ export function catalogPages() {
       this.emitFile({ type: 'asset', fileName: page.file, source: html })
     }
     if (sitemap) this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemap })
-    // Search engines may list the site once it has its own address.
+    // Search engines may list the site once it has its own address (not
+    // Cloudflare's temporary *.pages.dev one).
+    const ownAddress = siteUrl && !new URL(siteUrl).hostname.endsWith('.pages.dev')
     this.emitFile({
       type: 'asset',
       fileName: 'robots.txt',
-      source: siteUrl ? `User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: ${new URL('sitemap.xml', siteUrl.replace(/\/?$/, '/')).href}\n` : 'User-agent: *\nDisallow: /\n',
+      source: ownAddress ? `User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: ${new URL('sitemap.xml', siteUrl.replace(/\/?$/, '/')).href}\n` : 'User-agent: *\nDisallow: /\n',
     })
     // Security headers for Cloudflare Pages, allowing exactly the site's own
     // inline scripts (by their fingerprints) and nothing else.
@@ -437,7 +439,7 @@ export function securityHeaders(htmlFiles, { supabaseUrl = '', turnstile = false
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${supabase}`,
     "font-src 'self'",
-    `connect-src 'self'${supabase}${supabase.replace('https://', ' wss://')}`,
+    `connect-src 'self'${supabase}${supabase.replace(' https://', ' wss://')}`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -456,11 +458,13 @@ export function securityHeaders(htmlFiles, { supabaseUrl = '', turnstile = false
 # The admin panel: never cached, never listed by search engines, never shown
 # inside another site's frame, and only allowed to talk to Supabase.
 /admin/*
+  ! Content-Security-Policy
+  ! X-Frame-Options
+  ! Referrer-Policy
   Cache-Control: no-store
   X-Robots-Tag: noindex, nofollow
   X-Frame-Options: DENY
   Referrer-Policy: no-referrer
-  ! Content-Security-Policy
   Content-Security-Policy: ${admin}
 
 /assets/*
