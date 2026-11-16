@@ -2,7 +2,7 @@ import '@fontsource/cormorant-garamond/latin-400.css'
 import '@fontsource/cormorant-garamond/latin-400-italic.css'
 import '@fontsource-variable/manrope'
 import './admin.css'
-import { configured, supabase } from './supabase.js'
+import { arrivedFromInvite, configured, supabase } from './supabase.js'
 
 // The admin panel: signing in, password reset, the dashboard and publishing.
 // The other pages arrive in later phases.
@@ -133,7 +133,8 @@ function forgot(prefill = '') {
   form.elements.email.focus()
 }
 
-function newPassword() {
+// Also the first screen for someone arriving from their invitation email.
+function newPassword({ invited = false } = {}) {
   const note = h('p.note', { role: 'alert' })
   const form = h(
     'form.form',
@@ -141,7 +142,7 @@ function newPassword() {
     h('label', 'New password', h('input', { type: 'password', name: 'password', autocomplete: 'new-password', minlength: 8, required: true })),
     h('label', 'Type it again', h('input', { type: 'password', name: 'again', autocomplete: 'new-password', required: true })),
     note,
-    h('button.btn', { type: 'submit' }, 'Save the new password'),
+    h('button.btn', { type: 'submit' }, invited ? 'Save and continue' : 'Save the new password'),
   )
   form.addEventListener('submit', async (e) => {
     e.preventDefault()
@@ -155,7 +156,11 @@ function newPassword() {
     recovering = false
     openPanel()
   })
-  show(card('Choose a new password', form))
+  show(
+    invited
+      ? card('Welcome', h('p', 'Choose a password for signing in to the admin panel. You’ll use it with this email from now on.'), form)
+      : card('Choose a new password', form),
+  )
   form.elements.password.focus()
 }
 
@@ -407,8 +412,10 @@ async function publish(content) {
 
 // ---------- Start ----------
 
-// Arriving from a password-reset link: choose a new password before anything else.
+// Arriving from a password-reset link or an invitation: choose a password
+// before anything else (for an invitation, only on that first arrival).
 let recovering = false
+let inviteToAnswer = arrivedFromInvite
 // Whose panel is open, so repeated sign-in events don't redraw it.
 let openFor = null
 
@@ -418,9 +425,11 @@ if (!configured) {
   supabase.auth.onAuthStateChange((event, session) => {
     // Run outside the callback: Supabase asks that it not await other calls.
     setTimeout(() => {
-      if (event === 'PASSWORD_RECOVERY') {
+      if (event === 'PASSWORD_RECOVERY' || (inviteToAnswer && session && event !== 'SIGNED_OUT')) {
+        const invited = event !== 'PASSWORD_RECOVERY'
+        inviteToAnswer = false
         recovering = true
-        return newPassword()
+        return newPassword({ invited })
       }
       if (recovering) return
       if (!session || event === 'SIGNED_OUT') {

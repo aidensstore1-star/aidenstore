@@ -9,6 +9,10 @@ const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
 
 export const configured = Boolean(url && key)
 
+// Someone arriving from their invitation email. Read before the client below
+// starts, because it signs them in from the address and then clears it.
+export const arrivedFromInvite = /[#&?]type=invite\b/.test(location.hash + location.search)
+
 export const supabase = configured
   ? createClient(url, key, {
       auth: {
