@@ -6,5 +6,10 @@ export default defineConfig({
   base: './',
   plugins: [htmlContent()],
   server: { host: true },
-  build: { target: 'es2022', assetsInlineLimit: 0 },
+  build: {
+    target: 'es2022',
+    assetsInlineLimit: 0,
+    // The site, and the admin panel at /admin/.
+    rollupOptions: { input: { site: 'index.html', admin: 'admin/index.html' } },
+  },
 })

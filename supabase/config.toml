@@ -1,0 +1,22 @@
+# Settings for the Supabase command-line tool (`npx supabase ...`), used to
+# send the migrations to the hosted project. The auth settings here apply to
+# a local test copy; set the same ones in the hosted project's dashboard
+# (see supabase/README.md).
+project_id = "shop"
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/admin/"]
+# Admins are invited; nobody can sign themselves up.
+enable_signup = false
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = false
+enable_confirmations = true
+
+[storage]
+file_size_limit = "5MiB"

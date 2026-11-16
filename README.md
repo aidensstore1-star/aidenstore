@@ -50,6 +50,24 @@ npm run build    # production files in dist/
 `dist/` is plain static files and can go on any static host (Netlify, Vercel,
 Cloudflare Pages, GitHub Pages).
 
+## Admin panel and database
+
+The admin panel is at `/admin/`. It signs in through Supabase, and only
+people on the admin team get in. Phase 1 has signing in, password reset and
+the dashboard; the other pages arrive in later phases.
+
+The database (tables, security rules, photo storage) is in `supabase/`.
+`supabase/README.md` explains who can do what and how to set up the hosted
+project. Useful commands:
+
+```sh
+npm run db:seed-file   # rewrite supabase/seed.sql from src/content.js
+npm run db:test        # check the security rules on a throwaway local Postgres
+```
+
+To run the admin panel locally, copy `.env.example` to `.env.local` and fill
+in the project's address and publishable key.
+
 ## Preview link
 
 The built site is published with GitHub Pages from the `gh-pages` branch:
