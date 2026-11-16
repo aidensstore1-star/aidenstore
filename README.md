@@ -53,8 +53,23 @@ Cloudflare Pages, GitHub Pages).
 ## Admin panel and database
 
 The admin panel is at `/admin/`. It signs in through Supabase, and only
-people on the admin team get in. It has the dashboard and publishing so far;
-the other pages arrive in later phases.
+people on the admin team get in. Its pages (in `src/admin/pages/`):
+
+- **Dashboard**: new and open inquiries, payments due, products, recent
+  changes, and a reminder when there are changes to publish
+- **Inquiries**: each cake inquiry with its private photos, a WhatsApp reply
+  button, status and notes; then the quote and the payments received
+- **Products**: add, edit, hide, reorder and delete products in each section,
+  with photos (resized to the site's two sizes and given the site's warm
+  colour in the browser before uploading)
+- **Gallery**: which pieces the story page's gallery shows, in what order
+- **Cake options**: occasions, sizes, bases and frostings, with their prices
+- **Site text**: every text on the story page and the two sections' signs,
+  with photo pickers
+- **Settings**: business name, WhatsApp, email, Instagram, UPI ID and QR code,
+  search-engine title and description
+- **Team** (owners): invite, change and remove admins
+- **Publish**: rebuild the site with the latest content
 
 The site is built from the database: pressing **Publish** rebuilds it with
 the latest content (about a minute). Each section has its own page

@@ -3,54 +3,23 @@ import '@fontsource/cormorant-garamond/latin-400-italic.css'
 import '@fontsource-variable/manrope'
 import './admin.css'
 import { arrivedFromInvite, configured, supabase } from './supabase.js'
+import { busy, dateTime, fill, friendly, h } from './ui.js'
+import { cakeOptions } from './pages/cake-options.js'
+import { gallery } from './pages/gallery.js'
+import { inquiries } from './pages/inquiries.js'
+import { products } from './pages/products.js'
+import { settings } from './pages/settings.js'
+import { siteText } from './pages/site-text.js'
+import { team } from './pages/team.js'
 
-// The admin panel: signing in, password reset, the dashboard and publishing.
-// The other pages arrive in later phases.
-//
-// Everything shown comes from the database, so text is always set with
-// textContent (never as HTML) to keep anything typed into the site from
-// running as code here.
+// The admin panel: signing in, the dashboard, and a page for each part of the
+// shop (in ./pages). Shared pieces are in ./ui.js.
 
 const app = document.getElementById('app')
-
-// Builds an element: h('p.note', 'Hello') or h('button', { type: 'submit' }, 'Go').
-function h(tag, ...rest) {
-  const [name, ...classes] = tag.split('.')
-  const el = document.createElement(name)
-  if (classes.length) el.className = classes.join(' ')
-  for (const part of rest) {
-    if (part == null || part === false) continue
-    if (typeof part === 'string' || typeof part === 'number') el.append(String(part))
-    else if (part instanceof Node) el.append(part)
-    else if (Array.isArray(part)) el.append(...part.filter(Boolean))
-    else
-      for (const [k, v] of Object.entries(part)) {
-        if (k.startsWith('on')) el.addEventListener(k.slice(2), v)
-        else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v)
-      }
-  }
-  return el
-}
-
-const show = (...nodes) => app.replaceChildren(...nodes)
-
-// Turns Supabase's error messages into plain words for the owner.
-function friendly(error) {
-  const m = (error?.message || '').toLowerCase()
-  if (m.includes('invalid login')) return 'That email and password don’t match an account.'
-  if (m.includes('email not confirmed')) return 'Please confirm your email first: open the link we sent you.'
-  if (m.includes('rate limit') || m.includes('too many')) return 'Too many tries. Please wait a few minutes and try again.'
-  if (m.includes('password should be')) return 'The password needs to be at least 8 characters.'
-  if (m.includes('failed to fetch') || m.includes('network')) return 'Can’t reach the server. Check your internet connection.'
-  return 'Something went wrong. Please try again.'
-}
+const show = (...nodes) => fill(app, ...nodes)
 
 function card(title, ...body) {
   return h('main.auth', h('section.auth__card', h('p.brand', 'Admin'), h('h1', title), ...body))
-}
-
-function busy(form, on) {
-  for (const el of form.elements) el.disabled = on
 }
 
 // ---------- Not set up yet ----------
@@ -166,33 +135,44 @@ function newPassword({ invited = false } = {}) {
 
 // ---------- The panel ----------
 
-// Pages in the menu, with the phase that brings each one.
+// The menu, and the page each item opens.
 const pages = [
-  { id: 'dashboard', label: 'Dashboard' },
-  { id: 'inquiries', label: 'Inquiries', soon: 'phase 4' },
-  { id: 'products', label: 'Products', soon: 'phase 3' },
-  { id: 'cake-options', label: 'Cake options', soon: 'phase 3' },
-  { id: 'content', label: 'Site text', soon: 'phase 3' },
-  { id: 'gallery', label: 'Gallery', soon: 'phase 3' },
-  { id: 'settings', label: 'Settings', soon: 'phase 3' },
-  { id: 'publish', label: 'Publish' },
+  { id: 'dashboard', label: 'Dashboard', view: (el, ctx) => dashboard(el, ctx) },
+  { id: 'inquiries', label: 'Inquiries', view: inquiries },
+  { id: 'products', label: 'Products', view: products },
+  { id: 'gallery', label: 'Gallery', view: gallery },
+  { id: 'cake-options', label: 'Cake options', view: cakeOptions },
+  { id: 'site-text', label: 'Site text', view: siteText },
+  { id: 'settings', label: 'Settings', view: settings },
+  { id: 'team', label: 'Team', view: team },
+  { id: 'publish', label: 'Publish', view: (el) => publish(el) },
 ]
 
-// Shows a page of the panel; remembered in the address (#publish) so a
+// Shows a page of the panel; remembered in the address (#products) so a
 // reload stays on it.
-const views = { dashboard: (el) => dashboard(el), publish: (el) => publish(el) }
 let stopPage = null
-function go(id, content, nav) {
-  if (!views[id]) id = 'dashboard'
+// Each page gets a fresh area to draw in, so a page still loading when you
+// move on can't draw over the next one.
+function go(id, slot, nav, ctx) {
+  const content = h('section.content')
+  fill(slot, content)
+  const page = pages.find((p) => p.id === id) || pages[0]
   stopPage?.()
   stopPage = null
-  for (const b of nav.querySelectorAll('.nav__item')) b.setAttribute('aria-current', b.dataset.page === id ? 'page' : 'false')
-  history.replaceState(null, '', id === 'dashboard' ? location.pathname : `#${id}`)
-  views[id](content)
+  for (const b of nav.querySelectorAll('.nav__item')) b.setAttribute('aria-current', b.dataset.page === page.id ? 'page' : 'false')
+  history.replaceState(null, '', page.id === 'dashboard' ? location.pathname : `#${page.id}`)
+  window.scrollTo(0, 0)
+  page.view(content, ctx)
+  markUnpublished(nav)
 }
 
-const dateTime = (iso) =>
-  iso ? new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso)) : '—'
+// A dot on Publish when there are saved changes the live site doesn't have yet.
+async function markUnpublished(nav) {
+  const [build, { data: last }] = await Promise.all([liveBuild(), supabase.from('activity_log').select('at').order('at', { ascending: false }).limit(1)])
+  const pending = Boolean(last?.[0] && build?.contentFetchedAt && Date.parse(last[0].at) > Date.parse(build.contentFetchedAt))
+  nav.querySelector('[data-page=publish]')?.classList.toggle('has-dot', pending)
+  return pending
+}
 
 const describe = {
   insert: 'added',
@@ -228,10 +208,11 @@ async function openPanel() {
     return supabase.auth.signOut()
   }
 
-  const { data: me } = await supabase.from('admins').select('email, role').eq('user_id', user.id).single()
+  const { data: me } = await supabase.from('admins').select('user_id, email, role').eq('user_id', user.id).single()
   const { data: settings } = await supabase.from('site_settings').select('business_name').single()
 
-  const content = h('section.content')
+  const slot = h('div.slot')
+  const ctx = { me: me || { user_id: user.id, email: user.email, role: 'editor' } }
   const nav = h(
     'nav.nav',
     { 'aria-label': 'Admin' },
@@ -241,12 +222,9 @@ async function openPanel() {
         {
           type: 'button',
           'data-page': p.id,
-          disabled: Boolean(p.soon),
-          title: p.soon ? `Coming in ${p.soon}` : false,
-          onclick: () => go(p.id, content, nav),
+          onclick: () => go(p.id, slot, nav, ctx),
         },
         p.label,
-        p.soon ? h('span.nav__soon', 'soon') : null,
       ),
     ),
   )
@@ -263,10 +241,10 @@ async function openPanel() {
         ),
       ),
       nav,
-      content,
+      slot,
     ),
   )
-  go(location.hash.slice(1), content, nav)
+  go(location.hash.slice(1), slot, nav, ctx)
 }
 
 // ---------- Publishing ----------
@@ -291,18 +269,27 @@ function publishState(entry, build) {
 }
 
 async function dashboard(content) {
-  content.replaceChildren(h('h1', 'Dashboard'), h('p.muted', 'Loading…'))
-  const [{ data: summary, error }, { data: activity }] = await Promise.all([
+  fill(content, h('h1', 'Dashboard'), h('p.muted', 'Loading…'))
+  const [{ data: summary, error }, { data: activity }, build] = await Promise.all([
     supabase.rpc('dashboard_summary'),
     supabase.from('activity_log').select('action, table_name, at, actor').order('at', { ascending: false }).limit(8),
+    liveBuild(),
   ])
-  if (error) return content.replaceChildren(h('h1', 'Dashboard'), h('p.note', friendly(error)))
+  if (error) return fill(content, h('h1', 'Dashboard'), h('p.note', friendly(error)))
+  const unpublished = activity?.[0] && build?.contentFetchedAt && Date.parse(activity[0].at) > Date.parse(build.contentFetchedAt)
+  const goTo = (id) => document.querySelector(`.nav__item[data-page="${id}"]`)?.click()
 
   const stat = (label, value, hint) => h('div.stat', h('p.stat__value', String(value ?? 0)), h('p.stat__label', label), hint ? h('p.muted', hint) : null)
   const last = summary.last_publish
-  const lastState = last ? publishState(last, await liveBuild()) : null
-  content.replaceChildren(
+  const lastState = last ? publishState(last, build) : null
+  fill(content,
     h('h1', 'Dashboard'),
+    unpublished
+      ? h('div.banner', h('span', 'You have changes that aren’t on the website yet.'), h('button.btn', { type: 'button', onclick: () => goTo('publish') }, 'Publish them'))
+      : null,
+    summary.new_inquiries
+      ? h('div.banner.banner--busy', h('span', `${summary.new_inquiries} new ${summary.new_inquiries === 1 ? 'inquiry' : 'inquiries'} waiting for a reply.`), h('button.btn', { type: 'button', onclick: () => goTo('inquiries') }, 'See inquiries'))
+      : null,
     h(
       'div.stats',
       stat('New inquiries', summary.new_inquiries),
@@ -340,7 +327,7 @@ async function publish(content) {
   )
   const liveLine = h('p.muted')
   const historyBox = h('div.box', h('h2', 'History'), h('p.muted', 'Loading…'))
-  content.replaceChildren(
+  fill(content,
     h('h1', 'Publish'),
     h('p', 'Changes made here appear on the website once you publish. The site is rebuilt with everything saved so far, which takes about a minute.'),
     h('div.box', form, liveLine),
@@ -362,10 +349,10 @@ async function publish(content) {
     ])
     if (!alive) return
     liveLine.textContent = build ? `The live site was built ${dateTime(build.builtAt)}.` : ''
-    if (error) return historyBox.replaceChildren(h('h2', 'History'), h('p.note', friendly(error)))
+    if (error) return fill(historyBox, h('h2', 'History'), h('p.note', friendly(error)))
     const who = Object.fromEntries((team || []).map((t) => [t.user_id, t.email]))
     const states = (log || []).map((e) => publishState(e, build))
-    historyBox.replaceChildren(
+    fill(historyBox,
       h('h2', 'History'),
       log?.length
         ? h(

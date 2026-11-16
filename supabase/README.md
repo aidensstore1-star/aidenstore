@@ -91,6 +91,10 @@ final address in *URL Configuration*, and sending emails through Resend.
    `SITE_URL` to the site's address. The admin panel's Publish button calls
    `functions/api/publish.js`, which checks the person is an admin and then
    calls the hook.
+10. **Set up invitations from the admin panel's Team page:** save the
+   project's secret key as the Cloudflare secret `SUPABASE_SERVICE_KEY`.
+   Only `functions/api/invite.js` uses it, after checking the caller is an
+   owner; it never reaches the browser.
 
 ## How content reaches the site
 
