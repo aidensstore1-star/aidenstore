@@ -30,6 +30,16 @@ orders and payments, and the admin team.
 - Site photos live in the public `public-media` bucket (readable, not
   listable); customers' photos are in the private `inquiry-uploads` bucket.
 
+## The live project
+
+Project `xwhjgkwtddvofnufijoi` (Singapore), at
+`https://xwhjgkwtddvofnufijoi.supabase.co`. Set up on 16 Nov 2026: the
+migration and seed are applied, the 84 photo files are in `public-media`,
+public sign-ups are off, passwords need 8 characters, and the access rules
+were checked against it (visitors, uninvited accounts, admins, storage). No
+admins yet: invite the owner (step 5 below). Still to do there: the site's
+final address in *URL Configuration*, and sending emails through Resend.
+
 ## Setting up the hosted project
 
 1. **Create the project** at supabase.com: region *Mumbai (ap-south-1)*,
