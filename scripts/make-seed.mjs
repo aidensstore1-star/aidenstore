@@ -78,19 +78,15 @@ content.gallery.forEach((id, i) => {
 on conflict (image_id) do nothing;`)
 })
 
-// Starting choices for the cake inquiry form; the owner edits these and their
+// Starting choices for the cake order form; the owner edits these and their
 // prices in the admin panel.
-const cakeOptions = {
-  occasion: ['Wedding', 'Birthday', 'Holy Communion', 'Christening', 'Baby shower', 'Anniversary', 'Other'],
-  size: ['0.5 kg', '1 kg', '1.5 kg', '2 kg', '3 kg', 'Two tiers', 'Three tiers'],
-  base: ['Vanilla', 'Chocolate', 'Red velvet', 'Butterscotch', 'Pineapple', 'Mango', 'Coconut'],
-  frosting: ['Whipped cream', 'Buttercream', 'Chocolate ganache', 'Cream cheese', 'Fondant'],
-}
 lines.push('', '-- Cake inquiry options (starting list, prices to be set by the owner)')
-for (const [kind, labels] of Object.entries(cakeOptions)) {
-  labels.forEach((label, i) => {
-    lines.push(`insert into public.cake_options (kind, label, sort) values (${q(kind)}, ${q(label)}, ${i}) on conflict (kind, label) do nothing;`)
-  })
+for (const kind of ['occasion', 'size', 'base', 'frosting']) {
+  content.cakeOptions
+    .filter((o) => o.kind === kind)
+    .forEach((o, i) => {
+      lines.push(`insert into public.cake_options (kind, label, sort) values (${q(kind)}, ${q(o.label)}, ${i}) on conflict (kind, label) do nothing;`)
+    })
 }
 
 const out = new URL('../supabase/seed.sql', import.meta.url)

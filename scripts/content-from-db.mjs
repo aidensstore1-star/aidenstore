@@ -115,6 +115,7 @@ export function contentFromRows({ settings, sections, blocks, products, gallery,
     process: need('process').steps.map((s, i) => ({ ...s, photo: one(s.photo, `step ${i + 1}`) })),
     catalog,
     cakeOptions: cakeOptions.map((o) => ({
+      id: o.id,
       kind: o.kind,
       label: o.label,
       description: o.description,

@@ -3,6 +3,7 @@
 // Supabase), so the page ships as plain HTML (readable without JavaScript).
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
+import { loadEnv } from 'vite'
 import { loadContent } from './content-source.mjs'
 
 const root = path.resolve(import.meta.dirname, '..')
@@ -12,7 +13,7 @@ const esc = (s = '') =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const pad = (n) => String(n).padStart(2, '0')
 
-export function renderSections(content) {
+export function renderSections(content, { siteUrl = '' } = {}) {
   const manifest = loadManifest()
   const { brand, photos } = content
 
@@ -69,6 +70,42 @@ export function renderSections(content) {
   // ---------- The two houses (the shop's sections) ----------
   const { houses, houseOf } = content
   s.houseNames = `${esc(houses.decor.name)} &amp; ${esc(houses.cakes.name)}`
+  // What search engines and link previews show: the admin panel's Settings
+  // when set, otherwise a sensible default.
+  const seoTitle = brand.seoTitle || `${houses.decor.name} & ${houses.cakes.name}: handmade bridal accessories, candles, florals & cakes`
+  const seoDescription = brand.seoDescription || `${brand.tagline}, made by hand for weddings, Holy Communions, christenings and celebrations.`
+  s.seoTitle = esc(seoTitle)
+  s.seoDescription = esc(seoDescription)
+  const home = siteUrl ? new URL(siteUrl.replace(/\/?$/, '/')).href : ''
+  const shareImage = home ? new URL(`photos/${content.hero[0]}-1280.webp`, home).href : ''
+  const business = {
+    '@context': 'https://schema.org',
+    '@type': 'Store',
+    name: brand.name,
+    description: seoDescription,
+    ...(home ? { url: home, image: shareImage } : {}),
+    ...(brand.whatsapp ? { telephone: `+${brand.whatsapp}` } : {}),
+    ...(brand.email ? { email: brand.email } : {}),
+    ...(brand.instagram ? { sameAs: [`https://instagram.com/${brand.instagram}`] } : {}),
+    department: Object.entries(houses).map(([key, h]) => ({
+      '@type': key === 'cakes' ? 'Bakery' : 'HomeGoodsStore',
+      name: h.name,
+      description: h.line,
+      ...(home ? { url: new URL(`${key}/`, home).href } : {}),
+    })),
+  }
+  s.seoHead = [
+    home ? `<link rel="canonical" href="${esc(home)}" />` : '',
+    `<meta property="og:type" content="website" />`,
+    `<meta property="og:title" content="${esc(seoTitle)}" />`,
+    `<meta property="og:description" content="${esc(seoDescription)}" />`,
+    home ? `<meta property="og:url" content="${esc(home)}" />` : '',
+    shareImage ? `<meta property="og:image" content="${esc(shareImage)}" />` : '',
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<script type="application/ld+json">${JSON.stringify(business).replace(/</g, '\\u003c')}</script>`,
+  ]
+    .filter(Boolean)
+    .join('\n    ')
   s.decorName = esc(houses.decor.name)
   s.cakesName = esc(houses.cakes.name)
   s.heroSub = `<strong>${esc(houses.decor.name)}</strong> for bridal accessories, ceremony candles and décor. <strong>${esc(houses.cakes.name)}</strong> for celebration cakes and toppers. All made by hand, for weddings, Holy Communions and every celebration in between.`
@@ -328,12 +365,16 @@ export function renderSections(content) {
 }
 
 export function htmlContent() {
+  let siteUrl = ''
   return {
     name: 'html-content',
+    configResolved(config) {
+      siteUrl = loadEnv(config.mode, root, '').SITE_URL || process.env.SITE_URL || ''
+    },
     // Only the story page (index.html) has these placeholders.
     async transformIndexHtml(html, ctx) {
       if (path.basename(ctx.filename) !== 'index.html' || path.dirname(ctx.filename) !== root) return html
-      const sections = renderSections(await loadContent())
+      const sections = renderSections(await loadContent(), { siteUrl })
       return html.replace(/<!--@(\w+)-->/g, (match, key) => {
         if (!(key in sections)) throw new Error(`index.html uses unknown section "${key}"`)
         return sections[key]

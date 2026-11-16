@@ -3,6 +3,7 @@ import '@fontsource/cormorant-garamond/latin-400.css'
 import '@fontsource/cormorant-garamond/latin-400-italic.css'
 import '@fontsource-variable/manrope'
 import './catalog.css'
+import { initOrder } from './order.js'
 
 // The section and product pages: cards rise in as they come into view, the
 // section's filter shows one kind of piece at a time, and a product's
@@ -74,3 +75,7 @@ for (const thumb of document.querySelectorAll('.product__thumb')) {
     if (!reduced) main.animate([{ opacity: 0.2, transform: 'scale(1.04)' }, { opacity: 1, transform: 'none' }], { duration: 500, easing: 'cubic-bezier(.16,1,.3,1)' })
   })
 }
+
+// ---------- The cake order form ----------
+const order = document.getElementById('order')
+if (order) initOrder(order)

@@ -166,9 +166,13 @@ function go(id, slot, nav, ctx) {
   markUnpublished(nav)
 }
 
+// Tables whose changes show on the website (inquiries, orders and payments don't).
+const SITE_TABLES = ['site_settings', 'sections', 'content_blocks', 'products', 'product_images', 'gallery_items', 'cake_options']
+const lastSiteChange = () => supabase.from('activity_log').select('at').in('table_name', SITE_TABLES).order('at', { ascending: false }).limit(1)
+
 // A dot on Publish when there are saved changes the live site doesn't have yet.
 async function markUnpublished(nav) {
-  const [build, { data: last }] = await Promise.all([liveBuild(), supabase.from('activity_log').select('at').order('at', { ascending: false }).limit(1)])
+  const [build, { data: last }] = await Promise.all([liveBuild(), lastSiteChange()])
   const pending = Boolean(last?.[0] && build?.contentFetchedAt && Date.parse(last[0].at) > Date.parse(build.contentFetchedAt))
   nav.querySelector('[data-page=publish]')?.classList.toggle('has-dot', pending)
   return pending
@@ -270,13 +274,14 @@ function publishState(entry, build) {
 
 async function dashboard(content) {
   fill(content, h('h1', 'Dashboard'), h('p.muted', 'Loading…'))
-  const [{ data: summary, error }, { data: activity }, build] = await Promise.all([
+  const [{ data: summary, error }, { data: activity }, build, { data: lastChange }] = await Promise.all([
     supabase.rpc('dashboard_summary'),
     supabase.from('activity_log').select('action, table_name, at, actor').order('at', { ascending: false }).limit(8),
     liveBuild(),
+    lastSiteChange(),
   ])
   if (error) return fill(content, h('h1', 'Dashboard'), h('p.note', friendly(error)))
-  const unpublished = activity?.[0] && build?.contentFetchedAt && Date.parse(activity[0].at) > Date.parse(build.contentFetchedAt)
+  const unpublished = lastChange?.[0] && build?.contentFetchedAt && Date.parse(lastChange[0].at) > Date.parse(build.contentFetchedAt)
   const goTo = (id) => document.querySelector(`.nav__item[data-page="${id}"]`)?.click()
 
   const stat = (label, value, hint) => h('div.stat', h('p.stat__value', String(value ?? 0)), h('p.stat__label', label), hint ? h('p.muted', hint) : null)

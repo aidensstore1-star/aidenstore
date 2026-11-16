@@ -509,6 +509,349 @@ p {
   }
 }
 
+/* ---------- Buttons side by side ---------- */
+.cat-cta__buttons,
+.product__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+}
+
+.product__buttons {
+  justify-content: flex-start;
+}
+
+/* ---------- The cake order form ---------- */
+.order__form,
+.order__done,
+.order__noscript {
+  display: grid;
+  gap: 1.6rem;
+  max-width: 46rem;
+  margin: 0 auto;
+}
+
+.order__step {
+  display: grid;
+  gap: 1.4rem;
+  margin: 0;
+  padding: clamp(1.4rem, 4vw, 2.2rem);
+  border: 1px solid var(--line);
+  border-radius: 1.4rem;
+  background: var(--paper);
+}
+
+.order__step legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0 0.4rem;
+  font-family: var(--serif);
+  font-size: 1.7rem;
+}
+
+.order__step legend small {
+  flex-basis: 100%;
+  padding-left: 2.7rem;
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.order__num {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--rose);
+  color: var(--ivory);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.order__label,
+.order__field > span {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.order__field small {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.order__choice {
+  display: grid;
+  gap: 0.6rem;
+}
+
+/* Choices as pills, easy to tap. */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 22%, transparent);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition:
+    background 0.25s,
+    color 0.25s,
+    border-color 0.25s,
+    transform 0.25s var(--ease-out);
+}
+
+.chip span small {
+  color: var(--rose-deep);
+}
+
+.chip input:checked + span {
+  background: var(--plum);
+  border-color: var(--plum);
+  color: var(--ivory);
+  transform: translateY(-2px);
+}
+
+.chip input:checked + span small {
+  color: color-mix(in srgb, var(--ivory) 75%, transparent);
+}
+
+.chip input:focus-visible + span {
+  outline: 2px solid var(--rose);
+  outline-offset: 2px;
+}
+
+.order__field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.order__field--short {
+  max-width: 16rem;
+}
+
+.order__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 1.2rem;
+}
+
+.order__form :is(input:not([type='radio'], [type='file']), textarea) {
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--plum) 24%, transparent);
+  border-radius: 0.7rem;
+  background: #fff;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--plum);
+}
+
+.order__form textarea {
+  resize: vertical;
+}
+
+.order__form :is(input, textarea):focus-visible {
+  outline: 2px solid var(--rose);
+  outline-offset: 1px;
+}
+
+/* Hidden from people; only bots fill it in. */
+.order__hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.drop {
+  position: relative;
+}
+
+.drop input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.drop input:disabled {
+  cursor: not-allowed;
+}
+
+.drop__label {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 2rem 1rem;
+  border: 1.5px dashed color-mix(in srgb, var(--rose) 60%, transparent);
+  border-radius: 1rem;
+  background: #fff;
+  text-align: center;
+  color: var(--muted);
+}
+
+.drop__label strong {
+  color: var(--plum);
+}
+
+.drop:focus-within .drop__label {
+  outline: 2px solid var(--rose);
+}
+
+.drop__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.drop__list:empty {
+  display: none;
+}
+
+.drop__item {
+  position: relative;
+}
+
+.drop__item img {
+  width: 5.5rem;
+  height: 5.5rem;
+  object-fit: cover;
+  border-radius: 0.6rem;
+}
+
+.drop__item button {
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 0;
+  border-radius: 50%;
+  background: var(--plum);
+  color: var(--ivory);
+  cursor: pointer;
+}
+
+.order__liked {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  border-radius: 1rem;
+  background: var(--paper);
+}
+
+.order__liked[hidden] {
+  display: none;
+}
+
+.order__liked img {
+  width: 4.5rem;
+  height: 5.6rem;
+  object-fit: cover;
+  border-radius: 999px 999px 4px 4px;
+}
+
+.order__liked p {
+  display: grid;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.order__unlike {
+  border: 0;
+  background: none;
+  color: var(--rose-deep);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.order__send {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  text-align: center;
+}
+
+.order__estimate {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+}
+
+.order__error {
+  min-height: 1.4em;
+  color: #a3372b;
+  font-weight: 600;
+}
+
+.order__error:empty {
+  min-height: 0;
+}
+
+.order__button {
+  min-width: 15rem;
+}
+
+.order__button:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.order__small {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.order__done {
+  justify-items: center;
+  padding: 3rem 1.6rem;
+  text-align: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, transparent);
+  border-radius: 50% 50% 14px 14px / 14% 14% 14px 14px;
+  background: var(--paper);
+}
+
+.order__done[hidden],
+.order__form[hidden] {
+  display: none;
+}
+
+.order__done h2 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+}
+
+.order__ref {
+  font-weight: 600;
+}
+
 /* ---------- Footer ---------- */
 .cat-footer {
   display: grid;

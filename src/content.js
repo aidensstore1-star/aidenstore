@@ -253,3 +253,12 @@ export const process = [
   { title: 'Design it together', text: 'Choose from past pieces or start something new. Every detail can be changed.', photo: 'hair-comb-pink-gold-wire-leaves' },
   { title: 'Made by hand', text: 'Shaped, piped, threaded and finished by hand, ready for your celebration.', photo: 'tall-candle-pink-wire-flower-cluster' },
 ]
+
+// Choices on the cake order form (/order/). In the database these are edited
+// on the admin panel's Cake options page, each with the price it adds.
+export const cakeOptions = [
+  ...['Wedding', 'Birthday', 'Holy Communion', 'Christening', 'Baby shower', 'Anniversary', 'Other'].map((label) => ({ kind: 'occasion', label, priceDelta: 0 })),
+  ...['0.5 kg', '1 kg', '1.5 kg', '2 kg', '3 kg', 'Two tiers', 'Three tiers'].map((label) => ({ kind: 'size', label, priceDelta: 0 })),
+  ...['Vanilla', 'Chocolate', 'Red velvet', 'Butterscotch', 'Pineapple', 'Mango', 'Coconut'].map((label) => ({ kind: 'base', label, priceDelta: 0 })),
+  ...['Whipped cream', 'Buttercream', 'Chocolate ganache', 'Cream cheese', 'Fondant'].map((label) => ({ kind: 'frosting', label, priceDelta: 0 })),
+]

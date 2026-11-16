@@ -45,7 +45,7 @@ const [settingsRows, sections, blocks, products, gallery, cakeOptions] = await P
     'select=slug,title,category,description,price_from,section_key,tags,sort,product_images(path,width,height,alt,focus,sort)&is_published=eq.true&order=section_key,sort',
   ),
   get('gallery_items', 'select=sort,product_images(path)&is_visible=eq.true&order=sort'),
-  get('cake_options', 'select=kind,label,description,price_delta,sort&is_active=eq.true&order=kind,sort'),
+  get('cake_options', 'select=id,kind,label,description,price_delta,sort&is_active=eq.true&order=kind,sort'),
 ])
 if (!settingsRows.length) throw new Error('The database has no site settings yet: run supabase/seed.sql first.')
 

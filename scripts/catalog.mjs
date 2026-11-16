@@ -6,6 +6,7 @@
 //
 // Every link is relative, so the pages work at the domain's root and in a
 // sub-folder (like the GitHub Pages preview).
+import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { loadEnv } from 'vite'
@@ -24,7 +25,7 @@ const jsonLd = (data) => `<script type="application/ld+json">${JSON.stringify(da
 const FAVICON =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232a1f22'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='24' font-style='italic' text-anchor='middle' fill='%23f3ece4'%3EA%26amp;A%3C/text%3E%3C/svg%3E"
 
-export function buildPages(content, { siteUrl = '' } = {}) {
+export function buildPages(content, { siteUrl = '', turnstileSiteKey = '' } = {}) {
   const manifest = JSON.parse(readFileSync(path.join(root, 'src', 'photo-manifest.json'), 'utf8'))
   const { brand, houses, photos } = content
   const catalog = catalogOf(content)
@@ -93,7 +94,9 @@ export function buildPages(content, { siteUrl = '' } = {}) {
     const items = catalog.filter((p) => p.section === key)
     const categories = [...new Set(items.map((p) => p.category).filter(Boolean))]
     const [first, ...rest] = h.name.split(' ')
-    const title = `${h.name}: ${categories.slice(0, 3).join(', ').toLowerCase() || 'handmade pieces'} · ${brand.name}`
+    // Named by what the section's sign lists, e.g. "Celebration cakes, Cake toppers".
+    const offers = [...new Set((h.sections || []).map((a) => a.label))].slice(0, 3)
+    const title = `${h.name}: ${offers.join(', ') || categories.slice(0, 3).join(', ') || 'handmade pieces'} · ${brand.name}`
     const enquire = wa(`${h.enquiry} `)
     pages.push({
       file: `${key}/index.html`,
@@ -142,7 +145,10 @@ ${items.map((p) => card(p, up)).join('\n')}
     <p class="cat-eyebrow">Made to order</p>
     <h2>Can’t see quite what you have in mind?</h2>
     <p>Every piece is made by hand, so colours, sizes and details can all be changed to match your day.</p>
-    <a class="cat-btn cat-btn--solid" href="${enquire || `${up}#contact`}"${enquire ? ' target="_blank" rel="noopener"' : ''}>Ask ${esc(h.name)}</a>
+    <div class="cat-cta__buttons">
+      ${key === 'cakes' ? `<a class="cat-btn cat-btn--solid" href="${up}order/">Design your cake</a>` : ''}
+      <a class="cat-btn${key === 'cakes' ? '' : ' cat-btn--solid'}" href="${enquire || `${up}#contact`}"${enquire ? ' target="_blank" rel="noopener"' : ''}>Ask ${esc(h.name)}</a>
+    </div>
   </section>
 </main>
 ${footer(up)}`,
@@ -212,7 +218,11 @@ ${footer(up)}`,
       <h1 class="product__title">${esc(p.title)}</h1>
       <p class="product__price">${p.priceFrom != null ? `From <strong>${money(p.priceFrom)}</strong>` : 'Price on request'}</p>
       <p class="product__text">${esc(description)}</p>
-      <a class="cat-btn cat-btn--solid" href="${ask || `${up2}#contact`}"${ask ? ' target="_blank" rel="noopener"' : ''}>Enquire about this piece</a>
+      ${
+        key === 'cakes'
+          ? `<div class="product__buttons"><a class="cat-btn cat-btn--solid" href="${up2}order/?like=${encodeURIComponent(p.slug)}">Order a cake like this</a><a class="cat-btn" href="${ask || `${up2}#contact`}"${ask ? ' target="_blank" rel="noopener"' : ''}>Ask a question</a></div>`
+          : `<a class="cat-btn cat-btn--solid" href="${ask || `${up2}#contact`}"${ask ? ' target="_blank" rel="noopener"' : ''}>Enquire about this piece</a>`
+      }
       <ul class="product__facts">
         <li>Made by hand, to order</li>
         <li>Colours and details to match your day</li>
@@ -236,6 +246,100 @@ ${footer(up2)}`,
     }
   })
 
+  // ---------- The cake order form ----------
+  const cakes = houses.cakes
+  if (cakes) {
+    const up = '../'
+    const options = content.cakeOptions || []
+    const LABELS = { occasion: 'What’s the occasion?', size: 'How big?', base: 'Cake flavour', frosting: 'Frosting' }
+    const chips = (kind) => {
+      const list = options.filter((o) => o.kind === kind)
+      if (!list.length) return ''
+      return `<div class="order__choice">
+        <p class="order__label" id="label-${kind}">${LABELS[kind]}</p>
+        <div class="chips" role="radiogroup" aria-labelledby="label-${kind}">
+          ${list
+            .map(
+              (o) =>
+                `<label class="chip"><input type="radio" name="${kind}" value="${esc(o.id || o.label)}" data-price="${Number(o.priceDelta) || 0}"><span>${esc(o.label)}${Number(o.priceDelta) ? ` <small>+${money(o.priceDelta)}</small>` : ''}</span></label>`,
+            )
+            .join('\n          ')}
+        </div>
+      </div>`
+    }
+    // The cakes a customer can start from ("Order a cake like this").
+    const likes = Object.fromEntries(
+      catalog
+        .filter((p) => p.section === 'cakes')
+        .map((p) => [p.slug, { title: p.title, photo: `${up}photos/${p.images[0]}-640.webp`, price: p.priceFrom }]),
+    )
+    pages.push({
+      file: 'order/index.html',
+      up,
+      url: abs('order/'),
+      head: head({
+        title: `Order a cake · ${cakes.name}`,
+        description: `Design your cake with ${cakes.name}: choose the occasion, size, flavour and frosting, add inspiration photos, and we’ll reply on WhatsApp.`,
+        url: abs('order/'),
+        image: catalog.find((p) => p.section === 'cakes') ? abs(`photos/${catalog.find((p) => p.section === 'cakes').images[0]}-1280.webp`) : '',
+        extra: turnstileSiteKey ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : '',
+      }),
+      body: `${header(up, 'cakes')}
+<main id="main" class="cat-main order">
+  <section class="cat-hero order__hero">
+    <p class="cat-eyebrow">${esc(cakes.name)} · Order a cake</p>
+    <h1 class="cat-hero__title">Design <em>your cake</em></h1>
+    <p class="cat-hero__line">Choose what you’d like, add a photo or two for inspiration, and send. We’ll reply on WhatsApp to confirm the price and the date.</p>
+  </section>
+  <noscript><p class="order__noscript">This form needs JavaScript. You can also ${brand.whatsapp ? `<a href="${esc(wa(`${cakes.enquiry} a cake.`))}">message us on WhatsApp</a>` : 'message us on WhatsApp'}.</p></noscript>
+  <form class="order__form" id="order" novalidate>
+    <div class="order__liked" hidden></div>
+    <input type="hidden" name="like">
+    <fieldset class="order__step">
+      <legend><span class="order__num">1</span> The cake</legend>
+      ${['occasion', 'size', 'base', 'frosting'].map(chips).join('\n      ')}
+      <label class="order__field order__field--short"><span>When do you need it?</span><input type="date" name="date"></label>
+    </fieldset>
+    <fieldset class="order__step">
+      <legend><span class="order__num">2</span> Inspiration photos <small>optional, up to 5</small></legend>
+      <div class="drop">
+        <input type="file" id="order-photos" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" multiple>
+        <label for="order-photos" class="drop__label"><strong>Add photos</strong><span>Cakes you love, your colours, or the theme</span></label>
+      </div>
+      <ul class="drop__list" aria-live="polite"></ul>
+    </fieldset>
+    <fieldset class="order__step">
+      <legend><span class="order__num">3</span> About you</legend>
+      <div class="order__row">
+        <label class="order__field"><span>Your name</span><input name="name" autocomplete="name" required maxlength="100"></label>
+        <label class="order__field"><span>WhatsApp number</span><input name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+91 98000 00000"></label>
+      </div>
+      <label class="order__field"><span>Email <small>optional, for a copy of your order</small></span><input name="email" type="email" autocomplete="email"></label>
+      <label class="order__field"><span>Anything else? <small>optional</small></span><textarea name="notes" rows="4" maxlength="2000" placeholder="Colours, a name or message on the cake, how many people…"></textarea></label>
+      <div class="order__hp" aria-hidden="true"><label>Leave this empty <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    </fieldset>
+    <div class="order__send">
+      <p class="order__estimate" hidden></p>
+      ${turnstileSiteKey ? `<div class="cf-turnstile" data-sitekey="${esc(turnstileSiteKey)}" data-theme="light"></div>` : ''}
+      <p class="order__error" role="alert"></p>
+      <button class="cat-btn cat-btn--solid order__button" type="submit">Send my order</button>
+      <p class="order__small">Your details are only used to reply about this order.</p>
+    </div>
+  </form>
+  <section class="order__done" hidden tabindex="-1">
+    <p class="cat-eyebrow">Thank you</p>
+    <h2>Your order has reached ${esc(cakes.name)}</h2>
+    <p class="order__ref"></p>
+    <p>We’ll reply on WhatsApp soon to confirm the price and the date.</p>
+    <a class="cat-btn cat-btn--solid order__whatsapp" hidden target="_blank" rel="noopener">Send it on WhatsApp too</a>
+    <a class="cat-btn" href="${up}cakes/">See more cakes</a>
+  </section>
+  <script type="application/json" id="order-likes">${JSON.stringify(likes).replace(/</g, '\\u003c')}</script>
+</main>
+${footer(up)}`,
+    })
+  }
+
   const sitemap = siteUrl
     ? `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -248,11 +352,16 @@ ${[abs(''), ...pages.map((p) => p.url)].map((u) => `  <url><loc>${esc(u)}</loc><
 
 export function catalogPages() {
   let siteUrl = ''
+  let turnstileSiteKey = ''
+  let supabaseUrl = ''
   return {
     name: 'catalog-pages',
     apply: 'build',
     configResolved(config) {
-      siteUrl = loadEnv(config.mode, root, '').SITE_URL || process.env.SITE_URL || ''
+      const env = { ...loadEnv(config.mode, root, ''), ...process.env }
+      siteUrl = env.SITE_URL || ''
+      turnstileSiteKey = env.VITE_TURNSTILE_SITE_KEY || ''
+      supabaseUrl = (env.VITE_SUPABASE_URL || '').replace(/\/$/, '')
     },
     // Runs after Vite has written the template page, with its styles and script.
     generateBundle: { order: 'post', handler: generate },
@@ -264,7 +373,7 @@ export function catalogPages() {
     delete bundle[TEMPLATE]
     const template = String(templateAsset.source).replace(/<!--[^]*?-->\n?/, (m) => (m.includes('page:') ? m : ''))
     const content = await loadContent()
-    const { pages, sitemap } = buildPages(content, { siteUrl })
+    const { pages, sitemap } = buildPages(content, { siteUrl, turnstileSiteKey })
     for (const page of pages) {
       const html = template
         .replace('<!--page:head-->', () => page.head)
@@ -274,10 +383,87 @@ export function catalogPages() {
       this.emitFile({ type: 'asset', fileName: page.file, source: html })
     }
     if (sitemap) this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: sitemap })
+    // Search engines may list the site once it has its own address.
+    this.emitFile({
+      type: 'asset',
+      fileName: 'robots.txt',
+      source: siteUrl ? `User-agent: *\nAllow: /\nDisallow: /admin/\n\nSitemap: ${new URL('sitemap.xml', siteUrl.replace(/\/?$/, '/')).href}\n` : 'User-agent: *\nDisallow: /\n',
+    })
+    // Security headers for Cloudflare Pages, allowing exactly the site's own
+    // inline scripts (by their fingerprints) and nothing else.
+    const htmlFiles = [...Object.values(bundle).filter((f) => f.type === 'asset' && f.fileName.endsWith('.html')).map((f) => String(f.source)), ...pages.map((p) => p.head + p.body + template)]
+    this.emitFile({ type: 'asset', fileName: '_headers', source: securityHeaders(htmlFiles, { supabaseUrl, turnstile: Boolean(turnstileSiteKey) }) })
     this.emitFile({
       type: 'asset',
       fileName: 'build-info.json',
       source: JSON.stringify({ builtAt: new Date().toISOString(), contentFrom: content.meta?.source || 'content.js', contentFetchedAt: content.meta?.fetchedAt || null }),
     })
   }
+}
+
+// The sha256 fingerprints of every inline <script> (not JSON data blocks).
+function inlineScriptHashes(htmlFiles) {
+  const hashes = new Set()
+  for (const html of htmlFiles)
+    for (const [, attrs, body] of html.matchAll(/<script\b([^>]*)>([^]*?)<\/script>/g)) {
+      if (/\bsrc=/.test(attrs) || /type="application\/(ld\+)?json"/.test(attrs) || !body.trim()) continue
+      hashes.add(`'sha256-${createHash('sha256').update(body).digest('base64')}'`)
+    }
+  return [...hashes]
+}
+
+export function securityHeaders(htmlFiles, { supabaseUrl = '', turnstile = false } = {}) {
+  const supabase = supabaseUrl ? ` ${supabaseUrl}` : ''
+  const challenge = turnstile ? ' https://challenges.cloudflare.com' : ''
+  const site = [
+    "default-src 'self'",
+    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}${challenge}`,
+    // The animations set styles directly on elements.
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob:${supabase}`,
+    "font-src 'self' data:",
+    `connect-src 'self'${supabase}`,
+    `frame-src${challenge || " 'none'"}`,
+    "worker-src 'self' blob:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+    'upgrade-insecure-requests',
+  ].join('; ')
+  const admin = [
+    "default-src 'self'",
+    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}`,
+    "style-src 'self' 'unsafe-inline'",
+    `img-src 'self' data: blob:${supabase}`,
+    "font-src 'self'",
+    `connect-src 'self'${supabase}${supabase.replace('https://', ' wss://')}`,
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "object-src 'none'",
+  ].join('; ')
+  return `# Response headers for Cloudflare Pages, written by scripts/catalog.mjs at build time.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  Content-Security-Policy: ${site}
+
+# The admin panel: never cached, never listed by search engines, never shown
+# inside another site's frame, and only allowed to talk to Supabase.
+/admin/*
+  Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
+  X-Frame-Options: DENY
+  Referrer-Policy: no-referrer
+  ! Content-Security-Policy
+  Content-Security-Policy: ${admin}
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+`
 }

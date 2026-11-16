@@ -1,0 +1,28 @@
+# Supabase pauses free projects after a week with no activity. This reads one
+# public row every day, so the shop's database never goes to sleep. It uses
+# the publishable key, which is public by design (it is in the website too).
+name: Keep the database awake
+
+on:
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    # Only from the shop's own repository.
+    if: github.repository == 'aidensstore1-star/aidenstore'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read the site settings
+        run: |
+          status=$(curl -sS -o /dev/null -w '%{http_code}' \
+            -H "apikey: $KEY" "$URL/rest/v1/site_settings?select=business_name")
+          echo "Supabase answered $status"
+          test "$status" = 200
+        env:
+          URL: https://xwhjgkwtddvofnufijoi.supabase.co
+          KEY: sb_publishable_yoBC2QgPXgskJ9Utc9aMBw_hK0Vdx92
