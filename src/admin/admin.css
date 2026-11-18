@@ -479,6 +479,7 @@ a.btn {
 
 /* An on/off switch, with its words beside it. */
 .switch {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -489,6 +490,10 @@ a.btn {
 
 .switch input {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
   opacity: 0;
   pointer-events: none;
 }
