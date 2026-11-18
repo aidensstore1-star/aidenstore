@@ -61,6 +61,7 @@ export function buildPages(content, { siteUrl = '', turnstileSiteKey = '' } = {}
     .map(([key, h]) => `<a href="${up}${key}/">${esc(h.name)}</a>`)
     .join('')}<a href="${up}#contact">Enquire</a></nav>
   <p class="cat-footer__small">© ${new Date().getFullYear()} ${esc(houseNames)} · Made by hand, one piece at a time</p>
+  <button type="button" class="motion-toggle" data-motion-toggle>Reduce motion</button>
 </footer>`
 
   const card = (p, up) => {
@@ -417,14 +418,16 @@ function inlineScriptHashes(htmlFiles) {
 export function securityHeaders(htmlFiles, { supabaseUrl = '', turnstile = false } = {}) {
   const supabase = supabaseUrl ? ` ${supabaseUrl}` : ''
   const challenge = turnstile ? ' https://challenges.cloudflare.com' : ''
+  const insights = ' https://static.cloudflareinsights.com'
   const site = [
     "default-src 'self'",
-    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}${challenge}`,
+    // Cloudflare adds its visitor-stats script to pages served on the domain.
+    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}${challenge}${insights}`,
     // The animations set styles directly on elements.
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${supabase}`,
     "font-src 'self' data:",
-    `connect-src 'self'${supabase}`,
+    `connect-src 'self'${supabase} https://cloudflareinsights.com`,
     `frame-src${challenge || " 'none'"}`,
     "worker-src 'self' blob:",
     "object-src 'none'",
@@ -435,11 +438,11 @@ export function securityHeaders(htmlFiles, { supabaseUrl = '', turnstile = false
   ].join('; ')
   const admin = [
     "default-src 'self'",
-    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}`,
+    `script-src 'self' ${inlineScriptHashes(htmlFiles).join(' ')}${insights}`,
     "style-src 'self' 'unsafe-inline'",
     `img-src 'self' data: blob:${supabase}`,
     "font-src 'self'",
-    `connect-src 'self'${supabase}${supabase.replace(' https://', ' wss://')}`,
+    `connect-src 'self'${supabase}${supabase.replace(' https://', ' wss://')} https://cloudflareinsights.com`,
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

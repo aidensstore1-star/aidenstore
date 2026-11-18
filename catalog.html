@@ -9,6 +9,9 @@
     <!--page:head-->
     <script>
       document.documentElement.classList.add('js')
+      try {
+        if (localStorage.getItem('motion') === 'reduced') document.documentElement.classList.add('reduced-motion')
+      } catch (e) {}
     </script>
     <script type="module" src="/src/catalog/main.js"></script>
   </head>

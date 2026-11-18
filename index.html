@@ -9,9 +9,12 @@
     <meta name="theme-color" content="#f3ece4" />
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%232a1f22'/%3E%3Ctext x='32' y='42' font-family='Georgia,serif' font-size='24' font-style='italic' text-anchor='middle' fill='%23f3ece4'%3EA%26amp;A%3C/text%3E%3C/svg%3E" />
     <script>
-      // Decide the motion level before first paint.
+      // Decide the motion level before first paint: full motion unless the
+      // visitor chose "Reduce motion" (the button in the footer).
       document.documentElement.classList.add('js')
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('reduced-motion')
+      try {
+        if (localStorage.getItem('motion') === 'reduced') document.documentElement.classList.add('reduced-motion')
+      } catch (e) {}
     </script>
   </head>
   <body>
@@ -218,6 +221,7 @@
       <div class="footer__bottom">
         <span>© <!--@year--> <!--@houseNames--></span>
         <span>Made by hand, one piece at a time</span>
+        <button type="button" class="motion-toggle" data-motion-toggle>Reduce motion</button>
         <a href="#top" class="footer__top-link">Back to top ↑</a>
       </div>
     </footer>

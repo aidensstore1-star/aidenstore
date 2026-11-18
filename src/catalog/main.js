@@ -4,12 +4,15 @@ import '@fontsource/cormorant-garamond/latin-400-italic.css'
 import '@fontsource-variable/manrope'
 import './catalog.css'
 import { initOrder } from './order.js'
+import { initMotionToggle } from '../js/motion-toggle.js'
 
 // The section and product pages: cards rise in as they come into view, the
 // section's filter shows one kind of piece at a time, and a product's
 // thumbnails swap the main photo. Everything still works without this script.
 
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
+// Full motion unless the visitor chose “Reduce motion” in the footer.
+const reduced = document.documentElement.classList.contains('reduced-motion')
+initMotionToggle()
 
 // ---------- Cards rise in, a few at a time ----------
 const cards = [...document.querySelectorAll('.cat-card')]

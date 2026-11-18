@@ -17,6 +17,7 @@ import { initDetail } from './js/detail.js'
 import { initCursor } from './js/cursor.js'
 import { initMenu } from './js/menu.js'
 import { initNudge } from './js/nudge.js'
+import { initMotionToggle } from './js/motion-toggle.js'
 
 gsap.registerPlugin(ScrollTrigger, SplitText)
 // Phones show and hide the address bar while scrolling; don't re-measure for that.
@@ -26,6 +27,7 @@ const html = document.documentElement
 const reduced = html.classList.contains('reduced-motion')
 // Switches on the pinned, cinematic layouts in CSS (set here so they only apply when the script runs).
 if (!reduced) html.classList.add('motion')
+initMotionToggle()
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 window.scrollTo(0, 0)

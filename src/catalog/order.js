@@ -206,6 +206,6 @@ export function initOrder(form) {
       wa.hidden = false
     }
     done.focus()
-    done.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' })
+    done.scrollIntoView({ behavior: document.documentElement.classList.contains('reduced-motion') ? 'auto' : 'smooth', block: 'start' })
   }
 }

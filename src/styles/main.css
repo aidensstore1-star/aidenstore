@@ -2714,10 +2714,24 @@ html.motion .cta__title .line {
   color: var(--ink);
 }
 
+/* The footer's "Reduce motion" / "Full motion" switch. */
+.motion-toggle {
+  font: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
 /* Comfortable tap targets for the small text links. */
 .footer__links a,
 .menu__links a,
-.footer__top-link {
+.footer__top-link,
+.motion-toggle {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
