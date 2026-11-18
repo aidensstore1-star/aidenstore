@@ -903,6 +903,16 @@ html:not(.reduced-motion) .cat-hero > :nth-child(n + 4) {
   text-underline-offset: 0.25em;
 }
 
+/* ---------- Page not found ---------- */
+.notfound .cat-grid {
+  grid-template-columns: repeat(2, minmax(0, 17rem));
+  justify-content: center;
+}
+
+.notfound .cat-cta__buttons {
+  margin: 3.5rem 0 1rem;
+}
+
 /* ---------- Phones ---------- */
 @media (max-width: 900px) {
   .cat-header {

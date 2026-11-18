@@ -168,7 +168,16 @@ export function initOrder(form) {
         if (res.ok) uploaded.push(up.path)
       }
       button.textContent = 'Finishing…'
-      const finished = await post('inquiry/complete', { id: started.id, token: started.token, uploaded }).catch(() => ({ ref: started.ref }))
+      // The order is already saved; this step records the photos and sends the
+      // emails. It's safe to repeat, so a dropped connection gets two more tries.
+      let finished = { ref: started.ref }
+      for (const wait of [0, 1500, 4000]) {
+        await new Promise((r) => setTimeout(r, wait))
+        try {
+          finished = await post('inquiry/complete', { id: started.id, token: started.token, uploaded })
+          break
+        } catch {}
+      }
       showDone(finished.ref || started.ref, finished.whatsappUrl, uploaded.length < photos.length)
     } catch (err) {
       fail(err.message)

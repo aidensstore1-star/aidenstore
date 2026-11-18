@@ -89,7 +89,7 @@ export async function cakeOptions(content) {
     options.sort((a, b) => (a.kind === b.kind ? a.sort - b.sort : a.kind.localeCompare(b.kind)))
     draw()
     const ok = await attempt(async () => {
-      for (const o of changed) must(await supabase.from('cake_options').update({ sort: o.sort }).eq('id', o.id))
+      ;(await Promise.all(changed.map((o) => supabase.from('cake_options').update({ sort: o.sort }).eq('id', o.id)))).forEach(must)
     })
     if (!ok) cakeOptions(content)
   }

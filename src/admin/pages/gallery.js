@@ -56,10 +56,9 @@ export async function gallery(content) {
 
   // Saves everyone's position, so the order is always clean.
   async function saveOrder() {
-    for (const [n, item] of items.entries()) {
-      if (item.sort !== n) must(await supabase.from('gallery_items').update({ sort: n }).eq('id', item.id))
-      item.sort = n
-    }
+    const changed = items.map((item, n) => [item, n]).filter(([item, n]) => item.sort !== n)
+    ;(await Promise.all(changed.map(([item, n]) => supabase.from('gallery_items').update({ sort: n }).eq('id', item.id)))).forEach(must)
+    for (const [item, n] of changed) item.sort = n
   }
 
   // The list moves at once; the new positions are saved behind it.

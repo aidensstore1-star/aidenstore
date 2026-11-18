@@ -124,7 +124,8 @@ export async function products(content) {
       list.sort((a, b) => (a.section_key === b.section_key ? a.sort - b.sort : a.section_key.localeCompare(b.section_key)))
       draw()
       const ok = await attempt(async () => {
-        for (const [n, id] of order.entries()) if (before.get(id) !== n) must(await supabase.from('products').update({ sort: n }).eq('id', id))
+        const changed = [...order.entries()].filter(([n, id]) => before.get(id) !== n)
+        ;(await Promise.all(changed.map(([n, id]) => supabase.from('products').update({ sort: n }).eq('id', id)))).forEach(must)
       })
       forgetProducts()
       if (!ok) showList()
@@ -270,6 +271,9 @@ export async function products(content) {
           p.id = id
           p.slug = slug
         } else {
+          // Moved to the other section: it goes to the end of its new section.
+          if (fields.section_key !== product.section_key)
+            fields.sort = Math.max(-1, ...list.filter((o) => o.section_key === fields.section_key).map((o) => o.sort)) + 1
           must(await supabase.from('products').update(fields).eq('id', id))
         }
         // Photos: remove, then update the kept ones' order and details, then add new ones.

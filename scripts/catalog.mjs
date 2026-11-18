@@ -341,10 +341,38 @@ ${footer(up)}`,
     })
   }
 
+  // Shown for any address that doesn't exist (an old link to a piece that's
+  // been hidden or deleted, a typo). Cloudflare serves it with a 404 status,
+  // so search engines drop the old address instead of indexing a copy of the
+  // home page. Links are from the root, as it can appear at any depth.
+  {
+    const up = '/'
+    const picks = Object.entries(houses).map(([key, h]) => ({ key, h, p: catalog.find((x) => x.section === key) }))
+    pages.push({
+      file: '404.html',
+      up,
+      url: '',
+      head: head({ title: `Page not found · ${brand.name}`, description: brand.tagline, extra: '<meta name="robots" content="noindex" />' }),
+      body: `${header(up, '')}
+<main id="main" class="cat-main notfound">
+  <section class="cat-hero">
+    <p class="cat-eyebrow">Page not found</p>
+    <h1 class="cat-hero__title">This page <em>isn’t here</em></h1>
+    <p class="cat-hero__line">The piece may have sold out or moved. Have a look around both sections instead.</p>
+  </section>
+  <ul class="cat-grid">
+${picks.filter(({ p }) => p).map(({ key, h, p }) => `<li class="cat-card"><a href="${up}${key}/"><figure class="cat-media">${img(p.images[0], up, { sizes: '(max-width: 700px) 46vw, 30vw' })}</figure><span class="cat-card__title">${esc(h.name)}</span><span class="cat-card__price">See everything →</span></a></li>`).join('\n')}
+  </ul>
+  <p class="cat-cta__buttons"><a class="cat-btn" href="${up}">Back to the story</a></p>
+</main>
+${footer(up)}`,
+    })
+  }
+
   const sitemap = siteUrl
     ? `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[abs(''), ...pages.map((p) => p.url)].map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n')}
+${[abs(''), ...pages.map((p) => p.url).filter(Boolean)].map((u) => `  <url><loc>${esc(u)}</loc></url>`).join('\n')}
 </urlset>
 `
     : ''

@@ -257,6 +257,7 @@ export async function inquiries(content) {
             h('dt', 'Still to pay'),
             h('dd', money(Math.max(0, Number(order.total) - paid))),
           ),
+          changeQuote(paid),
           field('Order status', orderStatus),
           payments.length
             ? h(
@@ -274,6 +275,50 @@ export async function inquiries(content) {
           payForm,
         )
       }
+      // The agreed price can change (a bigger cake, a discount): edit the
+      // quote in place, and the order's status follows what's been paid.
+      function changeQuote(paid) {
+        const wrap = h('div')
+        const closed = () =>
+          fill(wrap, h('button.link', { type: 'button', onclick: opened }, 'Change the quote'))
+        function opened() {
+          const total = h('input', { type: 'number', min: 0, step: 1, inputmode: 'numeric', value: Number(order.total), 'aria-label': 'New total price' })
+          const advance = h('input', { type: 'number', min: 0, step: 1, inputmode: 'numeric', value: Number(order.advance_due) || '', 'aria-label': 'New advance due' })
+          const form = h(
+            'form.form',
+            h('div.form__row', field('Total price (₹)', total), field('Advance to ask for (₹)', advance, 'Optional.')),
+            h('div.form__actions', h('button.btn', { type: 'submit' }, 'Save the new quote'), h('button.btn.btn--quiet', { type: 'button', onclick: closed }, 'Cancel')),
+          )
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            const t = Number(total.value)
+            const a = Number(advance.value || 0)
+            if (!total.value || t < 0) return toast('Enter the total price.', 'bad')
+            if (a > t) return toast('The advance can’t be more than the total.', 'bad')
+            const change = { total: t, advance_due: a }
+            if (!['cancelled', 'refunded'].includes(order.status)) change.status = paid >= t && paid > 0 ? 'paid' : paid > 0 ? 'advance_paid' : order.status === 'paid' || order.status === 'advance_paid' ? 'quoted' : order.status
+            busy(form, true)
+            const ok = await attempt(async () => {
+              must(await supabase.from('orders').update(change).eq('id', order.id))
+              Object.assign(order, change)
+              if (change.status === 'paid' && !['delivered', 'cancelled', 'paid'].includes(inq.status)) {
+                must(await supabase.from('inquiries').update({ status: 'paid' }).eq('id', inq.id))
+                setStatus('paid')
+              } else if (change.status === 'advance_paid' && inq.status === 'paid') {
+                must(await supabase.from('inquiries').update({ status: 'confirmed' }).eq('id', inq.id))
+                setStatus('confirmed')
+              }
+            }, 'Quote changed')
+            busy(form, false)
+            if (ok) draw()
+          })
+          fill(wrap, form)
+          total.focus()
+        }
+        closed()
+        return wrap
+      }
+
       draw()
       return box
     }
