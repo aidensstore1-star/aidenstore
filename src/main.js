@@ -27,6 +27,7 @@ const html = document.documentElement
 const reduced = html.classList.contains('reduced-motion')
 // Switches on the pinned, cinematic layouts in CSS (set here so they only apply when the script runs).
 if (!reduced) html.classList.add('motion')
+window.__storyStarted = true
 initMotionToggle()
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
@@ -53,11 +54,17 @@ if (reduced) {
   await preloaderDone
   nudge.start()
 } else {
+  // Set up in steps behind the loading screen, giving the browser a moment
+  // between them so the page never freezes for long.
+  const breathe = () => new Promise((r) => setTimeout(r, 0))
   const gl = createGL(document.querySelector('.gl'), { scroll })
+  await breathe()
   let detail
   const galleryApi = initGallery({ scroll, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })
+  await breathe()
   const { intro } = initAnimations({ scroll, gl })
+  await breathe()
   // Refresh triggers in page order so ones below a pinned chapter account for it.
   ScrollTrigger.sort()
   ScrollTrigger.refresh()

@@ -10,7 +10,8 @@ const srcDir = path.join(root, 'images')
 const outDir = path.join(root, 'public', 'photos')
 const manifestPath = path.join(root, 'src', 'photo-manifest.json')
 
-const WIDTHS = [640, 1280]
+// 320 is for small places (cards, thumbnails, phones); 640 and 1280 for the rest.
+const WIDTHS = [320, 640, 1280]
 
 // One shared grade, baked into the files so phones don't pay for CSS filters:
 // a touch of warmth (16% sepia), slightly less saturation, a little contrast.

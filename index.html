@@ -15,6 +15,15 @@
       try {
         if (localStorage.getItem('motion') === 'reduced') document.documentElement.classList.add('reduced-motion')
       } catch (e) {}
+      // The animated layout from the first paint (switching to it later makes
+      // the page jump). If the story's script never starts, fall back to the
+      // simple layout so nothing stays hidden.
+      if (!document.documentElement.classList.contains('reduced-motion')) {
+        document.documentElement.classList.add('motion')
+        setTimeout(function () {
+          if (!window.__storyStarted) document.documentElement.classList.remove('motion')
+        }, 8000)
+      }
     </script>
   </head>
   <body>

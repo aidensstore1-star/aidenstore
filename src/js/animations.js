@@ -11,7 +11,15 @@ const vh = () => window.innerHeight
 // Background of each section, for the browser's address-bar colour.
 const SURFACES = { ivory: '#f3ece4', blush: '#efd9d3', sage: '#dfe3d5', cocoa: '#221816', night: '#1c1416' }
 
-const splitChars = (target) => SplitText.create(target, { type: 'words,chars', charsClass: 'char', wordsClass: 'word' })
+// Headings get one label for screen readers; other text is left readable as is
+// (a label on a plain span or paragraph isn't allowed).
+const splitChars = (target) =>
+  SplitText.create(target, {
+    type: 'words,chars',
+    charsClass: 'char',
+    wordsClass: 'word',
+    aria: gsap.utils.toArray(target).every((el) => /^H[1-6]$/.test(el.tagName)) ? 'auto' : 'none',
+  })
 
 // ---------- Chapter entrance shapes ----------
 // Each chapter rises through a window shaped from its own world, outlined in

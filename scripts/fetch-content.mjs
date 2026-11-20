@@ -70,10 +70,21 @@ async function worker() {
 }
 await Promise.all([worker(), worker(), worker(), worker()])
 
+// A small 320px copy of each, made here from the 640 one (for cards,
+// thumbnails and phones), so pages don't download more than they show.
+const { default: sharp } = await import('sharp')
+let made = 0
+for (const id of Object.keys(sizes)) {
+  const out = path.join(photoDir, `${id}-320.webp`)
+  if (existsSync(out)) continue
+  await sharp(path.join(photoDir, `${id}-640.webp`)).resize({ width: 320, withoutEnlargement: true }).webp({ quality: 80, effort: 5 }).toFile(out)
+  made++
+}
+
 const manifestPath = path.join(root, 'src', 'photo-manifest.json')
 const manifest = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')) : {}
 for (const [id, s] of Object.entries(sizes)) manifest[id] = { w: s.w, h: s.h }
 writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n')
 
 writeFileSync(generatedPath, toModule(content))
-console.log(`Content: Supabase, ${content.catalog.length} products, ${downloaded} photo files downloaded.`)
+console.log(`Content: Supabase, ${content.catalog.length} products, ${downloaded} photo files downloaded, ${made} small copies made.`)

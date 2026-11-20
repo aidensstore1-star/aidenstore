@@ -38,7 +38,7 @@ export function buildPages(content, { siteUrl = '', turnstileSiteKey = '' } = {}
     const m = manifest[id]
     if (!m) throw new Error(`Photo "${id}" has no file in public/photos/`)
     const focus = photos[id]?.focus ? ` style="object-position:${photos[id].focus}"` : ''
-    return `<img${cls ? ` class="${cls}"` : ''}${focus} src="${up}photos/${id}-1280.webp" srcset="${up}photos/${id}-640.webp ${Math.min(640, m.w)}w, ${up}photos/${id}-1280.webp ${Math.min(1280, m.w)}w" sizes="${sizes}" width="${m.w}" height="${m.h}" alt="${esc(photos[id]?.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`
+    return `<img${cls ? ` class="${cls}"` : ''}${focus} src="${up}photos/${id}-1280.webp" srcset="${up}photos/${id}-320.webp ${Math.min(320, m.w)}w, ${up}photos/${id}-640.webp ${Math.min(640, m.w)}w, ${up}photos/${id}-1280.webp ${Math.min(1280, m.w)}w" sizes="${sizes}" width="${m.w}" height="${m.h}" alt="${esc(photos[id]?.alt)}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`
   }
 
   const header = (up, current) => `<a class="skip" href="#main">Skip to content</a>
@@ -208,7 +208,7 @@ ${footer(up)}`,
           ? `<div class="product__thumbs">${p.images
               .map(
                 (id, n) =>
-                  `<button type="button" class="product__thumb" aria-pressed="${n === 0}" aria-label="Photo ${n + 1}" data-src="${up2}photos/${id}-1280.webp" data-srcset="${up2}photos/${id}-640.webp 640w, ${up2}photos/${id}-1280.webp 1280w">${img(id, up2, { sizes: '6rem' })}</button>`,
+                  `<button type="button" class="product__thumb" aria-pressed="${n === 0}" aria-label="Photo ${n + 1}" data-src="${up2}photos/${id}-1280.webp" data-srcset="${up2}photos/${id}-320.webp 320w, ${up2}photos/${id}-640.webp 640w, ${up2}photos/${id}-1280.webp 1280w">${img(id, up2, { sizes: '6rem' })}</button>`,
               )
               .join('')}</div>`
           : ''
@@ -332,7 +332,7 @@ ${footer(up2)}`,
     <h2>Your order has reached ${esc(cakes.name)}</h2>
     <p class="order__ref"></p>
     <p>We’ll reply on WhatsApp soon to confirm the price and the date.</p>
-    <a class="cat-btn cat-btn--solid order__whatsapp" hidden target="_blank" rel="noopener">Send it on WhatsApp too</a>
+    <a class="cat-btn cat-btn--solid order__whatsapp" href="#order" hidden target="_blank" rel="noopener">Send it on WhatsApp too</a>
     <a class="cat-btn" href="${up}cakes/">See more cakes</a>
   </section>
   <script type="application/json" id="order-likes">${JSON.stringify(likes).replace(/</g, '\\u003c')}</script>

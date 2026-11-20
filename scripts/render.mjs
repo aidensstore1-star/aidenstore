@@ -31,11 +31,12 @@ export function renderSections(content, { siteUrl = '' } = {}) {
   const img = (id, { sizes = '50vw', eager = false, cls = '', box = 0, decorative = false } = {}) => {
     const { w, h } = size(id)
     if (box) sizes = scaleSizes(sizes, w / h / box)
+    const tiny = Math.min(320, w)
     const small = Math.min(640, w)
     const large = Math.min(1280, w)
     const loading = eager ? 'fetchpriority="high"' : 'loading="lazy"'
     const focus = photos[id]?.focus ? ` style="object-position:${photos[id].focus}"` : ''
-    return `<img${cls ? ` class="${cls}"` : ''}${focus} src="photos/${id}-1280.webp" srcset="photos/${id}-640.webp ${small}w, photos/${id}-1280.webp ${large}w" sizes="${sizes}" width="${w}" height="${h}" alt="${decorative ? '' : esc(photos[id]?.alt)}" ${loading} decoding="async">`
+    return `<img${cls ? ` class="${cls}"` : ''}${focus} src="photos/${id}-1280.webp" srcset="photos/${id}-320.webp ${tiny}w, photos/${id}-640.webp ${small}w, photos/${id}-1280.webp ${large}w" sizes="${sizes}" width="${w}" height="${h}" alt="${decorative ? '' : esc(photos[id]?.alt)}" ${loading} decoding="async">`
   }
 
   const media = (id, { cls = '', gl = true, attrs = '', ...opts } = {}) => {

@@ -193,7 +193,8 @@ p {
 
 .cat-hero__title em {
   display: block;
-  color: var(--rose);
+  /* A touch deeper than --rose, so large text has enough contrast. */
+  color: #a8746b;
 }
 
 .cat-main--decor .cat-hero__title em {
