@@ -54,17 +54,11 @@ if (reduced) {
   await preloaderDone
   nudge.start()
 } else {
-  // Set up in steps behind the loading screen, giving the browser a moment
-  // between them so the page never freezes for long.
-  const breathe = () => new Promise((r) => setTimeout(r, 0))
   const gl = createGL(document.querySelector('.gl'), { scroll })
-  await breathe()
   let detail
   const galleryApi = initGallery({ scroll, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })
-  await breathe()
   const { intro } = initAnimations({ scroll, gl })
-  await breathe()
   // Refresh triggers in page order so ones below a pinned chapter account for it.
   ScrollTrigger.sort()
   ScrollTrigger.refresh()
