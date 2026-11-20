@@ -165,6 +165,16 @@ exception when insufficient_privilege then raise notice 'ok: editors cannot invi
 end $$;
 with removed as (delete from public.admins where role = 'owner' returning 1)
 select test.ok((select count(*) from removed) = 0, 'editors cannot remove the owner');
+do $$ begin
+  delete from public.site_settings;
+  raise exception 'FAILED: an editor could delete the site settings';
+exception when insufficient_privilege then raise notice 'ok: the settings, sections and texts can be changed but not deleted';
+end $$;
+do $$ begin
+  insert into public.content_blocks (key, label, value) values ('extra', 'Extra', '{}');
+  raise exception 'FAILED: an editor could add a text block';
+exception when insufficient_privilege then raise notice 'ok: no new text blocks from the panel';
+end $$;
 reset role;
 
 select test.sign_in(null);

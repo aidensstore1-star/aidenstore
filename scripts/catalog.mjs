@@ -293,7 +293,7 @@ ${footer(up2)}`,
     <p class="cat-hero__line">Choose what you’d like, add a photo or two for inspiration, and send. We’ll reply on WhatsApp to confirm the price and the date.</p>
   </section>
   <noscript><p class="order__noscript">This form needs JavaScript. You can also ${brand.whatsapp ? `<a href="${esc(wa(`${cakes.enquiry} a cake.`))}">message us on WhatsApp</a>` : 'message us on WhatsApp'}.</p></noscript>
-  <form class="order__form" id="order" novalidate>
+  <form class="order__form" id="order" novalidate${brand.whatsapp ? ` data-whatsapp="${esc(wa(`${cakes.enquiry} a cake.`))}"` : ''}>
     <div class="order__liked" hidden></div>
     <input type="hidden" name="like">
     <fieldset class="order__step">

@@ -108,10 +108,19 @@ export async function startInquiry(request, env) {
   if (!(await turnstileOk(env, b.turnstile, ip))) return fail(400, 'Please complete the check that you’re not a robot, then send again.')
 
   try {
-    // The same number can't send more than three in ten minutes.
-    const since = new Date(Date.now() - 10 * 60 * 1000).toISOString()
-    const recent = await db.rest(`inquiries?select=id&customer_phone=eq.${encodeURIComponent(phone)}&created_at=gte.${encodeURIComponent(since)}`)
-    if (recent.length >= 3) return fail(429, 'You’ve sent a few already. We’ll be in touch soon, or message us on WhatsApp.')
+    // Limits, so the form can't be used to flood the shop (or to send
+    // confirmation emails to strangers): three per phone number in ten
+    // minutes, five per visitor an hour, and 60 a day in all. Visitors are
+    // told by a fingerprint of their address, never the address itself.
+    const ago = (minutes) => encodeURIComponent(new Date(Date.now() - minutes * 60 * 1000).toISOString())
+    const visitor = ip ? await sign(db.key, `ip:${ip}`) : null
+    const [byPhone, byVisitor, today] = await Promise.all([
+      db.rest(`inquiries?select=id&customer_phone=eq.${encodeURIComponent(phone)}&created_at=gte.${ago(10)}`),
+      visitor ? db.rest(`inquiries?select=id&visitor=eq.${visitor}&created_at=gte.${ago(60)}`) : [],
+      db.rest(`inquiries?select=id&created_at=gte.${ago(24 * 60)}&limit=60`),
+    ])
+    if (byPhone.length >= 3 || byVisitor.length >= 5) return fail(429, 'You’ve sent a few already. We’ll be in touch soon, or message us on WhatsApp.')
+    if (today.length >= 60) return fail(429, 'We’ve had a lot of orders today. Please message us on WhatsApp instead.')
 
     // The choices as the customer saw them, with the price they add.
     const options = await db.rest('cake_options?select=id,kind,label,price_delta&is_active=eq.true')
@@ -151,6 +160,7 @@ export async function startInquiry(request, env) {
         frosting_id: chosen.frosting?.id ?? null,
         options_snapshot: snapshot,
         notes,
+        visitor,
       }),
     })
 
@@ -199,7 +209,7 @@ async function sendEmail(env, { to, subject, rows, intro, replyTo }) {
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;color:#2a1f22">
 <p>${escapeHtml(intro)}</p>
 <table style="border-collapse:collapse;width:100%">${rows
-    .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#6b5a5e;vertical-align:top;white-space:nowrap">${escapeHtml(k)}</td><td style="padding:6px 0">${/^https:\/\//.test(v) ? `<a href="${escapeHtml(v)}">Open photo</a>` : escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`)
+    .map(([k, v]) => `<tr><td style="padding:6px 12px 6px 0;color:#6b5a5e;vertical-align:top;white-space:nowrap">${escapeHtml(k)}</td><td style="padding:6px 0">${k.startsWith('Photo ') ? `<a href="${escapeHtml(v)}">Open photo</a>` : escapeHtml(v).replace(/\n/g, '<br>')}</td></tr>`)
     .join('')}</table></div>`
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',

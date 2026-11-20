@@ -138,7 +138,16 @@ export function initOrder(form) {
     if (f.phone.value.replace(/\D/g, '').length < 10) return fail('Please give a WhatsApp number we can reach you on.', f.phone)
     if (f.email.value && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(f.email.value.trim())) return fail('That email address doesn’t look right.', f.email)
     const turnstile = form.querySelector('[name="cf-turnstile-response"]')
-    if (form.querySelector('.cf-turnstile') && !turnstile?.value) return fail('Please complete the check that you’re not a robot.')
+    if (form.querySelector('.cf-turnstile') && !turnstile?.value) {
+      // The check comes from Cloudflare; if it couldn't load (an ad blocker,
+      // a patchy connection), say so and offer WhatsApp instead.
+      if (!window.turnstile) {
+        const whatsapp = form.dataset.whatsapp
+        error.replaceChildren('The “not a robot” check didn’t load. Please refresh the page and try again', ...(whatsapp ? [', or ', Object.assign(document.createElement('a'), { href: whatsapp, textContent: 'message us on WhatsApp', target: '_blank', rel: 'noopener' })] : []), '.')
+        return
+      }
+      return fail('Please tick the “not a robot” check above the button, then send again.')
+    }
 
     const value = (name) => form.querySelector(`input[name="${name}"]:checked`)?.value || ''
     const order = {
