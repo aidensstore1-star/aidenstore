@@ -7,7 +7,9 @@ const clamp = (v, min, max) => Math.min(max, Math.max(min, v))
 
 // One fixed, transparent canvas behind the page. Every <figure data-gl> photo
 // is drawn here as a plane that follows its <img> position each frame.
-export function createGL(canvas, { scroll }) {
+// photos: false draws only the petals (the lighter version for phones); the
+// photos then stay plain <img>s with their own entrance animations.
+export function createGL(canvas, { scroll, photos = true }) {
   const small = matchMedia('(max-width: 900px)').matches
   const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2)
 
@@ -30,7 +32,7 @@ export function createGL(canvas, { scroll }) {
   const viewport = { w: 1, h: 1 }
 
   const geometry = new Plane(gl, { widthSegments: 24, heightSegments: 24 })
-  const medias = [...document.querySelectorAll('[data-gl]')].map(
+  const medias = [...(photos ? document.querySelectorAll('[data-gl]') : [])].map(
     (el) =>
       new Media({
         gl,

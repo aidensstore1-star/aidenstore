@@ -54,7 +54,10 @@ if (reduced) {
   await preloaderDone
   nudge.start()
 } else {
-  const gl = createGL(document.querySelector('.gl'), { scroll })
+  // Phones get the lighter story: the petals still fall, but the photos are
+  // plain images rather than redrawn in 3D every frame.
+  const phone = matchMedia('(max-width: 900px)').matches
+  const gl = createGL(document.querySelector('.gl'), { scroll, photos: !phone })
   let detail
   const galleryApi = initGallery({ scroll, onOpen: (i, item) => detail.open(i, item) })
   detail = initDetail({ scroll, gl, galleryApi, reduced })

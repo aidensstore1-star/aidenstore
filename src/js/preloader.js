@@ -27,12 +27,14 @@ export function runPreloader({ reduced }) {
   let done = 0
   tasks.forEach((p) => p.then(() => done++))
 
-  const MIN_DURATION = 1.8
+  // Shorter and a little quicker on phones, where every second of waiting counts.
+  const phone = matchMedia('(max-width: 900px)').matches
+  const MIN_DURATION = phone ? 1 : 1.8
   const MAX_DURATION = 9
   const start = performance.now()
   let shown = 0
 
-  const intro = gsap.timeline()
+  const intro = gsap.timeline().timeScale(phone ? 1.4 : 1)
   intro.to(letters, { y: 0, duration: 1.1, stagger: 0.05, ease: 'expo.out' }, 0.05)
   imgs.forEach((img, i) => {
     intro.to(img, { clipPath: 'inset(0% 0 0 0)', duration: 0.55, ease: 'power4.inOut' }, 0.15 + i * 0.24)
@@ -60,6 +62,7 @@ export function runPreloader({ reduced }) {
       const cover = Math.max(window.innerWidth / r.width, window.innerHeight / r.height) * 1.05
       gsap
         .timeline({ onComplete: () => root.remove() })
+        .timeScale(phone ? 1.4 : 1)
         .to(letters, { yPercent: -110, duration: 0.7, stagger: 0.03, ease: 'expo.in' }, 0)
         .to(fade, { opacity: 0, duration: 0.5 }, 0)
         .to(stack, { scale: cover, duration: 1.1, ease: 'expo.inOut' }, 0.2)
